@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SupriFlow
+
+SaaS multi-tenant para gestão de compras, suprimentos e fornecedores.
+
+## Stack
+
+- **Frontend:** Next.js 14 (App Router) + TypeScript + TailwindCSS
+- **Backend:** Supabase (PostgreSQL + Auth + Storage + Edge Functions)
+- **Pagamentos:** Asaas
+- **E-mails:** Resend
 
 ## Getting Started
 
-First, run the development server:
+1. Clone o repositório
+2. Copie `.env.example` para `.env.local` e preencha as variáveis
+3. Instale as dependências:
+
+```bash
+npm install
+```
+
+4. Execute o projeto em desenvolvimento:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Acesse [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estrutura do Projeto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+supriflow/
+├── app/                    # Next.js App Router
+├── components/             # Componentes React
+├── lib/                    # Utilitários e configurações
+│   └── supabase/          # Clientes Supabase
+├── supabase/
+│   ├── migrations/        # Migrações SQL
+│   └── functions/         # Edge Functions
+└── CLAUDE.md              # Documentação do projeto
+```
 
-## Learn More
+## Multi-Tenancy
 
-To learn more about Next.js, take a look at the following resources:
+O isolamento entre empresas (tenants) é garantido via **Row Level Security (RLS)** do PostgreSQL.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- JWT contém `tenant_id` do usuário logado
+- Todas as queries são automaticamente filtradas pelo RLS
+- Zero possibilidade de vazamento de dados entre tenants
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Documentação
 
-## Deploy on Vercel
+Veja [CLAUDE.md](./CLAUDE.md) para detalhes completos da arquitetura e convenções.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proprietary - Todos os direitos reservados
