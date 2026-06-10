@@ -17,8 +17,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Plus, Star } from 'lucide-react'
-import { formatCNPJ, formatDate } from '@/lib/utils'
-import type { Fornecedor } from '@/lib/types'
+import Link from 'next/link'
 
 export default async function FornecedoresPage() {
   const supabase = await createClient()
@@ -37,29 +36,15 @@ export default async function FornecedoresPage() {
     }
     return (
       <Badge className={colors[status] || 'bg-slate-100 text-slate-800'}>
-        {status.replace('_', ' ')}
+        {status.replace(/_/g, ' ')}
       </Badge>
     )
   }
 
-  const renderScore = (score: number) => {
-    const stars = Math.round(score / 2)
-    return (
-      <div className="flex items-center gap-1">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            className={`h-4 w-4 ${
-              i < stars
-                ? 'fill-yellow-400 text-yellow-400'
-                : 'text-slate-300'
-            }`}
-          />
-        ))}
-        <span className="text-sm text-muted-foreground ml-1">
-          ({score.toFixed(1)})
-        </span>
-      </div>
+  const formatCNPJ = (cnpj: string) => {
+    return cnpj.replace(
+      /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+      '$1.$2.$3/$4-$5'
     )
   }
 
@@ -69,13 +54,15 @@ export default async function FornecedoresPage() {
         <div>
           <h1 className="text-3xl font-bold">Fornecedores</h1>
           <p className="text-muted-foreground mt-1">
-            Gerencie sua base de fornecedores
+            Gerencie seus fornecedores e parceiros
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Fornecedor
-        </Button>
+        <Link href="/fornecedores/novo">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Fornecedor
+          </Button>
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -86,7 +73,9 @@ export default async function FornecedoresPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{fornecedores?.length || 0}</div>
+            <div className="text-2xl font-bold">
+              {fornecedores?.length || 0}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -121,7 +110,7 @@ export default async function FornecedoresPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-blue-600">
               {fornecedores && fornecedores.length > 0
                 ? (
                     fornecedores.reduce((acc, f) => acc + (f.score || 0), 0) /
@@ -145,48 +134,56 @@ export default async function FornecedoresPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Razão Social</TableHead>
+                <TableHead>Nome Fantasia</TableHead>
                 <TableHead>CNPJ</TableHead>
-                <TableHead>Contato</TableHead>
+                <TableHead>Categorias</TableHead>
+                <TableHead>Score</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Avaliação</TableHead>
-                <TableHead>Cadastrado em</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {fornecedores && fornecedores.length > 0 ? (
-                fornecedores.map((fornecedor: Fornecedor) => (
-                  <TableRow key={fornecedor.id}>
+                fornecedores.map((forn: any) => (
+                  <TableRow key={forn.id}>
                     <TableCell className="font-medium">
-                      <div>
-                        <div>{fornecedor.razao_social}</div>
-                        {fornecedor.nome_fantasia && (
-                          <div className="text-sm text-muted-foreground">
-                            {fornecedor.nome_fantasia}
-                          </div>
-                        )}
-                      </div>
+                      {forn.razao_social}
                     </TableCell>
+                    <TableCell>{forn.nome_fantasia || '-'}</TableCell>
                     <TableCell className="font-mono text-sm">
-                      {formatCNPJ(fornecedor.cnpj)}
+                      {formatCNPJ(forn.cnpj)}
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
-                        {fornecedor.email && <div>{fornecedor.email}</div>}
-                        {fornecedor.telefone && (
-                          <div className="text-muted-foreground">
-                            {fornecedor.telefone}
-                          </div>
-                        )}
+                      {forn.categorias && forn.categorias.length > 0 ? (
+                        <div className="flex gap-1 flex-wrap">
+                          {forn.categorias.slice(0, 2).map((cat: string) => (
+                            <Badge key={cat} variant="outline" className="text-xs">
+                              {cat}
+                            </Badge>
+                          ))}
+                          {forn.categorias.length > 2 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{forn.categorias.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                        <span className="font-medium">{forn.score || 0}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{getStatusBadge(fornecedor.status)}</TableCell>
-                    <TableCell>{renderScore(fornecedor.score)}</TableCell>
-                    <TableCell>{formatDate(fornecedor.criado_em)}</TableCell>
+                    <TableCell>{getStatusBadge(forn.status)}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        Ver Detalhes
-                      </Button>
+                      <Link href={`/fornecedores/${forn.id}`}>
+                        <Button variant="ghost" size="sm">
+                          Ver Detalhes
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))
@@ -196,10 +193,12 @@ export default async function FornecedoresPage() {
                     <div className="text-muted-foreground">
                       Nenhum fornecedor cadastrado
                     </div>
-                    <Button className="mt-4" variant="outline" size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Cadastrar Primeiro Fornecedor
-                    </Button>
+                    <Link href="/fornecedores/novo">
+                      <Button className="mt-4" variant="outline" size="sm">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Cadastrar Primeiro Fornecedor
+                      </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               )}
