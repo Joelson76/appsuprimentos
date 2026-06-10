@@ -9,7 +9,7 @@ export type Perfil =
 
 export type PlanoTipo = 'BASICO' | 'PROFISSIONAL' | 'ENTERPRISE'
 
-export type StatusTenant = 'ATIVO' | 'TRIAL' | 'SUSPENSO' | 'CANCELADO'
+export type StatusTenant = 'TRIAL' | 'ATIVO' | 'BLOQUEADO' | 'CANCELADO'
 
 export interface Tenant {
   id: string
@@ -40,4 +40,26 @@ export interface User {
   email: string
   profile?: Profile
   tenant?: Tenant
+}
+
+export interface RegisterRequest {
+  empresa: {
+    nome: string
+    cnpj: string
+    endereco?: {
+      cep?: string
+      logradouro?: string
+      numero?: string
+      complemento?: string
+      bairro?: string
+      cidade?: string
+      uf?: string
+    }
+  }
+  admin: {
+    nome: string
+    email: string
+    senha: string
+  }
+  plano: PlanoTipo
 }
