@@ -9,6 +9,8 @@ import {
   FileText,
   Settings,
   ShoppingCart,
+  Receipt,
+  FileCheck,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -40,6 +42,16 @@ export function Sidebar({ tenant }: SidebarProps) {
       label: 'Pedidos',
       icon: ShoppingCart,
       href: '/pedidos',
+    },
+    {
+      label: 'Notas Fiscais',
+      icon: Receipt,
+      href: '/notas-fiscais',
+    },
+    {
+      label: 'Contratos',
+      icon: FileCheck,
+      href: '/contratos',
     },
     {
       label: 'Fornecedores',

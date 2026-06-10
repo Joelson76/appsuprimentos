@@ -194,3 +194,65 @@ export interface ItemPO {
   valor_unitario: number
   valor_total: number
 }
+
+// Fase 3 - Recebimento, NF-e e Contratos
+export type StatusRecebimento = 'PENDENTE' | 'PARCIAL' | 'COMPLETO' | 'DIVERGENTE'
+
+export type StatusNF = 'PENDENTE' | 'CONFERIDA' | 'APROVADA' | 'DIVERGENTE' | 'DEVOLVIDA'
+
+export type StatusContrato = 'ATIVO' | 'VENCENDO' | 'VENCIDO' | 'CANCELADO' | 'EM_RENOVACAO'
+
+export interface Recebimento {
+  id: string
+  tenant_id: string
+  pedido_id: string
+  recebido_por_id: string
+  status: StatusRecebimento
+  observacoes?: string
+  criado_em: string
+}
+
+export interface ItemRecebimento {
+  id: string
+  recebimento_id: string
+  descricao: string
+  quantidade_pedida: number
+  quantidade_recebida: number
+  divergencia: boolean
+  observacao?: string
+}
+
+export interface NotaFiscal {
+  id: string
+  tenant_id: string
+  pedido_id: string
+  recebimento_id?: string
+  numero: string
+  serie?: string
+  chave_acesso?: string
+  emissao: string
+  valor_total: number
+  status: StatusNF
+  xml_path?: string
+  pdf_path?: string
+  divergencias?: any[]
+  criado_em: string
+}
+
+export interface Contrato {
+  id: string
+  tenant_id: string
+  fornecedor_id: string
+  titulo: string
+  numero?: string
+  valor_total?: number
+  inicio: string
+  fim: string
+  status: StatusContrato
+  renovacao_auto: boolean
+  alerta_dias: number
+  arquivo_path?: string
+  observacoes?: string
+  criado_em: string
+  atualizado_em: string
+}
