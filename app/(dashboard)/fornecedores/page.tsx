@@ -28,16 +28,34 @@ export default async function FornecedoresPage() {
     .order('razao_social')
 
   const getStatusBadge = (status: string) => {
-    const colors: Record<string, string> = {
-      ATIVO: 'bg-green-100 text-green-800',
-      INATIVO: 'bg-slate-100 text-slate-800',
-      BLOQUEADO: 'bg-red-100 text-red-800',
-      EM_HOMOLOGACAO: 'bg-yellow-100 text-yellow-800',
+    const badges: Record<string, JSX.Element> = {
+      ATIVO: (
+        <Badge className="bg-green-100 text-green-800 border-green-200">
+          ATIVO
+        </Badge>
+      ),
+      INATIVO: (
+        <Badge className="bg-slate-100 text-slate-800 border-slate-200">
+          INATIVO
+        </Badge>
+      ),
+      BLOQUEADO: (
+        <Badge className="bg-red-100 text-red-800 border-red-200">
+          BLOQUEADO
+        </Badge>
+      ),
+      EM_HOMOLOGACAO: (
+        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+          EM HOMOLOGAÇÃO
+        </Badge>
+      ),
     }
     return (
-      <Badge className={colors[status] || 'bg-slate-100 text-slate-800'}>
-        {status.replace(/_/g, ' ')}
-      </Badge>
+      badges[status] || (
+        <Badge className="bg-slate-100 text-slate-800 border-slate-200">
+          {status.replace(/_/g, ' ')}
+        </Badge>
+      )
     )
   }
 
