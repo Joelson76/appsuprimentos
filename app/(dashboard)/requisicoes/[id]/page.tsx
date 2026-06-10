@@ -53,7 +53,7 @@ export default async function RequisicaoDetalhesPage({ params }: PageProps) {
     .select(
       `
       *,
-      solicitante:profiles!requisicoes_solicitante_id_fkey (nome, email),
+      solicitante:profiles!requisicoes_solicitante_id_fkey (nome),
       aprovador:profiles!requisicoes_aprovado_por_fkey (nome),
       itens_requisicao (*)
     `
