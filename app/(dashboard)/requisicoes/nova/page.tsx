@@ -24,10 +24,12 @@ import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface Item {
+  produto: string
   descricao: string
   quantidade: number
   unidade: string
   valor_estimado: number
+  observacao: string
 }
 
 export default function NovaRequisicaoPage() {
@@ -38,13 +40,13 @@ export default function NovaRequisicaoPage() {
   const [descricao, setDescricao] = useState('')
   const [urgencia, setUrgencia] = useState<'BAIXA' | 'NORMAL' | 'ALTA' | 'CRITICA'>('NORMAL')
   const [itens, setItens] = useState<Item[]>([
-    { descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0 },
+    { produto: '', descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0, observacao: '' },
   ])
 
   const addItem = () => {
     setItens([
       ...itens,
-      { descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0 },
+      { produto: '', descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0, observacao: '' },
     ])
   }
 
@@ -96,7 +98,7 @@ export default function NovaRequisicaoPage() {
       }
 
       const itensValidos = itens.filter(
-        (item) => item.descricao.trim() && item.quantidade > 0
+        (item) => (item.produto.trim() || item.descricao.trim()) && item.quantidade > 0
       )
 
       if (itensValidos.length === 0) {
@@ -124,10 +126,12 @@ export default function NovaRequisicaoPage() {
       // Criar itens da requisição
       const itensParaInserir = itensValidos.map((item) => ({
         requisicao_id: requisicao.id,
+        produto: item.produto.trim() || null,
         descricao: item.descricao.trim(),
         quantidade: item.quantidade,
         unidade: item.unidade,
         valor_estimado: item.valor_estimado > 0 ? item.valor_estimado : null,
+        observacao: item.observacao.trim() || null,
       }))
 
       const { error: itensError } = await supabase
@@ -250,19 +254,32 @@ export default function NovaRequisicaoPage() {
                     </Button>
                   )}
 
-                  <div className="space-y-2">
-                    <Label>Descrição do Item *</Label>
-                    <Input
-                      placeholder="Ex: Parafuso M8 de aço inox"
-                      value={item.descricao}
-                      onChange={(e) =>
-                        updateItem(index, 'descricao', e.target.value)
-                      }
-                      required
-                    />
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Produto / Serviço</Label>
+                      <Input
+                        placeholder="Ex: Parafuso M8"
+                        value={item.produto}
+                        onChange={(e) =>
+                          updateItem(index, 'produto', e.target.value)
+                        }
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Descrição *</Label>
+                      <Input
+                        placeholder="Ex: Aço inox, 100 unidades"
+                        value={item.descricao}
+                        onChange={(e) =>
+                          updateItem(index, 'descricao', e.target.value)
+                        }
+                        required
+                      />
+                    </div>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="grid gap-4 md:grid-cols-4">
                     <div className="space-y-2">
                       <Label>Quantidade *</Label>
                       <Input
@@ -319,6 +336,17 @@ export default function NovaRequisicaoPage() {
                             'valor_estimado',
                             parseFloat(e.target.value) || 0
                           )
+                        }
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Observação</Label>
+                      <Input
+                        placeholder="Ex: Entrega urgente"
+                        value={item.observacao}
+                        onChange={(e) =>
+                          updateItem(index, 'observacao', e.target.value)
                         }
                       />
                     </div>

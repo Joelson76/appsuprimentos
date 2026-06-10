@@ -253,16 +253,19 @@ export default async function RequisicaoDetalhesPage({ params }: PageProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Produto</TableHead>
                 <TableHead>Descrição</TableHead>
                 <TableHead className="text-right">Quantidade</TableHead>
                 <TableHead>Unidade</TableHead>
                 <TableHead className="text-right">Valor Estimado</TableHead>
+                <TableHead>Observação</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {requisicao.itens_requisicao?.map((item: any) => (
                 <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.descricao}</TableCell>
+                  <TableCell className="font-medium">{item.produto || '-'}</TableCell>
+                  <TableCell>{item.descricao}</TableCell>
                   <TableCell className="text-right">
                     {item.quantidade}
                   </TableCell>
@@ -274,6 +277,9 @@ export default async function RequisicaoDetalhesPage({ params }: PageProps) {
                           currency: 'BRL',
                         }).format(item.valor_estimado)
                       : '-'}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {item.observacao || '-'}
                   </TableCell>
                 </TableRow>
               ))}
