@@ -48,7 +48,7 @@ export default async function RequisicaoDetalhesPage({ params }: PageProps) {
     .single()
 
   // Buscar requisição
-  const { data: requisicao } = await supabase
+  const { data: requisicao, error: reqError } = await supabase
     .from('requisicoes')
     .select(
       `
@@ -60,6 +60,11 @@ export default async function RequisicaoDetalhesPage({ params }: PageProps) {
     )
     .eq('id', params.id)
     .single()
+
+  // Debug: mostrar erro no console do servidor
+  if (reqError) {
+    console.error('❌ Erro ao buscar requisição:', reqError)
+  }
 
   if (!requisicao) {
     notFound()
