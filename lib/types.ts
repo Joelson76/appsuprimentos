@@ -256,3 +256,59 @@ export interface Contrato {
   criado_em: string
   atualizado_em: string
 }
+
+// Fase 4 - Estoque, Dashboard e Relatórios
+export type TipoMovimentacao =
+  | 'ENTRADA'
+  | 'SAIDA'
+  | 'AJUSTE_MAIS'
+  | 'AJUSTE_MENOS'
+  | 'TRANSFERENCIA'
+
+export interface Produto {
+  id: string
+  tenant_id: string
+  descricao: string
+  codigo?: string
+  unidade: string
+  categoria_id?: string
+  estoque_atual: number
+  estoque_minimo_alerta?: number
+  localizacao?: string
+  ativo: boolean
+  criado_em: string
+  atualizado_em: string
+}
+
+export interface MovimentacaoEstoque {
+  id: string
+  tenant_id: string
+  produto_id: string
+  tipo: TipoMovimentacao
+  quantidade: number
+  saldo_anterior: number
+  saldo_posterior: number
+  pedido_id?: string
+  requisicao_id?: string
+  usuario_id: string
+  observacao?: string
+  criado_em: string
+}
+
+export interface KPIDashboard {
+  gasto_mes_atual: number
+  gasto_mes_anterior: number
+  pos_abertas: number
+  pos_mes_atual: number
+}
+
+export interface GastoCategoria {
+  categoria: string
+  total: number
+}
+
+export interface TopFornecedor {
+  razao_social: string
+  num_pedidos: number
+  total: number
+}

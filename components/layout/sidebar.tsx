@@ -11,6 +11,7 @@ import {
   ShoppingCart,
   Receipt,
   FileCheck,
+  Warehouse,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -42,6 +43,11 @@ export function Sidebar({ tenant }: SidebarProps) {
       label: 'Pedidos',
       icon: ShoppingCart,
       href: '/pedidos',
+    },
+    {
+      label: 'Estoque',
+      icon: Warehouse,
+      href: '/estoque',
     },
     {
       label: 'Notas Fiscais',
