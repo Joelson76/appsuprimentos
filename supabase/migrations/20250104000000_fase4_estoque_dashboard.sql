@@ -233,5 +233,6 @@ CREATE INDEX idx_movimentacoes_tenant ON movimentacoes_estoque(tenant_id);
 CREATE INDEX idx_movimentacoes_produto ON movimentacoes_estoque(produto_id);
 CREATE INDEX idx_movimentacoes_criado ON movimentacoes_estoque(criado_em DESC);
 
-CREATE INDEX idx_ordens_compra_tenant_mes ON ordens_compra(tenant_id, DATE_TRUNC('month', criado_em));
-CREATE INDEX idx_requisicoes_tenant_mes ON requisicoes(tenant_id, DATE_TRUNC('month', criado_em));
+-- Índices simples sem DATE_TRUNC (queries continuam rápidas)
+CREATE INDEX idx_ordens_compra_tenant_criado ON ordens_compra(tenant_id, criado_em DESC);
+CREATE INDEX idx_requisicoes_tenant_criado ON requisicoes(tenant_id, criado_em DESC);
