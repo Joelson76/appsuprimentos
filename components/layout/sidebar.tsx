@@ -40,9 +40,19 @@ export function Sidebar({ tenant }: SidebarProps) {
       href: '/requisicoes',
     },
     {
+      label: 'Cotações',
+      icon: Receipt,
+      href: '/cotacoes',
+    },
+    {
       label: 'Pedidos',
       icon: ShoppingCart,
       href: '/pedidos',
+    },
+    {
+      label: 'Fornecedores',
+      icon: Package,
+      href: '/fornecedores',
     },
     {
       label: 'Estoque',
@@ -58,11 +68,6 @@ export function Sidebar({ tenant }: SidebarProps) {
       label: 'Contratos',
       icon: FileCheck,
       href: '/contratos',
-    },
-    {
-      label: 'Fornecedores',
-      icon: Package,
-      href: '/fornecedores',
     },
     {
       label: 'Usuários',
