@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import type { Requisicao } from '@/lib/types'
+import Link from 'next/link'
 
 export default async function RequisicoesPage() {
   const supabase = await createClient()
@@ -73,10 +74,12 @@ export default async function RequisicoesPage() {
             Gerencie as requisições de compra
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Requisição
-        </Button>
+        <Link href="/requisicoes/nova">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Requisição
+          </Button>
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -167,9 +170,11 @@ export default async function RequisicoesPage() {
                     <TableCell>{getStatusBadge(req.status)}</TableCell>
                     <TableCell>{formatDate(req.criado_em)}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        Ver Detalhes
-                      </Button>
+                      <Link href={`/requisicoes/${req.id}`}>
+                        <Button variant="ghost" size="sm">
+                          Ver Detalhes
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))
@@ -179,10 +184,12 @@ export default async function RequisicoesPage() {
                     <div className="text-muted-foreground">
                       Nenhuma requisição encontrada
                     </div>
-                    <Button className="mt-4" variant="outline" size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Criar Primeira Requisição
-                    </Button>
+                    <Link href="/requisicoes/nova">
+                      <Button className="mt-4" variant="outline" size="sm">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Criar Primeira Requisição
+                      </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               )}
