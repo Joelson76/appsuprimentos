@@ -34,11 +34,34 @@ ALTER TABLE IF EXISTS assinaturas DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS pagamentos DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS uso_tenants DISABLE ROW LEVEL SECURITY;
 
--- 2. Remover jobs pg_cron
-SELECT cron.unschedule('alertas-contratos-diarios');
-SELECT cron.unschedule('alerta-estoque-minimo');
-SELECT cron.unschedule('verificar-trial-diario');
-SELECT cron.unschedule('reset-pos-mensais');
+-- 2. Remover jobs pg_cron (apenas se existirem)
+DO $$
+BEGIN
+  PERFORM cron.unschedule('alertas-contratos-diarios');
+EXCEPTION WHEN OTHERS THEN
+  NULL;
+END $$;
+
+DO $$
+BEGIN
+  PERFORM cron.unschedule('alerta-estoque-minimo');
+EXCEPTION WHEN OTHERS THEN
+  NULL;
+END $$;
+
+DO $$
+BEGIN
+  PERFORM cron.unschedule('verificar-trial-diario');
+EXCEPTION WHEN OTHERS THEN
+  NULL;
+END $$;
+
+DO $$
+BEGIN
+  PERFORM cron.unschedule('reset-pos-mensais');
+EXCEPTION WHEN OTHERS THEN
+  NULL;
+END $$;
 
 -- 3. Dropar tabelas (ordem reversa de dependências)
 DROP TABLE IF EXISTS pagamentos CASCADE;
