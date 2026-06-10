@@ -1,0 +1,118 @@
+-- ==========================================
+-- SCRIPT DE LIMPEZA COMPLETA
+-- Use APENAS se quiser recomeçar do zero
+-- ==========================================
+
+-- ⚠️ ATENÇÃO: Isso apagará TODOS os dados!
+-- Execute APENAS se tiver certeza
+
+-- 1. Desabilitar RLS temporariamente
+ALTER TABLE IF EXISTS tenants DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS profiles DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS audit_logs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS fornecedores DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS categorias DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS centros_custo DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS requisicoes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS itens_requisicao DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS regras_aprovacao DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS aprovacoes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS cotacoes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS itens_cotacao DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS ordens_compra DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS itens_po DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS avaliacoes_fornecedor DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS recebimentos DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS itens_recebimento DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS notas_fiscais DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS contratos DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS produtos DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS movimentacoes_estoque DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS notificacoes_pendentes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS planos DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS assinaturas DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS pagamentos DISABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS uso_tenants DISABLE ROW LEVEL SECURITY;
+
+-- 2. Remover jobs pg_cron
+SELECT cron.unschedule('alertas-contratos-diarios');
+SELECT cron.unschedule('alerta-estoque-minimo');
+SELECT cron.unschedule('verificar-trial-diario');
+SELECT cron.unschedule('reset-pos-mensais');
+
+-- 3. Dropar tabelas (ordem reversa de dependências)
+DROP TABLE IF EXISTS pagamentos CASCADE;
+DROP TABLE IF EXISTS assinaturas CASCADE;
+DROP TABLE IF EXISTS uso_tenants CASCADE;
+DROP TABLE IF EXISTS planos CASCADE;
+DROP TABLE IF EXISTS notificacoes_pendentes CASCADE;
+DROP TABLE IF EXISTS movimentacoes_estoque CASCADE;
+DROP TABLE IF EXISTS produtos CASCADE;
+DROP TABLE IF EXISTS contratos CASCADE;
+DROP TABLE IF EXISTS notas_fiscais CASCADE;
+DROP TABLE IF EXISTS itens_recebimento CASCADE;
+DROP TABLE IF EXISTS recebimentos CASCADE;
+DROP TABLE IF EXISTS avaliacoes_fornecedor CASCADE;
+DROP TABLE IF EXISTS itens_po CASCADE;
+DROP TABLE IF EXISTS ordens_compra CASCADE;
+DROP TABLE IF EXISTS itens_cotacao CASCADE;
+DROP TABLE IF EXISTS cotacoes CASCADE;
+DROP TABLE IF EXISTS aprovacoes CASCADE;
+DROP TABLE IF EXISTS regras_aprovacao CASCADE;
+DROP TABLE IF EXISTS itens_requisicao CASCADE;
+DROP TABLE IF EXISTS requisicoes CASCADE;
+DROP TABLE IF EXISTS centros_custo CASCADE;
+DROP TABLE IF EXISTS categorias CASCADE;
+DROP TABLE IF EXISTS fornecedores CASCADE;
+DROP TABLE IF EXISTS sequencias_numeracao CASCADE;
+DROP TABLE IF EXISTS audit_logs CASCADE;
+DROP TABLE IF EXISTS profiles CASCADE;
+DROP TABLE IF EXISTS tenants CASCADE;
+
+-- 4. Dropar views
+DROP VIEW IF EXISTS vw_kpis_dashboard CASCADE;
+DROP VIEW IF EXISTS vw_gasto_por_categoria CASCADE;
+DROP VIEW IF EXISTS vw_top_fornecedores CASCADE;
+
+-- 5. Dropar functions
+DROP FUNCTION IF EXISTS handle_updated_at() CASCADE;
+DROP FUNCTION IF EXISTS handle_new_user() CASCADE;
+DROP FUNCTION IF EXISTS custom_access_token_hook(JSONB) CASCADE;
+DROP FUNCTION IF EXISTS perfil_tem_permissao(perfil_usuario) CASCADE;
+DROP FUNCTION IF EXISTS proximo_numero(UUID, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS gerar_numero_requisicao() CASCADE;
+DROP FUNCTION IF EXISTS gerar_numero_cotacao() CASCADE;
+DROP FUNCTION IF EXISTS gerar_numero_po() CASCADE;
+DROP FUNCTION IF EXISTS aprovar_requisicao(UUID, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS reprovar_requisicao(UUID, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS recalcular_score_fornecedor() CASCADE;
+DROP FUNCTION IF EXISTS atualizar_status_po_recebimento() CASCADE;
+DROP FUNCTION IF EXISTS verificar_matching(UUID, TEXT, NUMERIC, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS movimentar_estoque(UUID, tipo_movimentacao, NUMERIC, UUID, UUID, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS entrada_estoque_recebimento() CASCADE;
+DROP FUNCTION IF EXISTS incrementar_pos_mes() CASCADE;
+DROP FUNCTION IF EXISTS verificar_limite_plano(TEXT) CASCADE;
+DROP FUNCTION IF EXISTS metricas_saas_globais() CASCADE;
+DROP FUNCTION IF EXISTS criar_assinatura_trial() CASCADE;
+
+-- 6. Dropar enums
+DROP TYPE IF EXISTS perfil_usuario CASCADE;
+DROP TYPE IF EXISTS status_tenant CASCADE;
+DROP TYPE IF EXISTS plano_tipo CASCADE;
+DROP TYPE IF EXISTS status_fornecedor CASCADE;
+DROP TYPE IF EXISTS urgencia_tipo CASCADE;
+DROP TYPE IF EXISTS status_requisicao CASCADE;
+DROP TYPE IF EXISTS status_po CASCADE;
+DROP TYPE IF EXISTS status_cotacao CASCADE;
+DROP TYPE IF EXISTS tipo_aprovacao CASCADE;
+DROP TYPE IF EXISTS status_aprovacao CASCADE;
+DROP TYPE IF EXISTS status_recebimento CASCADE;
+DROP TYPE IF EXISTS status_nf CASCADE;
+DROP TYPE IF EXISTS status_contrato CASCADE;
+DROP TYPE IF EXISTS tipo_movimentacao CASCADE;
+DROP TYPE IF EXISTS status_assinatura CASCADE;
+DROP TYPE IF EXISTS status_pagamento CASCADE;
+
+-- ==========================================
+-- BANCO LIMPO! Agora você pode aplicar as migrations na ordem correta
+-- ==========================================
