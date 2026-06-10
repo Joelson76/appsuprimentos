@@ -32,19 +32,19 @@ export function Sidebar({ tenant }: SidebarProps) {
       href: '/dashboard',
     },
     {
-      label: 'Compras',
+      label: 'Requisições',
+      icon: FileText,
+      href: '/requisicoes',
+    },
+    {
+      label: 'Pedidos',
       icon: ShoppingCart,
-      href: '/compras',
+      href: '/pedidos',
     },
     {
       label: 'Fornecedores',
       icon: Package,
       href: '/fornecedores',
-    },
-    {
-      label: 'Notas Fiscais',
-      icon: FileText,
-      href: '/notas-fiscais',
     },
     {
       label: 'Usuários',
