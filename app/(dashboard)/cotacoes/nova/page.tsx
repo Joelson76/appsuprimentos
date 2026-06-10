@@ -218,14 +218,14 @@ export default function NovaCotacaoPage() {
                 Selecione a requisição e configure a cotação
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="requisicao">Requisição Aprovada *</Label>
                 <Select value={requisicaoId} onValueChange={setRequisicaoId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma requisição" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[200px]">
                     {requisicoes.length === 0 ? (
                       <div className="p-4 text-sm text-muted-foreground">
                         Nenhuma requisição aprovada encontrada
@@ -233,7 +233,8 @@ export default function NovaCotacaoPage() {
                     ) : (
                       requisicoes.map((req) => (
                         <SelectItem key={req.id} value={req.id}>
-                          {req.numero} - {req.descricao}
+                          {req.numero} - {req.descricao?.substring(0, 50)}
+                          {req.descricao?.length > 50 ? '...' : ''}
                         </SelectItem>
                       ))
                     )}
