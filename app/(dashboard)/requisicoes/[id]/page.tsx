@@ -55,7 +55,7 @@ export default async function RequisicaoDetalhesPage({ params }: PageProps) {
       *,
       solicitante:profiles!requisicoes_solicitante_id_fkey (nome, email),
       aprovador:profiles!requisicoes_aprovado_por_fkey (nome),
-      requisicao_itens (*)
+      itens_requisicao (*)
     `
     )
     .eq('id', params.id)
@@ -246,31 +246,34 @@ export default async function RequisicaoDetalhesPage({ params }: PageProps) {
         <CardHeader>
           <CardTitle>Itens da Requisição</CardTitle>
           <CardDescription>
-            {requisicao.requisicao_itens?.length || 0} item(ns) solicitado(s)
+            {requisicao.itens_requisicao?.length || 0} item(ns) solicitado(s)
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Produto</TableHead>
                 <TableHead>Descrição</TableHead>
                 <TableHead className="text-right">Quantidade</TableHead>
                 <TableHead>Unidade</TableHead>
-                <TableHead>Observação</TableHead>
+                <TableHead className="text-right">Valor Estimado</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {requisicao.requisicao_itens?.map((item: any) => (
+              {requisicao.itens_requisicao?.map((item: any) => (
                 <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.produto}</TableCell>
-                  <TableCell>{item.descricao || '-'}</TableCell>
+                  <TableCell className="font-medium">{item.descricao}</TableCell>
                   <TableCell className="text-right">
                     {item.quantidade}
                   </TableCell>
                   <TableCell>{item.unidade}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {item.observacao || '-'}
+                  <TableCell className="text-right">
+                    {item.valor_estimado
+                      ? new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        }).format(item.valor_estimado)
+                      : '-'}
                   </TableCell>
                 </TableRow>
               ))}

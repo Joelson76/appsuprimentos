@@ -24,11 +24,10 @@ import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface Item {
-  produto: string
   descricao: string
   quantidade: number
   unidade: string
-  observacao: string
+  valor_estimado: number
 }
 
 export default function NovaRequisicaoPage() {
@@ -39,13 +38,13 @@ export default function NovaRequisicaoPage() {
   const [descricao, setDescricao] = useState('')
   const [urgencia, setUrgencia] = useState<'BAIXA' | 'NORMAL' | 'ALTA' | 'CRITICA'>('NORMAL')
   const [itens, setItens] = useState<Item[]>([
-    { produto: '', descricao: '', quantidade: 1, unidade: 'UN', observacao: '' },
+    { descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0 },
   ])
 
   const addItem = () => {
     setItens([
       ...itens,
-      { produto: '', descricao: '', quantidade: 1, unidade: 'UN', observacao: '' },
+      { descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0 },
     ])
   }
 
@@ -97,7 +96,7 @@ export default function NovaRequisicaoPage() {
       }
 
       const itensValidos = itens.filter(
-        (item) => item.produto.trim() && item.quantidade > 0
+        (item) => item.descricao.trim() && item.quantidade > 0
       )
 
       if (itensValidos.length === 0) {
@@ -124,17 +123,15 @@ export default function NovaRequisicaoPage() {
 
       // Criar itens da requisição
       const itensParaInserir = itensValidos.map((item) => ({
-        tenant_id: profile.tenant_id,
         requisicao_id: requisicao.id,
-        produto: item.produto.trim(),
-        descricao: item.descricao.trim() || null,
+        descricao: item.descricao.trim(),
         quantidade: item.quantidade,
         unidade: item.unidade,
-        observacao: item.observacao.trim() || null,
+        valor_estimado: item.valor_estimado > 0 ? item.valor_estimado : null,
       }))
 
       const { error: itensError } = await supabase
-        .from('requisicao_itens')
+        .from('itens_requisicao')
         .insert(itensParaInserir)
 
       if (itensError) {
@@ -253,29 +250,16 @@ export default function NovaRequisicaoPage() {
                     </Button>
                   )}
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Produto / Serviço *</Label>
-                      <Input
-                        placeholder="Ex: Parafuso M8"
-                        value={item.produto}
-                        onChange={(e) =>
-                          updateItem(index, 'produto', e.target.value)
-                        }
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Descrição Adicional</Label>
-                      <Input
-                        placeholder="Ex: Aço inox"
-                        value={item.descricao}
-                        onChange={(e) =>
-                          updateItem(index, 'descricao', e.target.value)
-                        }
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label>Descrição do Item *</Label>
+                    <Input
+                      placeholder="Ex: Parafuso M8 de aço inox"
+                      value={item.descricao}
+                      onChange={(e) =>
+                        updateItem(index, 'descricao', e.target.value)
+                      }
+                      required
+                    />
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-3">
@@ -322,12 +306,19 @@ export default function NovaRequisicaoPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label>Observação</Label>
+                      <Label>Valor Estimado (R$)</Label>
                       <Input
-                        placeholder="Ex: Entrega urgente"
-                        value={item.observacao}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={item.valor_estimado || ''}
                         onChange={(e) =>
-                          updateItem(index, 'observacao', e.target.value)
+                          updateItem(
+                            index,
+                            'valor_estimado',
+                            parseFloat(e.target.value) || 0
+                          )
                         }
                       />
                     </div>
