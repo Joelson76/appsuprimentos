@@ -219,7 +219,7 @@ export default function NovaCotacaoPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma requisição" />
                   </SelectTrigger>
-                  <SelectContent className="max-h-[200px] z-50 bg-white border border-border shadow-lg">
+                  <SelectContent className="max-h-[200px]">
                     {requisicoes.length === 0 ? (
                       <div className="p-4 text-sm text-muted-foreground">
                         Nenhuma requisição aprovada encontrada
