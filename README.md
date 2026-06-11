@@ -1,58 +1,54 @@
-# SupriFlow
+# SupriFlow - Sistema de Gestão de Compras e Suprimentos
 
 SaaS multi-tenant para gestão de compras, suprimentos e fornecedores.
 
-## Stack
+## 🚀 Stack Tecnológico
 
-- **Frontend:** Next.js 14 (App Router) + TypeScript + TailwindCSS
+- **Frontend:** Next.js 14 (App Router) + TypeScript + TailwindCSS + shadcn/ui
 - **Backend:** Supabase (PostgreSQL + Auth + Storage + Edge Functions)
-- **Pagamentos:** Asaas
+- **Pagamentos:** Asaas (PIX + Boleto + Cartão)
 - **E-mails:** Resend
 
-## Getting Started
+## ✨ Funcionalidades Implementadas
 
-1. Clone o repositório
-2. Copie `.env.example` para `.env.local` e preencha as variáveis
-3. Instale as dependências:
+- ✅ Requisições de Compra
+- ✅ Cotações com Portal do Fornecedor
+- ✅ Comparação de Propostas por Item
+- ✅ Geração Automática de Pedidos
+- ✅ Multi-Tenant com RLS
+
+## 📦 Deploy na Vercel
+
+### 1. Configure as variáveis de ambiente:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
+
+### 2. Execute as migrations no Supabase
+
+### 3. Deploy:
+
+```bash
+vercel
+```
+
+## 🛠️ Desenvolvimento Local
 
 ```bash
 npm install
-```
-
-4. Execute o projeto em desenvolvimento:
-
-```bash
+cp .env.example .env.local
 npm run dev
 ```
 
-5. Acesse [http://localhost:3000](http://localhost:3000)
+Acesse http://localhost:3000
 
-## Estrutura do Projeto
+## 📖 Documentação
 
-```
-supriflow/
-├── app/                    # Next.js App Router
-├── components/             # Componentes React
-├── lib/                    # Utilitários e configurações
-│   └── supabase/          # Clientes Supabase
-├── supabase/
-│   ├── migrations/        # Migrações SQL
-│   └── functions/         # Edge Functions
-└── CLAUDE.md              # Documentação do projeto
-```
+- [CLAUDE.md](./CLAUDE.md) - Guia de desenvolvimento
+- [PROXIMOS_PASSOS.md](./PROXIMOS_PASSOS.md) - Roadmap
 
-## Multi-Tenancy
+---
 
-O isolamento entre empresas (tenants) é garantido via **Row Level Security (RLS)** do PostgreSQL.
-
-- JWT contém `tenant_id` do usuário logado
-- Todas as queries são automaticamente filtradas pelo RLS
-- Zero possibilidade de vazamento de dados entre tenants
-
-## Documentação
-
-Veja [CLAUDE.md](./CLAUDE.md) para detalhes completos da arquitetura e convenções.
-
-## License
-
-Proprietary - Todos os direitos reservados
+Desenvolvido com ❤️ usando Next.js e Supabase
