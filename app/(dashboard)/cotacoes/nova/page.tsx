@@ -148,27 +148,21 @@ export default function NovaCotacaoPage() {
         .select('*')
         .eq('requisicao_id', requisicaoId)
 
-      // Criar itens da cotação
+      // Criar itens da cotação COM fornecedores
+      // Para cada fornecedor, criar uma cópia dos itens
       if (itensReq && itensReq.length > 0) {
-        const itensCotacao = itensReq.map((item: any) => ({
-          tenant_id: profile.tenant_id,
-          cotacao_id: cotacao.id,
-          descricao: item.descricao,
-          quantidade: item.quantidade,
-          unidade: item.unidade,
-        }))
+        const itensCotacao = fornecedoresValidos.flatMap((fornId) =>
+          itensReq.map((item: any) => ({
+            cotacao_id: cotacao.id,
+            fornecedor_id: fornId,
+            descricao: item.descricao,
+            quantidade: item.quantidade,
+            unidade: item.unidade,
+          }))
+        )
 
         await supabase.from('itens_cotacao').insert(itensCotacao)
       }
-
-      // Criar registros de fornecedores da cotação
-      const fornecedoresCotacao = fornecedoresValidos.map((fornId) => ({
-        tenant_id: profile.tenant_id,
-        cotacao_id: cotacao.id,
-        fornecedor_id: fornId,
-      }))
-
-      await supabase.from('cotacao_fornecedores').insert(fornecedoresCotacao)
 
       // Atualizar status da requisição
       await supabase
