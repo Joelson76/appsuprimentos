@@ -53,31 +53,31 @@ export default async function FornecedorDetalhesPage({ params }: PageProps) {
   const getStatusBadge = (status: string) => {
     const badges: Record<string, JSX.Element> = {
       ATIVO: (
-        <Badge className="bg-green-100 text-green-800 border-green-200">
+        <span className="inline-flex items-center rounded-md border border-green-200 bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
           ATIVO
-        </Badge>
+        </span>
       ),
       INATIVO: (
-        <Badge className="bg-slate-100 text-slate-800 border-slate-200">
+        <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-800">
           INATIVO
-        </Badge>
+        </span>
       ),
       BLOQUEADO: (
-        <Badge className="bg-red-100 text-red-800 border-red-200">
+        <span className="inline-flex items-center rounded-md border border-red-200 bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-800">
           BLOQUEADO
-        </Badge>
+        </span>
       ),
       EM_HOMOLOGACAO: (
-        <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+        <span className="inline-flex items-center rounded-md border border-yellow-200 bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800">
           EM HOMOLOGAÇÃO
-        </Badge>
+        </span>
       ),
     }
     return (
       badges[status] || (
-        <Badge className="bg-slate-100 text-slate-800 border-slate-200">
+        <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-800">
           {status.replace(/_/g, ' ')}
-        </Badge>
+        </span>
       )
     )
   }
