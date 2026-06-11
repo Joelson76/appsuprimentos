@@ -20,6 +20,9 @@ import { ArrowLeft, Calendar, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 import EnviarLinksButton from '@/components/cotacoes/enviar-links-button'
+import MarcarVencedorButton from '@/components/cotacoes/marcar-vencedor-button'
+import ComparacaoItens from '@/components/cotacoes/comparacao-itens'
+import GerarPedidoButton from '@/components/cotacoes/gerar-pedido-button'
 
 interface PageProps {
   params: {
@@ -92,6 +95,9 @@ export default async function CotacaoDetalhesPage({ params }: PageProps) {
       }))
     : []
 
+  // Itens vencedores para gerar pedido
+  const itensVencedores = itens?.filter((i) => i.vencedor) || []
+
   const getStatusBadge = (status: string) => {
     const badges: Record<string, JSX.Element> = {
       ABERTA: (
@@ -102,6 +108,16 @@ export default async function CotacaoDetalhesPage({ params }: PageProps) {
       AGUARDANDO_RESPOSTAS: (
         <span className="inline-flex items-center rounded-md border border-yellow-200 bg-yellow-100 px-2.5 py-0.5 text-xs font-semibold text-yellow-800">
           AGUARDANDO RESPOSTAS
+        </span>
+      ),
+      RESPOSTAS_PARCIAIS: (
+        <span className="inline-flex items-center rounded-md border border-orange-200 bg-orange-100 px-2.5 py-0.5 text-xs font-semibold text-orange-800">
+          RESPOSTAS PARCIAIS
+        </span>
+      ),
+      EM_ANALISE: (
+        <span className="inline-flex items-center rounded-md border border-purple-200 bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800">
+          EM ANÁLISE
         </span>
       ),
       ENCERRADA: (
@@ -143,10 +159,16 @@ export default async function CotacaoDetalhesPage({ params }: PageProps) {
         </div>
         <div className="flex items-center gap-3">
           {getStatusBadge(cotacao.status)}
-          {fornecedoresList.length > 0 && (
+          {fornecedoresList.length > 0 && cotacao.status !== 'ENCERRADA' && (
             <EnviarLinksButton
               cotacaoId={cotacao.id}
               fornecedores={fornecedoresList}
+            />
+          )}
+          {itensVencedores.length > 0 && cotacao.status !== 'ENCERRADA' && (
+            <GerarPedidoButton
+              cotacaoId={cotacao.id}
+              itensVencedores={itensVencedores}
             />
           )}
         </div>
@@ -227,92 +249,169 @@ export default async function CotacaoDetalhesPage({ params }: PageProps) {
         </Card>
       </div>
 
-      {/* Itens por Fornecedor */}
+      {/* Comparação de Itens */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Propostas dos Fornecedores</h2>
+        <h2 className="text-2xl font-bold">Comparação de Propostas</h2>
+        <p className="text-muted-foreground">
+          Compare os itens e selecione o melhor fornecedor para cada produto
+        </p>
+
+        {itens && itens.length > 0 ? (
+          <ComparacaoItens
+            cotacaoId={cotacao.id}
+            itens={itens}
+            statusCotacao={cotacao.status}
+          />
+        ) : (
+          <Card>
+            <CardContent className="text-center py-8">
+              <p className="text-muted-foreground">
+                Nenhum fornecedor convidado para esta cotação
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {/* Propostas por Fornecedor (visão antiga - opcional) */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Propostas por Fornecedor</h2>
 
         {itensPorFornecedor && Object.keys(itensPorFornecedor).length > 0 ? (
           Object.entries(itensPorFornecedor).map(
             ([fornecedorId, data]: [string, any]) => (
               <Card key={fornecedorId}>
                 <CardHeader>
-                  <CardTitle>
-                    {data.fornecedor?.nome_fantasia ||
-                      data.fornecedor?.razao_social ||
-                      'Fornecedor não encontrado'}
-                  </CardTitle>
-                  <CardDescription>
-                    {data.itens.length} item(ns) cotado(s)
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>
+                        {data.fornecedor?.nome_fantasia ||
+                          data.fornecedor?.razao_social ||
+                          'Fornecedor não encontrado'}
+                      </CardTitle>
+                      <CardDescription>
+                        {data.itens.length} item(ns) cotado(s)
+                      </CardDescription>
+                    </div>
+                    {data.itens.some((i: any) => i.valor_unitario) ? (
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <div className="text-sm text-muted-foreground">
+                            Total da Proposta
+                          </div>
+                          <div className="text-2xl font-bold text-primary">
+                            {new Intl.NumberFormat('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
+                            }).format(
+                              data.itens.reduce(
+                                (sum: number, item: any) =>
+                                  sum +
+                                  (item.valor_unitario || 0) * item.quantidade,
+                                0
+                              )
+                            )}
+                          </div>
+                        </div>
+                        {cotacao.status !== 'ENCERRADA' && (
+                          <MarcarVencedorButton
+                            cotacaoId={cotacao.id}
+                            fornecedorId={fornecedorId}
+                            fornecedorNome={
+                              data.fornecedor?.nome_fantasia ||
+                              data.fornecedor?.razao_social ||
+                              'Fornecedor'
+                            }
+                            valorTotal={data.itens.reduce(
+                              (sum: number, item: any) =>
+                                sum + (item.valor_unitario || 0) * item.quantidade,
+                              0
+                            )}
+                            itens={data.itens}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground italic">
+                        Aguardando resposta
+                      </span>
+                    )}
+                  </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Descrição</TableHead>
-                        <TableHead className="text-right">
-                          Quantidade
-                        </TableHead>
-                        <TableHead className="text-right">Unidade</TableHead>
-                        <TableHead className="text-right">
-                          Valor Unit.
-                        </TableHead>
-                        <TableHead className="text-right">
-                          Valor Total
-                        </TableHead>
+                        <TableHead className="text-right">Qtd</TableHead>
+                        <TableHead className="text-right">Valor Unit.</TableHead>
+                        <TableHead className="text-right">Prazo</TableHead>
+                        <TableHead className="text-right">Subtotal</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {data.itens.map((item: any) => (
                         <TableRow key={item.id}>
-                          <TableCell>{item.descricao}</TableCell>
+                          <TableCell className="font-medium">
+                            {item.descricao}
+                          </TableCell>
                           <TableCell className="text-right">
                             {item.quantidade}
                           </TableCell>
                           <TableCell className="text-right">
-                            {item.unidade}
+                            {item.valor_unitario
+                              ? new Intl.NumberFormat('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
+                                }).format(item.valor_unitario)
+                              : '-'}
                           </TableCell>
                           <TableCell className="text-right">
-                            {item.preco_unitario
-                              ? new Intl.NumberFormat('pt-BR', {
-                                  style: 'currency',
-                                  currency: 'BRL',
-                                }).format(item.preco_unitario)
-                              : 'Aguardando'}
+                            {item.prazo_entrega ? `${item.prazo_entrega} dias` : '-'}
                           </TableCell>
                           <TableCell className="text-right font-medium">
-                            {item.preco_unitario
+                            {item.valor_unitario
                               ? new Intl.NumberFormat('pt-BR', {
                                   style: 'currency',
                                   currency: 'BRL',
-                                }).format(item.preco_unitario * item.quantidade)
+                                }).format(item.valor_unitario * item.quantidade)
                               : '-'}
                           </TableCell>
                         </TableRow>
                       ))}
-                      <TableRow>
-                        <TableCell colSpan={4} className="text-right font-bold">
-                          Total Geral:
-                        </TableCell>
-                        <TableCell className="text-right font-bold">
-                          {data.itens.some((i: any) => i.preco_unitario)
-                            ? new Intl.NumberFormat('pt-BR', {
-                                style: 'currency',
-                                currency: 'BRL',
-                              }).format(
-                                data.itens.reduce(
-                                  (sum: number, item: any) =>
-                                    sum +
-                                    (item.preco_unitario || 0) *
-                                      item.quantidade,
-                                  0
-                                )
-                              )
-                            : 'Aguardando proposta'}
-                        </TableCell>
-                      </TableRow>
                     </TableBody>
                   </Table>
+
+                  {/* Informações Adicionais */}
+                  {data.itens.some(
+                    (i: any) => i.condicao_pagamento || i.observacoes
+                  ) && (
+                    <div className="space-y-3 pt-4 border-t">
+                      <h4 className="font-semibold text-sm">
+                        Informações Adicionais
+                      </h4>
+                      {data.itens[0]?.condicao_pagamento && (
+                        <div>
+                          <span className="text-sm text-muted-foreground">
+                            Condições de Pagamento:
+                          </span>
+                          <p className="text-sm mt-1">
+                            {data.itens[0].condicao_pagamento}
+                          </p>
+                        </div>
+                      )}
+                      {data.itens[0]?.observacoes && (
+                        <div>
+                          <span className="text-sm text-muted-foreground">
+                            Observações:
+                          </span>
+                          <p className="text-sm mt-1 whitespace-pre-wrap">
+                            {data.itens[0].observacoes}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )

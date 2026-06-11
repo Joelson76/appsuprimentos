@@ -35,10 +35,10 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  const [acesso, setAcesso] = useState<any>(null)
   const [cotacao, setCotacao] = useState<any>(null)
   const [fornecedor, setFornecedor] = useState<any>(null)
   const [itens, setItens] = useState<any[]>([])
+  const [respondido, setRespondido] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -48,9 +48,9 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
     try {
       const supabase = createClient()
 
-      // Buscar acesso pelo token
-      const { data: acessoData, error: acessoError } = await supabase
-        .from('cotacao_acessos')
+      // Buscar item pelo token (um dos itens terá este token)
+      const { data: itemData, error: itemError } = await supabase
+        .from('itens_cotacao')
         .select(
           `
           *,
@@ -58,25 +58,25 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
           fornecedor:fornecedores (razao_social, nome_fantasia)
         `
         )
-        .eq('token', params.token)
+        .eq('token_resposta', params.token)
+        .limit(1)
         .single()
 
-      if (acessoError || !acessoData) {
+      if (itemError || !itemData) {
         setError('Link inválido ou expirado')
         setLoading(false)
         return
       }
 
-      setAcesso(acessoData)
-      setCotacao(acessoData.cotacao)
-      setFornecedor(acessoData.fornecedor)
+      setCotacao(itemData.cotacao)
+      setFornecedor(itemData.fornecedor)
 
-      // Buscar itens desta cotação para este fornecedor
+      // Buscar todos os itens desta cotação para este fornecedor
       const { data: itensData, error: itensError } = await supabase
         .from('itens_cotacao')
         .select('*')
-        .eq('cotacao_id', acessoData.cotacao_id)
-        .eq('fornecedor_id', acessoData.fornecedor_id)
+        .eq('cotacao_id', itemData.cotacao_id)
+        .eq('fornecedor_id', itemData.fornecedor_id)
 
       if (itensError) {
         throw itensError
@@ -84,13 +84,8 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
 
       setItens(itensData || [])
 
-      // Registrar acesso
-      if (!acessoData.acessado_em) {
-        await supabase
-          .from('cotacao_acessos')
-          .update({ acessado_em: new Date().toISOString() })
-          .eq('id', acessoData.id)
-      }
+      // Verificar se já foi respondido (se algum item tem valor_unitario)
+      setRespondido(itensData?.some(i => i.valor_unitario !== null) || false)
 
       setLoading(false)
     } catch (err: any) {
@@ -115,7 +110,7 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
       const supabase = createClient()
 
       // Validar preços
-      const todosPreenchidos = itens.every((item) => item.preco_unitario > 0)
+      const todosPreenchidos = itens.every((item) => item.valor_unitario > 0)
 
       if (!todosPreenchidos) {
         setError('Preencha o preço de todos os itens')
@@ -128,10 +123,11 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
         const { error: updateError } = await supabase
           .from('itens_cotacao')
           .update({
-            preco_unitario: parseFloat(item.preco_unitario),
+            valor_unitario: parseFloat(item.valor_unitario),
             prazo_entrega: item.prazo_entrega
               ? parseInt(item.prazo_entrega)
               : null,
+            condicao_pagamento: item.condicao_pagamento || null,
             observacoes: item.observacoes || null,
           })
           .eq('id', item.id)
@@ -140,12 +136,6 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
           throw updateError
         }
       }
-
-      // Marcar como respondido
-      await supabase
-        .from('cotacao_acessos')
-        .update({ respondido_em: new Date().toISOString() })
-        .eq('id', acesso.id)
 
       setSuccess(true)
     } catch (err: any) {
@@ -203,7 +193,7 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
 
   const totalGeral = itens.reduce(
     (sum, item) =>
-      sum + (parseFloat(item.preco_unitario) || 0) * item.quantidade,
+      sum + (parseFloat(item.valor_unitario) || 0) * item.quantidade,
     0
   )
 
@@ -257,7 +247,6 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
                   <TableRow>
                     <TableHead>Descrição</TableHead>
                     <TableHead className="text-right">Qtd</TableHead>
-                    <TableHead className="text-right">Unidade</TableHead>
                     <TableHead className="w-[150px]">Preço Unit. *</TableHead>
                     <TableHead className="w-[120px]">
                       Prazo (dias)
@@ -274,21 +263,18 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
                       <TableCell className="text-right">
                         {item.quantidade}
                       </TableCell>
-                      <TableCell className="text-right">
-                        {item.unidade}
-                      </TableCell>
                       <TableCell>
                         <Input
                           type="number"
                           step="0.01"
                           min="0"
                           placeholder="0,00"
-                          value={item.preco_unitario || ''}
+                          value={item.valor_unitario || ''}
                           onChange={(e) =>
-                            updateItem(index, 'preco_unitario', e.target.value)
+                            updateItem(index, 'valor_unitario', e.target.value)
                           }
                           required
-                          disabled={acesso.respondido_em}
+                          disabled={respondido}
                         />
                       </TableCell>
                       <TableCell>
@@ -300,21 +286,21 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
                           onChange={(e) =>
                             updateItem(index, 'prazo_entrega', e.target.value)
                           }
-                          disabled={acesso.respondido_em}
+                          disabled={respondido}
                         />
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {item.preco_unitario
+                        {item.valor_unitario
                           ? new Intl.NumberFormat('pt-BR', {
                               style: 'currency',
                               currency: 'BRL',
-                            }).format(item.preco_unitario * item.quantidade)
+                            }).format(item.valor_unitario * item.quantidade)
                           : '-'}
                       </TableCell>
                     </TableRow>
                   ))}
                   <TableRow>
-                    <TableCell colSpan={5} className="text-right font-bold">
+                    <TableCell colSpan={4} className="text-right font-bold">
                       Total Geral:
                     </TableCell>
                     <TableCell className="text-right font-bold text-lg">
@@ -327,32 +313,50 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
                 </TableBody>
               </Table>
 
-              <div className="mt-6 space-y-2">
-                <Label htmlFor="observacoes">
-                  Observações Gerais (opcional)
-                </Label>
-                <Textarea
-                  id="observacoes"
-                  placeholder="Condições de pagamento, garantia, etc."
-                  value={itens[0]?.observacoes || ''}
-                  onChange={(e) =>
-                    itens.forEach((_, i) =>
-                      updateItem(i, 'observacoes', e.target.value)
-                    )
-                  }
-                  rows={4}
-                  disabled={acesso.respondido_em}
-                />
+              <div className="mt-6 space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="condicao_pagamento">
+                    Condições de Pagamento (opcional)
+                  </Label>
+                  <Input
+                    id="condicao_pagamento"
+                    placeholder="Ex: 30/60 dias, à vista com 5% desconto, etc."
+                    value={itens[0]?.condicao_pagamento || ''}
+                    onChange={(e) =>
+                      itens.forEach((_, i) =>
+                        updateItem(i, 'condicao_pagamento', e.target.value)
+                      )
+                    }
+                    disabled={respondido}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="observacoes">
+                    Observações Gerais (opcional)
+                  </Label>
+                  <Textarea
+                    id="observacoes"
+                    placeholder="Garantia, especificações técnicas, prazo de validade da proposta, etc."
+                    value={itens[0]?.observacoes || ''}
+                    onChange={(e) =>
+                      itens.forEach((_, i) =>
+                        updateItem(i, 'observacoes', e.target.value)
+                      )
+                    }
+                    rows={4}
+                    disabled={respondido}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <div className="mt-6 flex justify-end">
-            {acesso.respondido_em ? (
+            {respondido ? (
               <div className="text-green-600 font-medium flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5" />
-                Proposta já enviada em{' '}
-                {new Date(acesso.respondido_em).toLocaleString('pt-BR')}
+                Proposta já enviada
               </div>
             ) : (
               <Button type="submit" size="lg" disabled={submitting}>

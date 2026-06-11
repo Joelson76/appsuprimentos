@@ -37,6 +37,8 @@ export default async function CotacoesPage() {
     const colors: Record<string, string> = {
       ABERTA: 'bg-green-100 text-green-800',
       AGUARDANDO_RESPOSTAS: 'bg-yellow-100 text-yellow-800',
+      RESPOSTAS_PARCIAIS: 'bg-orange-100 text-orange-800',
+      EM_ANALISE: 'bg-purple-100 text-purple-800',
       ENCERRADA: 'bg-blue-100 text-blue-800',
       CANCELADA: 'bg-slate-100 text-slate-800',
     }

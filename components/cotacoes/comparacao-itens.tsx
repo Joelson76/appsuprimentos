@@ -1,0 +1,235 @@
+'use client'
+
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Trophy, Check } from 'lucide-react'
+
+interface ItemComparacao {
+  descricao: string
+  quantidade: number
+  propostas: Array<{
+    itemId: string
+    fornecedorId: string
+    fornecedorNome: string
+    valorUnitario: number | null
+    prazoEntrega: number | null
+    vencedor: boolean
+  }>
+}
+
+interface Props {
+  cotacaoId: string
+  itens: any[]
+  statusCotacao: string
+}
+
+export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Props) {
+  const router = useRouter()
+  const [loading, setLoading] = useState<string | null>(null)
+
+  // Agrupar itens por descrição
+  const itensAgrupados: ItemComparacao[] = []
+  const descricoes = new Set(itens.map((i) => i.descricao))
+
+  descricoes.forEach((desc) => {
+    const itensDesc = itens.filter((i) => i.descricao === desc)
+    const quantidade = itensDesc[0]?.quantidade || 0
+
+    const propostas = itensDesc.map((item) => ({
+      itemId: item.id,
+      fornecedorId: item.fornecedor_id,
+      fornecedorNome:
+        item.fornecedor?.nome_fantasia || item.fornecedor?.razao_social || 'N/A',
+      valorUnitario: item.valor_unitario,
+      prazoEntrega: item.prazo_entrega,
+      vencedor: item.vencedor,
+    }))
+
+    itensAgrupados.push({
+      descricao: desc,
+      quantidade,
+      propostas,
+    })
+  })
+
+  const marcarVencedor = async (itemId: string, descricao: string) => {
+    setLoading(itemId)
+    try {
+      const supabase = createClient()
+
+      // Marcar este item como vencedor
+      await supabase
+        .from('itens_cotacao')
+        .update({ vencedor: true })
+        .eq('id', itemId)
+
+      // Desmarcar outros itens com a mesma descrição nesta cotação
+      await supabase
+        .from('itens_cotacao')
+        .update({ vencedor: false })
+        .eq('cotacao_id', cotacaoId)
+        .eq('descricao', descricao)
+        .neq('id', itemId)
+
+      router.refresh()
+    } catch (err) {
+      console.error('Erro ao marcar vencedor:', err)
+      alert('Erro ao marcar vencedor')
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  const getMelhorPreco = (propostas: ItemComparacao['propostas']) => {
+    const comPreco = propostas.filter((p) => p.valorUnitario !== null)
+    if (comPreco.length === 0) return null
+    return Math.min(...comPreco.map((p) => p.valorUnitario!))
+  }
+
+  const getMelhorPrazo = (propostas: ItemComparacao['propostas']) => {
+    const comPrazo = propostas.filter((p) => p.prazoEntrega !== null)
+    if (comPrazo.length === 0) return null
+    return Math.min(...comPrazo.map((p) => p.prazoEntrega!))
+  }
+
+  return (
+    <div className="space-y-6">
+      {itensAgrupados.map((item, idx) => {
+        const melhorPreco = getMelhorPreco(item.propostas)
+        const melhorPrazo = getMelhorPrazo(item.propostas)
+        const jaTemVencedor = item.propostas.some((p) => p.vencedor)
+
+        return (
+          <Card key={idx}>
+            <CardHeader>
+              <CardTitle className="text-lg">
+                {item.descricao}
+                <span className="ml-3 text-sm font-normal text-muted-foreground">
+                  Quantidade: {item.quantidade}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fornecedor</TableHead>
+                    <TableHead className="text-right">Valor Unitário</TableHead>
+                    <TableHead className="text-right">Valor Total</TableHead>
+                    <TableHead className="text-right">Prazo (dias)</TableHead>
+                    {statusCotacao !== 'ENCERRADA' && (
+                      <TableHead className="text-right">Ação</TableHead>
+                    )}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {item.propostas.map((proposta) => {
+                    const isMelhorPreco =
+                      melhorPreco && proposta.valorUnitario === melhorPreco
+                    const isMelhorPrazo =
+                      melhorPrazo && proposta.prazoEntrega === melhorPrazo
+
+                    return (
+                      <TableRow
+                        key={proposta.itemId}
+                        className={
+                          proposta.vencedor ? 'bg-green-50 border-green-200' : ''
+                        }
+                      >
+                        <TableCell className="font-medium">
+                          {proposta.fornecedorNome}
+                          {proposta.vencedor && (
+                            <Trophy className="inline ml-2 h-4 w-4 text-yellow-600" />
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {proposta.valorUnitario ? (
+                            <div className="flex items-center justify-end gap-2">
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              }).format(proposta.valorUnitario)}
+                              {isMelhorPreco && (
+                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                                  Melhor
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-medium">
+                          {proposta.valorUnitario
+                            ? new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              }).format(proposta.valorUnitario * item.quantidade)
+                            : '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {proposta.prazoEntrega ? (
+                            <div className="flex items-center justify-end gap-2">
+                              {proposta.prazoEntrega} dias
+                              {isMelhorPrazo && (
+                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+                                  Mais rápido
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        {statusCotacao !== 'ENCERRADA' && (
+                          <TableCell className="text-right">
+                            {proposta.valorUnitario ? (
+                              proposta.vencedor ? (
+                                <div className="flex items-center justify-end gap-1 text-green-600 text-sm font-medium">
+                                  <Check className="h-4 w-4" />
+                                  Selecionado
+                                </div>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    marcarVencedor(proposta.itemId, item.descricao)
+                                  }
+                                  disabled={loading === proposta.itemId}
+                                >
+                                  {loading === proposta.itemId
+                                    ? 'Salvando...'
+                                    : 'Selecionar'}
+                                </Button>
+                              )
+                            ) : (
+                              <span className="text-muted-foreground text-sm">
+                                Aguardando
+                              </span>
+                            )}
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )
+      })}
+    </div>
+  )
+}

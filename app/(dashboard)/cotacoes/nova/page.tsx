@@ -157,7 +157,6 @@ export default function NovaCotacaoPage() {
             fornecedor_id: fornId,
             descricao: item.descricao,
             quantidade: item.quantidade,
-            unidade: item.unidade,
           }))
         )
 

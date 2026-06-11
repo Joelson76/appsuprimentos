@@ -35,52 +35,22 @@ export default function EnviarLinksButton({ cotacaoId, fornecedores }: Props) {
     try {
       const supabase = createClient()
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) return
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('tenant_id')
-        .eq('id', user.id)
-        .single()
-
-      if (!profile) return
-
       const novosLinks: Record<string, string> = {}
 
       for (const fornecedor of fornecedores) {
-        // Verificar se já existe token
-        const { data: acessoExistente } = await supabase
-          .from('cotacao_acessos')
-          .select('token')
+        // Buscar o token_resposta de um dos itens deste fornecedor nesta cotação
+        const { data: item } = await supabase
+          .from('itens_cotacao')
+          .select('token_resposta')
           .eq('cotacao_id', cotacaoId)
           .eq('fornecedor_id', fornecedor.id)
+          .limit(1)
           .single()
 
-        let token = acessoExistente?.token
-
-        if (!token) {
-          // Gerar novo token
-          const { data: novoToken } = await supabase.rpc(
-            'gerar_token_cotacao'
-          )
-
-          token = novoToken
-
-          // Criar acesso
-          await supabase.from('cotacao_acessos').insert({
-            tenant_id: profile.tenant_id,
-            cotacao_id: cotacaoId,
-            fornecedor_id: fornecedor.id,
-            token,
-          })
+        if (item?.token_resposta) {
+          novosLinks[fornecedor.id] =
+            `${window.location.origin}/fornecedor/${item.token_resposta}`
         }
-
-        novosLinks[fornecedor.id] =
-          `${window.location.origin}/fornecedor/${token}`
       }
 
       setLinks(novosLinks)
