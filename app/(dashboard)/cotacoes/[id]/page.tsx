@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Calendar, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
+import EnviarLinksButton from '@/components/cotacoes/enviar-links-button'
 
 interface PageProps {
   params: {
@@ -73,12 +74,23 @@ export default async function CotacaoDetalhesPage({ params }: PageProps) {
     if (!acc[fornecedorId]) {
       acc[fornecedorId] = {
         fornecedor: item.fornecedor,
+        fornecedor_id: fornecedorId,
         itens: [],
       }
     }
     acc[fornecedorId].itens.push(item)
     return acc
   }, {})
+
+  // Lista de fornecedores únicos para o botão de enviar links
+  const fornecedoresList = itensPorFornecedor
+    ? Object.values(itensPorFornecedor).map((data: any) => ({
+        id: data.fornecedor_id,
+        razao_social: data.fornecedor?.razao_social || 'Desconhecido',
+        nome_fantasia: data.fornecedor?.nome_fantasia,
+        email: data.fornecedor?.email,
+      }))
+    : []
 
   const getStatusBadge = (status: string) => {
     const badges: Record<string, JSX.Element> = {
@@ -129,8 +141,14 @@ export default async function CotacaoDetalhesPage({ params }: PageProps) {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {getStatusBadge(cotacao.status)}
+          {fornecedoresList.length > 0 && (
+            <EnviarLinksButton
+              cotacaoId={cotacao.id}
+              fornecedores={fornecedoresList}
+            />
+          )}
         </div>
       </div>
 
