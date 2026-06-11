@@ -88,8 +88,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-RAISE NOTICE '===========================================';
-RAISE NOTICE '✅ Tabela cotacao_acessos criada';
-RAISE NOTICE '✅ Campos prazo_entrega e observacoes adicionados';
-RAISE NOTICE '✅ Políticas RLS configuradas';
-RAISE NOTICE '===========================================';
+-- Mensagens de sucesso
+DO $$
+BEGIN
+  RAISE NOTICE '===========================================';
+  RAISE NOTICE '✅ Tabela cotacao_acessos criada';
+  RAISE NOTICE '✅ Campos prazo_entrega e observacoes adicionados';
+  RAISE NOTICE '✅ Políticas RLS configuradas';
+  RAISE NOTICE '===========================================';
+END $$;
