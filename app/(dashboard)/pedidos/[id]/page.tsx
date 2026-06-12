@@ -35,6 +35,7 @@ import Link from 'next/link'
 import { AprovarPedidoButton } from '@/components/pedidos/aprovar-pedido-button'
 import { CancelarPedidoButton } from '@/components/pedidos/cancelar-pedido-button'
 import { EnviarFornecedorButton } from '@/components/pedidos/enviar-fornecedor-button'
+import { ConfirmarRecebimentoButton } from '@/components/pedidos/confirmar-recebimento-button'
 
 interface PageProps {
   params: {
@@ -174,11 +175,13 @@ export default async function PedidoDetalhesPage({ params }: PageProps) {
               fornecedorEmail={pedido.fornecedores.email}
             />
           )}
-          {pedido.status === 'ENVIADO' && (
-            <Button variant="outline" size="sm">
-              <Truck className="mr-2 h-4 w-4" />
-              Confirmar Recebimento
-            </Button>
+          {(pedido.status === 'ENVIADO' ||
+            pedido.status === 'PARCIALMENTE_RECEBIDO') && (
+            <ConfirmarRecebimentoButton
+              pedidoId={pedido.id}
+              numero={pedido.numero}
+              itens={pedido.itens_pedido}
+            />
           )}
         </div>
       </div>
