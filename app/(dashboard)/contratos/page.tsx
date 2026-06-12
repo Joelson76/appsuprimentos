@@ -16,13 +16,16 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Plus, AlertTriangle, FileText } from 'lucide-react'
+import { Plus, AlertTriangle, FileText, Eye } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { Contrato } from '@/lib/types'
+import { NovoContratoDialog } from '@/components/contratos/novo-contrato-dialog'
+import Link from 'next/link'
 
 export default async function ContratosPage() {
   const supabase = await createClient()
 
+  // Buscar contratos
   const { data: contratos } = await supabase
     .from('contratos')
     .select(
@@ -32,6 +35,12 @@ export default async function ContratosPage() {
     `
     )
     .order('fim', { ascending: true })
+
+  // Buscar fornecedores para o select
+  const { data: fornecedores } = await supabase
+    .from('fornecedores')
+    .select('id, razao_social')
+    .order('razao_social')
 
   const getStatusBadge = (status: string) => {
     const colors: Record<string, string> = {
@@ -96,10 +105,7 @@ export default async function ContratosPage() {
             Gerencie contratos com fornecedores
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Contrato
-        </Button>
+        <NovoContratoDialog fornecedores={fornecedores || []} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -204,13 +210,16 @@ export default async function ContratosPage() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         {contrato.arquivo_path && (
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" title="Baixar arquivo">
                             <FileText className="h-4 w-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="sm">
-                          Detalhes
-                        </Button>
+                        <Link href={`/contratos/${contrato.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="mr-1 h-4 w-4" />
+                            Detalhes
+                          </Button>
+                        </Link>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -221,10 +230,9 @@ export default async function ContratosPage() {
                     <div className="text-muted-foreground">
                       Nenhum contrato cadastrado
                     </div>
-                    <Button className="mt-4" variant="outline" size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Cadastrar Primeiro Contrato
-                    </Button>
+                    <div className="mt-4">
+                      <NovoContratoDialog fornecedores={fornecedores || []} />
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
