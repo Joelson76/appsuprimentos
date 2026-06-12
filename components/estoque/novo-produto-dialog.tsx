@@ -74,9 +74,26 @@ export function NovoProdutoDialog({ categorias = [] }: NovoProdutoDialogProps) {
     try {
       const supabase = createClient()
 
+      // Buscar tenant_id do usuário logado
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        throw new Error('Usuário não autenticado')
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('tenant_id')
+        .eq('id', user.id)
+        .single()
+
+      if (!profile?.tenant_id) {
+        throw new Error('Tenant não encontrado')
+      }
+
       const { data, error } = await supabase
         .from('produtos')
         .insert({
+          tenant_id: profile.tenant_id,
           descricao: formData.descricao,
           codigo: formData.codigo || null,
           unidade: formData.unidade,
