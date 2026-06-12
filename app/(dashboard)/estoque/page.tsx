@@ -16,17 +16,27 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Plus, AlertTriangle } from 'lucide-react'
+import { Plus, AlertTriangle, Eye } from 'lucide-react'
 import type { Produto } from '@/lib/types'
+import { NovoProdutoDialog } from '@/components/estoque/novo-produto-dialog'
+import { MovimentarEstoqueDialog } from '@/components/estoque/movimentar-estoque-dialog'
+import Link from 'next/link'
 
 export default async function EstoquePage() {
   const supabase = await createClient()
 
+  // Buscar produtos
   const { data: produtos } = await supabase
     .from('produtos')
     .select('*, categorias(nome)')
     .eq('ativo', true)
     .order('descricao')
+
+  // Buscar categorias para o select
+  const { data: categorias } = await supabase
+    .from('categorias')
+    .select('id, nome')
+    .order('nome')
 
   const getStatusEstoque = (produto: Produto) => {
     if (!produto.estoque_minimo_alerta) {
@@ -70,10 +80,7 @@ export default async function EstoquePage() {
             Gerencie o estoque de produtos
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Produto
-        </Button>
+        <NovoProdutoDialog categorias={categorias || []} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -199,9 +206,19 @@ export default async function EstoquePage() {
                     </TableCell>
                     <TableCell>{getStatusEstoque(produto)}</TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        Ajustar
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <MovimentarEstoqueDialog
+                          produtoId={produto.id}
+                          produtoNome={produto.descricao}
+                          estoqueAtual={Number(produto.estoque_atual)}
+                          unidade={produto.unidade}
+                        />
+                        <Link href={`/estoque/${produto.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -211,10 +228,9 @@ export default async function EstoquePage() {
                     <div className="text-muted-foreground">
                       Nenhum produto cadastrado
                     </div>
-                    <Button className="mt-4" variant="outline" size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Cadastrar Primeiro Produto
-                    </Button>
+                    <div className="mt-4">
+                      <NovoProdutoDialog categorias={categorias || []} />
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
