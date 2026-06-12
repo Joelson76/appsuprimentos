@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Plus, AlertTriangle, Eye } from 'lucide-react'
+import { Plus, AlertTriangle, Eye, Folder } from 'lucide-react'
 import type { Produto } from '@/lib/types'
 import { NovoProdutoDialog } from '@/components/estoque/novo-produto-dialog'
 import { MovimentarEstoqueDialog } from '@/components/estoque/movimentar-estoque-dialog'
@@ -80,7 +80,15 @@ export default async function EstoquePage() {
             Gerencie o estoque de produtos
           </p>
         </div>
-        <NovoProdutoDialog categorias={categorias || []} />
+        <div className="flex gap-2">
+          <Link href="/estoque/categorias">
+            <Button variant="outline">
+              <Folder className="mr-2 h-4 w-4" />
+              Categorias
+            </Button>
+          </Link>
+          <NovoProdutoDialog categorias={categorias || []} />
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

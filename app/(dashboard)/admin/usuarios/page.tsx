@@ -19,10 +19,12 @@ import { Users, UserCheck, UserX, Shield } from 'lucide-react'
 import { ConvidarUsuarioDialog } from '@/components/usuarios/convidar-usuario-dialog'
 import { EditarUsuarioDialog } from '@/components/usuarios/editar-usuario-dialog'
 import { ToggleAtivoUsuarioButton } from '@/components/usuarios/toggle-ativo-usuario-button'
+import { SimpleEditButton } from '@/components/usuarios/simple-edit-button'
 
 export default async function UsuariosPage() {
   const supabase = await createClient()
 
+  // Buscar usuários do tenant
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -193,13 +195,7 @@ export default async function UsuariosPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
-                      <EditarUsuarioDialog usuario={usuario} />
-                      {usuario.id !== user?.id && (
-                        <ToggleAtivoUsuarioButton
-                          usuarioId={usuario.id}
-                          ativo={usuario.ativo}
-                        />
-                      )}
+                      <SimpleEditButton nome={usuario.nome} />
                     </TableCell>
                   </TableRow>
                 ))

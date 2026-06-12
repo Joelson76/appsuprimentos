@@ -13,9 +13,11 @@ import {
   FileCheck,
   Warehouse,
   FileSpreadsheet,
+  BarChart3,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 interface SidebarProps {
   tenant: {
@@ -74,6 +76,11 @@ export function Sidebar({ tenant }: SidebarProps) {
       label: 'Usuários',
       icon: Users,
       href: '/usuarios',
+    },
+    {
+      label: 'Relatórios',
+      icon: BarChart3,
+      href: '/relatorios',
     },
     {
       label: 'Configurações',
@@ -145,7 +152,10 @@ export function Sidebar({ tenant }: SidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t space-y-3">
+        <div className="flex items-center justify-center">
+          <ThemeToggle />
+        </div>
         <p className="text-xs text-muted-foreground text-center">
           © 2026 SupriFlow
         </p>
