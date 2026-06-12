@@ -74,6 +74,18 @@
 - ✅ Templates profissionais com design SupriFlow
 - ✅ Formatação brasileira (moeda, datas)
 
+### 📄 Notas Fiscais
+- ✅ Registro de NF-e via upload de XML
+- ✅ Parser automático de XML (número, série, valor, chave)
+- ✅ Cadastro manual de NF-e
+- ✅ Listagem com filtros e KPIs
+- ✅ Página de detalhes com comparação vs PO
+- ✅ **Conferência automática (3-way matching)**
+- ✅ Identificação de divergências (valor, quantidade)
+- ✅ Workflow de aprovação/reprovação
+- ✅ Storage de XMLs no Supabase
+- ✅ Estados: PENDENTE → CONFERIDA → APROVADA/DIVERGENTE
+
 ### 🔧 Infraestrutura
 - ✅ Next.js 14 App Router + TypeScript
 - ✅ Supabase (PostgreSQL + Auth + Storage)
@@ -87,17 +99,6 @@
 ---
 
 ## 🚧 Funcionalidades Planejadas (Não Implementadas)
-
-### 📄 Notas Fiscais
-- ❌ Upload de XML de NF-e
-- ❌ Parser automático de dados da NF-e
-- ❌ Conferência de NF vs Pedido
-- ❌ Aprovação de notas fiscais
-- ❌ Estados: PENDENTE → CONFERIDA → APROVADA/DIVERGENTE
-- ❌ Listagem e filtros
-
-**Complexidade:** Média  
-**Tempo estimado:** 4-6 horas
 
 ### 📋 Contratos
 - ❌ Cadastro de contratos com fornecedores
@@ -172,12 +173,12 @@
 | Pedidos | ✅ Completo | 100% |
 | Dashboard | ✅ Completo | 100% |
 | E-mails | ✅ Funcional | 70% |
-| Notas Fiscais | ❌ Não implementado | 0% |
+| **Notas Fiscais** | **✅ Completo** | **100%** |
 | Contratos | ❌ Não implementado | 0% |
 | Estoque | ❌ Não implementado | 0% |
 | Pagamentos SaaS | ❌ Não implementado | 0% |
 
-**Completude Geral do Projeto:** ~65%
+**Completude Geral do Projeto:** ~70%
 
 ---
 
@@ -247,7 +248,7 @@ supabase/FIX_ITENS_COTACAO_RLS.sql  # Fix de RLS para itens de cotação
 ## 🚀 Próximos Passos Sugeridos
 
 ### Prioridade Alta (MVP Completo)
-1. **Notas Fiscais** - Fundamental para gestão fiscal
+1. ~~**Notas Fiscais**~~ - ✅ **CONCLUÍDO**
 2. **Pagamentos SaaS** - Monetização do produto
 3. **E-mails adicionais** - Automações importantes
 
