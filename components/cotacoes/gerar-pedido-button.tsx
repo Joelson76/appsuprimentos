@@ -74,7 +74,7 @@ export default function GerarPedidoButton({
 
       // Criar um pedido para cada fornecedor
       for (const [fornecedorId, data] of Object.entries(
-        itensPorFornecedor as any
+        itensPorFornecedor as Record<string, any>
       )) {
         const { data: pedido, error: pedidoError } = await supabase
           .from('pedidos')

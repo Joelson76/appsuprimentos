@@ -45,3 +45,5 @@ limpar-*.js
 list-*.js
 ver-*.js
 verificar-*.js
+
+.vercel
