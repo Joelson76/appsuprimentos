@@ -41,15 +41,15 @@ export function Header({ user }: HeaderProps) {
   }
 
   return (
-    <header className="h-16 border-b bg-white flex items-center justify-between px-6">
+    <header className="h-16 border-b bg-card flex items-center justify-between px-6">
       <div>
-        <h2 className="text-xl font-semibold">Dashboard</h2>
+        <h2 className="text-xl font-semibold text-card-foreground">Dashboard</h2>
       </div>
 
       <div className="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 hover:bg-slate-50 rounded-lg p-2 transition">
+            <button className="flex items-center gap-3 hover:bg-accent rounded-lg p-2 transition">
               <div className="text-right">
                 <p className="text-sm font-medium">{user.nome}</p>
                 <p className="text-xs text-muted-foreground">{user.perfil}</p>

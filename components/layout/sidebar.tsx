@@ -114,7 +114,7 @@ export function Sidebar({ tenant }: SidebarProps) {
   const trialDays = getTrialDaysLeft()
 
   return (
-    <aside className="w-64 border-r bg-slate-50 flex flex-col h-screen">
+    <aside className="w-64 border-r bg-background flex flex-col h-screen">
       <div className="p-6 border-b">
         <h1 className="text-2xl font-bold text-primary">SupriFlow</h1>
         <p className="text-sm text-muted-foreground mt-1">{tenant.nome}</p>
@@ -142,7 +142,7 @@ export function Sidebar({ tenant }: SidebarProps) {
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                 isActive
                   ? 'bg-primary text-primary-foreground'
-                  : 'text-slate-700 hover:bg-slate-100'
+                  : 'text-foreground hover:bg-accent hover:text-accent-foreground'
               )}
             >
               <Icon className="h-5 w-5" />
