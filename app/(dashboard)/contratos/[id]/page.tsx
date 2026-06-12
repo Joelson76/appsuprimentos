@@ -22,6 +22,7 @@ import { formatCurrency, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 import { RenovarContratoButton } from '@/components/contratos/renovar-contrato-button'
 import { CancelarContratoButton } from '@/components/contratos/cancelar-contrato-button'
+import { DownloadDocumentoButton } from '@/components/contratos/download-documento-button'
 
 export default async function ContratoDetalhesPage({
   params,
@@ -224,10 +225,10 @@ export default async function ContratoDetalhesPage({
             </div>
 
             {contrato.arquivo_path && (
-              <Button variant="outline" className="w-full" size="sm">
-                <FileText className="mr-2 h-4 w-4" />
-                Baixar Documento
-              </Button>
+              <DownloadDocumentoButton
+                arquivoPath={contrato.arquivo_path}
+                nomeContrato={contrato.titulo}
+              />
             )}
           </CardContent>
         </Card>
