@@ -98,6 +98,18 @@
 - ✅ Cancelamento de contratos
 - ✅ Estados: ATIVO → VENCENDO → VENCIDO/RENOVAÇÃO
 
+### 📦 Estoque
+- ✅ Cadastro de produtos com SKU
+- ✅ Múltiplas unidades de medida
+- ✅ Estoque mínimo configurável
+- ✅ Alertas de estoque baixo/crítico
+- ✅ **5 tipos de movimentação** (entrada, saída, ajustes)
+- ✅ Validação de saldo (não permite negativo)
+- ✅ Histórico completo de movimentações
+- ✅ **Integração automática com recebimentos**
+- ✅ Rastreabilidade (usuário, data, observação)
+- ✅ KPIs visuais e barras de progresso
+
 ### 🔧 Infraestrutura
 - ✅ Next.js 14 App Router + TypeScript
 - ✅ Supabase (PostgreSQL + Auth + Storage)
@@ -113,16 +125,6 @@
 ## 🚧 Funcionalidades Planejadas (Não Implementadas)
 
 
-### 📦 Estoque
-- ❌ Cadastro de produtos
-- ❌ Movimentações (entrada/saída)
-- ❌ Saldo por localização
-- ❌ Estoque mínimo/máximo
-- ❌ Alertas de reposição
-- ❌ Inventário
-
-**Complexidade:** Média-Alta  
-**Tempo estimado:** 8-12 horas
 
 ### 💳 Pagamentos e Cobrança SaaS (Asaas)
 - ❌ Integração com Asaas
@@ -177,10 +179,10 @@
 | E-mails | ✅ Funcional | 70% |
 | **Notas Fiscais** | **✅ Completo** | **100%** |
 | **Contratos** | **✅ Completo** | **100%** |
-| Estoque | ❌ Não implementado | 0% |
+| **Estoque** | **✅ Completo** | **100%** |
 | Pagamentos SaaS | ❌ Não implementado | 0% |
 
-**Completude Geral do Projeto:** ~75%
+**Completude Geral do Projeto:** ~85%
 
 ---
 
@@ -252,11 +254,11 @@ supabase/FIX_ITENS_COTACAO_RLS.sql  # Fix de RLS para itens de cotação
 ### Prioridade Alta (MVP Completo)
 1. ~~**Notas Fiscais**~~ - ✅ **CONCLUÍDO**
 2. ~~**Contratos**~~ - ✅ **CONCLUÍDO**
-3. **Pagamentos SaaS** - Monetização do produto
-4. **E-mails adicionais** - Automações importantes
+3. ~~**Estoque**~~ - ✅ **CONCLUÍDO**
+4. **Pagamentos SaaS** - Monetização do produto (único módulo restante!)
 
 ### Prioridade Média (Melhorias)
-5. **Estoque** - Controle de inventário
+5. **E-mails adicionais** - Automações importantes
 6. **Exportação de relatórios** - Excel/PDF
 
 ### Prioridade Baixa (Nice to Have)
