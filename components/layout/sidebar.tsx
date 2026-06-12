@@ -12,6 +12,7 @@ import {
   Receipt,
   FileCheck,
   Warehouse,
+  FileSpreadsheet,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -61,7 +62,7 @@ export function Sidebar({ tenant }: SidebarProps) {
     },
     {
       label: 'Notas Fiscais',
-      icon: Receipt,
+      icon: FileSpreadsheet,
       href: '/notas-fiscais',
     },
     {

@@ -16,21 +16,40 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Plus, Download, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { Plus, Download, AlertTriangle, CheckCircle2, Eye } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { NotaFiscal } from '@/lib/types'
+import { ProcessarNFeDialog } from '@/components/notas-fiscais/processar-nfe-dialog'
+import Link from 'next/link'
 
 export default async function NotasFiscaisPage() {
   const supabase = await createClient()
 
+  // Buscar notas fiscais
   const { data: notasFiscais } = await supabase
     .from('notas_fiscais')
     .select(
       `
       *,
-      ordens_compra (numero, fornecedores (razao_social))
+      pedidos:pedidos!notas_fiscais_pedido_id_fkey (
+        numero,
+        fornecedor:fornecedores (razao_social)
+      )
     `
     )
+    .order('criado_em', { ascending: false })
+
+  // Buscar pedidos aprovados/enviados para o select
+  const { data: pedidosDisponiveis } = await supabase
+    .from('pedidos')
+    .select(
+      `
+      id,
+      numero,
+      fornecedor:fornecedores (razao_social)
+    `
+    )
+    .in('status', ['APROVADO', 'ENVIADO', 'RECEBIDO'])
     .order('criado_em', { ascending: false })
 
   const getStatusBadge = (status: string) => {
@@ -61,10 +80,7 @@ export default async function NotasFiscaisPage() {
             Gerencie e confira suas notas fiscais
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Processar NF-e
-        </Button>
+        <ProcessarNFeDialog pedidos={pedidosDisponiveis || []} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -158,10 +174,10 @@ export default async function NotasFiscaisPage() {
                       )}
                     </TableCell>
                     <TableCell className="font-mono">
-                      {nf.ordens_compra?.numero || '-'}
+                      {nf.pedidos?.numero || '-'}
                     </TableCell>
                     <TableCell>
-                      {nf.ordens_compra?.fornecedores?.razao_social || '-'}
+                      {nf.pedidos?.fornecedor?.razao_social || '-'}
                     </TableCell>
                     <TableCell>{formatDate(nf.emissao)}</TableCell>
                     <TableCell className="font-semibold">
@@ -183,13 +199,16 @@ export default async function NotasFiscaisPage() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         {nf.xml_path && (
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" title="Baixar XML">
                             <Download className="h-4 w-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="sm">
-                          Detalhes
-                        </Button>
+                        <Link href={`/notas-fiscais/${nf.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="mr-1 h-4 w-4" />
+                            Detalhes
+                          </Button>
+                        </Link>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -200,10 +219,9 @@ export default async function NotasFiscaisPage() {
                     <div className="text-muted-foreground">
                       Nenhuma nota fiscal processada
                     </div>
-                    <Button className="mt-4" variant="outline" size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Processar Primeira NF-e
-                    </Button>
+                    <div className="mt-4">
+                      <ProcessarNFeDialog pedidos={pedidosDisponiveis || []} />
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
