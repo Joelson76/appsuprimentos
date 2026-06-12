@@ -86,6 +86,18 @@
 - ✅ Storage de XMLs no Supabase
 - ✅ Estados: PENDENTE → CONFERIDA → APROVADA/DIVERGENTE
 
+### 📋 Contratos
+- ✅ Cadastro de contratos com fornecedores
+- ✅ Upload de documentos (PDF, DOC, DOCX)
+- ✅ Configuração de renovação automática
+- ✅ Alertas personalizados de vencimento
+- ✅ Listagem com KPIs e tempo restante
+- ✅ Página de detalhes com timeline visual
+- ✅ **Atualização automática de status**
+- ✅ Renovação manual (estender vigência)
+- ✅ Cancelamento de contratos
+- ✅ Estados: ATIVO → VENCENDO → VENCIDO/RENOVAÇÃO
+
 ### 🔧 Infraestrutura
 - ✅ Next.js 14 App Router + TypeScript
 - ✅ Supabase (PostgreSQL + Auth + Storage)
@@ -100,16 +112,6 @@
 
 ## 🚧 Funcionalidades Planejadas (Não Implementadas)
 
-### 📋 Contratos
-- ❌ Cadastro de contratos com fornecedores
-- ❌ Vigência e renovação automática
-- ❌ Anexos de documentos
-- ❌ Alertas de vencimento
-- ❌ Vinculação com pedidos
-- ❌ SLA e penalidades
-
-**Complexidade:** Média  
-**Tempo estimado:** 6-8 horas
 
 ### 📦 Estoque
 - ❌ Cadastro de produtos
@@ -174,11 +176,11 @@
 | Dashboard | ✅ Completo | 100% |
 | E-mails | ✅ Funcional | 70% |
 | **Notas Fiscais** | **✅ Completo** | **100%** |
-| Contratos | ❌ Não implementado | 0% |
+| **Contratos** | **✅ Completo** | **100%** |
 | Estoque | ❌ Não implementado | 0% |
 | Pagamentos SaaS | ❌ Não implementado | 0% |
 
-**Completude Geral do Projeto:** ~70%
+**Completude Geral do Projeto:** ~75%
 
 ---
 
@@ -249,11 +251,11 @@ supabase/FIX_ITENS_COTACAO_RLS.sql  # Fix de RLS para itens de cotação
 
 ### Prioridade Alta (MVP Completo)
 1. ~~**Notas Fiscais**~~ - ✅ **CONCLUÍDO**
-2. **Pagamentos SaaS** - Monetização do produto
-3. **E-mails adicionais** - Automações importantes
+2. ~~**Contratos**~~ - ✅ **CONCLUÍDO**
+3. **Pagamentos SaaS** - Monetização do produto
+4. **E-mails adicionais** - Automações importantes
 
 ### Prioridade Média (Melhorias)
-4. **Contratos** - Gestão de relacionamento com fornecedores
 5. **Estoque** - Controle de inventário
 6. **Exportação de relatórios** - Excel/PDF
 
