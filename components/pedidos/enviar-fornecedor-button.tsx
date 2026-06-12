@@ -40,9 +40,7 @@ export function EnviarFornecedorButton({
     setLoading(true)
 
     try {
-      // TODO: Integração com Resend para enviar e-mail
-      // Por enquanto, apenas atualiza o status
-
+      // Atualizar status para ENVIADO
       const { error } = await supabase
         .from('pedidos')
         .update({
@@ -53,15 +51,28 @@ export function EnviarFornecedorButton({
 
       if (error) throw error
 
-      // TODO: Chamar API para enviar e-mail
-      // await fetch('/api/pedidos/enviar-email', {
-      //   method: 'POST',
-      //   body: JSON.stringify({ pedidoId }),
-      // })
+      // Enviar e-mail para o fornecedor
+      const emailResponse = await fetch('/api/pedidos/enviar-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ pedidoId }),
+      })
 
-      alert(
-        `Pedido ${numero} marcado como enviado!\n\n⚠️ Integração de e-mail será implementada em breve.`
-      )
+      const emailData = await emailResponse.json()
+
+      if (!emailResponse.ok) {
+        console.error('Erro ao enviar e-mail:', emailData)
+        alert(
+          `Pedido ${numero} marcado como ENVIADO.\n\n⚠️ Porém houve erro ao enviar o e-mail:\n${emailData.error}\n\nPor favor, envie manualmente.`
+        )
+      } else {
+        alert(
+          `✅ Pedido ${numero} enviado com sucesso!\n\nE-mail enviado para: ${fornecedorEmail}`
+        )
+      }
+
       router.refresh()
     } catch (error) {
       console.error('Erro ao enviar pedido:', error)
