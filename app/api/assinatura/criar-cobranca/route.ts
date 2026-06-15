@@ -169,22 +169,24 @@ export async function POST(request: Request) {
     const firstPayment = payments.data[0]
     console.log('✅ [7/8] Primeira cobrança:', firstPayment.id)
 
-    // Salvar pagamento no banco
-    console.log('🔧 [7/8] Salvando pagamento no banco...')
-    const { data: novoPagamento } = await supabase
-      .from('pagamentos')
+    // Salvar fatura no banco
+    console.log('🔧 [7/8] Salvando fatura no banco...')
+    const numeroFatura = `FAT-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
+    const { data: novaFatura } = await supabase
+      .from('faturas')
       .insert({
+        tenant_id: profile.tenant_id,
         assinatura_id: assinatura!.id,
-        asaas_payment_id: firstPayment.id,
+        numero: numeroFatura,
         valor: plano.preco_centavos / 100,
         vencimento: firstPayment.dueDate,
         status: 'PENDENTE',
-        metodo_pagamento: metodoPagamento,
-        link_pagamento: firstPayment.invoiceUrl,
+        asaas_payment_id: firstPayment.id,
+        link_boleto: firstPayment.invoiceUrl,
       })
       .select()
       .single()
-    console.log('✅ [7/8] Pagamento salvo:', novoPagamento?.id)
+    console.log('✅ [7/8] Fatura salva:', novaFatura?.id)
 
     // Se for PIX, buscar QR Code
     let pixData = null
@@ -205,7 +207,7 @@ export async function POST(request: Request) {
     console.log('✅✅✅ [8/8] SUCESSO! Retornando resposta...')
     return NextResponse.json({
       success: true,
-      pagamento: novoPagamento,
+      fatura: novaFatura,
       pix: pixData
         ? {
             payload: pixData.payload,
