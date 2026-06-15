@@ -189,7 +189,7 @@ export async function POST(request: Request) {
         vencimento: firstPayment.dueDate,
         status: 'PENDENTE',
         asaas_payment_id: firstPayment.id,
-        link_boleto: firstPayment.invoiceUrl,
+        asaas_invoice_url: firstPayment.invoiceUrl,
       })
       .select()
       .single()
