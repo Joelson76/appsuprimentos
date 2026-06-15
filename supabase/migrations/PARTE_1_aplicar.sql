@@ -55,29 +55,24 @@ FROM historico_precos hp
 LEFT JOIN produtos p ON p.id = hp.produto_id
 JOIN fornecedores f ON f.id = hp.fornecedor_id;
 
--- Função para registrar automaticamente preço quando cotação é aprovada
+-- Função para registrar automaticamente preço quando cotação vencedora é selecionada
 CREATE OR REPLACE FUNCTION registrar_historico_preco_cotacao()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.status = 'APROVADA' AND OLD.status != 'APROVADA' THEN
-    -- Insere histórico para cada item da cotação aprovada
+  IF NEW.vencedor = TRUE AND (OLD IS NULL OR OLD.vencedor = FALSE) THEN
     INSERT INTO historico_precos (
-      tenant_id, produto_id, fornecedor_id, descricao_item,
-      preco_unitario, quantidade, unidade, cotacao_id, prazo_entrega
+      tenant_id, fornecedor_id, descricao_item,
+      preco_unitario, quantidade, cotacao_id, prazo_entrega
     )
     SELECT
-      NEW.tenant_id,
-      ci.produto_id,
+      (SELECT tenant_id FROM cotacoes WHERE id = NEW.cotacao_id),
       NEW.fornecedor_id,
-      COALESCE(p.descricao, ci.descricao),
-      ci.preco_unitario,
-      ci.quantidade,
-      ci.unidade,
-      NEW.id,
+      NEW.descricao,
+      NEW.valor_unitario,
+      NEW.quantidade,
+      NEW.cotacao_id,
       NEW.prazo_entrega
-    FROM cotacoes_itens ci
-    LEFT JOIN produtos p ON p.id = ci.produto_id
-    WHERE ci.cotacao_id = NEW.id;
+    WHERE NEW.valor_unitario IS NOT NULL;
   END IF;
 
   RETURN NEW;
@@ -85,7 +80,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_historico_preco_cotacao
-  AFTER UPDATE ON cotacoes
+  AFTER INSERT OR UPDATE ON itens_cotacao
   FOR EACH ROW
   EXECUTE FUNCTION registrar_historico_preco_cotacao();
 
@@ -94,21 +89,18 @@ CREATE OR REPLACE FUNCTION registrar_historico_preco_pedido()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO historico_precos (
-    tenant_id, produto_id, fornecedor_id, descricao_item,
-    preco_unitario, quantidade, unidade, pedido_id
+    tenant_id, fornecedor_id, descricao_item,
+    preco_unitario, quantidade, pedido_id
   )
   SELECT
     NEW.tenant_id,
-    oi.produto_id,
     NEW.fornecedor_id,
-    COALESCE(p.descricao, oi.descricao),
-    oi.preco_unitario,
-    oi.quantidade,
-    oi.unidade,
+    ip.descricao,
+    ip.valor_unitario,
+    ip.quantidade,
     NEW.id
-  FROM ordens_itens oi
-  LEFT JOIN produtos p ON p.id = oi.produto_id
-  WHERE oi.ordem_id = NEW.id;
+  FROM itens_po ip
+  WHERE ip.pedido_id = NEW.id;
 
   RETURN NEW;
 END;

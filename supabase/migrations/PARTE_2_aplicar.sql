@@ -573,25 +573,8 @@ GROUP BY f.id, f.tenant_id, f.razao_social, f.score
 HAVING COUNT(DISTINCT oc.id) > 0
 ORDER BY valor_total DESC;
 
--- View de produtos mais comprados
-CREATE OR REPLACE VIEW vw_produtos_mais_comprados AS
-SELECT
-  p.id,
-  p.tenant_id,
-  p.descricao,
-  p.codigo,
-  p.unidade,
-  COUNT(DISTINCT oi.ordem_id) as qtd_pedidos,
-  SUM(oi.quantidade) as quantidade_total,
-  SUM(oi.quantidade * oi.preco_unitario) as valor_total,
-  AVG(oi.preco_unitario) as preco_medio
-FROM produtos p
-JOIN ordens_itens oi ON oi.produto_id = p.id
-JOIN ordens_compra oc ON oc.id = oi.ordem_id AND oc.status NOT IN ('CANCELADA', 'RASCUNHO')
-WHERE oc.criado_em >= NOW() - INTERVAL '6 months'
-GROUP BY p.id, p.tenant_id, p.descricao, p.codigo, p.unidade
-ORDER BY valor_total DESC
-LIMIT 50;
+-- View de produtos mais comprados (DESABILITADA - itens_po não tem produto_id)
+-- Será implementada quando houver vinculação produto <-> item
 
 -- View de saving (economia com cotações)
 CREATE OR REPLACE VIEW vw_saving_cotacoes AS
@@ -650,22 +633,8 @@ GROUP BY oc.tenant_id, f.razao_social, f.id
 HAVING COUNT(*) >= 3
 ORDER BY lead_time_medio_dias;
 
--- View de categorias mais compradas
-CREATE OR REPLACE VIEW vw_categorias_compras AS
-SELECT
-  p.tenant_id,
-  c.id as categoria_id,
-  c.nome as categoria,
-  COUNT(DISTINCT oi.ordem_id) as qtd_pedidos,
-  SUM(oi.quantidade * oi.preco_unitario) as valor_total,
-  COUNT(DISTINCT oi.produto_id) as qtd_produtos
-FROM categorias c
-JOIN produtos p ON p.categoria_id = c.id
-JOIN ordens_itens oi ON oi.produto_id = p.id
-JOIN ordens_compra oc ON oc.id = oi.ordem_id AND oc.status NOT IN ('CANCELADA', 'RASCUNHO')
-WHERE oc.criado_em >= NOW() - INTERVAL '6 months'
-GROUP BY p.tenant_id, c.id, c.nome
-ORDER BY valor_total DESC;
+-- View de categorias mais compradas (DESABILITADA - itens_po não tem produto_id)
+-- Será implementada quando houver vinculação produto <-> item
 
 -- View de taxa de aprovação
 CREATE OR REPLACE VIEW vw_taxa_aprovacao AS
