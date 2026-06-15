@@ -49,6 +49,11 @@ export async function POST(request: Request) {
         await handlePaymentDeleted(payload)
         break
 
+      case 'PAYMENT_REFUND_DENIED':
+        console.log('⚠️ Estorno negado pelo Asaas:', payload.payment?.id)
+        // Não fazer nada - assinatura continua ativa
+        break
+
       default:
         console.log('⚠️ Evento não tratado:', event)
     }
