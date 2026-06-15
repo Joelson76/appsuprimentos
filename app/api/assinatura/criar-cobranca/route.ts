@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     // Buscar tenant e assinatura
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('tenant_id, email, tenants(nome, cnpj)')
+      .select('tenant_id, tenants(nome, cnpj)')
       .eq('id', user.id)
       .single()
 
@@ -40,6 +40,7 @@ export async function POST(request: Request) {
     }
 
     const tenant = profile.tenants as any
+    const userEmail = user.email
 
     // Buscar plano
     const { data: plano } = await supabase
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
     if (!customerId) {
       const customer = await asaas.createCustomer({
         name: tenant.nome,
-        email: profile.email,
+        email: userEmail,
         cpfCnpj: tenant.cnpj.replace(/\D/g, ''),
         externalReference: profile.tenant_id,
       })
