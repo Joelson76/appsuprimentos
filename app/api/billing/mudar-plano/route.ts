@@ -87,10 +87,14 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Plano alterado com sucesso',
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao mudar plano:', error)
     return NextResponse.json(
-      { error: 'Erro ao alterar plano' },
+      {
+        error: 'Erro ao alterar plano',
+        details: error.message,
+        code: error.code
+      },
       { status: 500 }
     )
   }
