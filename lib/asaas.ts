@@ -1,6 +1,8 @@
-const ASAAS_API_URL = process.env.NODE_ENV === 'production'
+// Usar ASAAS_ENV para controlar sandbox vs produção
+// Se não definido, usa sandbox por segurança
+const ASAAS_API_URL = process.env.ASAAS_ENV === 'production'
   ? 'https://api.asaas.com/v3'
-  : 'https://sandbox.asaas.com/v3'
+  : 'https://sandbox.asaas.com/api/v3'
 
 const ASAAS_API_KEY = process.env.ASAAS_API_KEY
 
