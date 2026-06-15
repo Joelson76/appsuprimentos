@@ -576,44 +576,9 @@ ORDER BY valor_total DESC;
 -- View de produtos mais comprados (DESABILITADA - itens_po não tem produto_id)
 -- Será implementada quando houver vinculação produto <-> item
 
--- View de saving (economia com cotações)
-CREATE OR REPLACE VIEW vw_saving_cotacoes AS
-SELECT
-  c.tenant_id,
-  DATE_TRUNC('month', c.criado_em) as mes,
-  COUNT(*) as qtd_cotacoes,
-  SUM(c.valor_total) as valor_contratado,
-  -- Calcula saving comparando com maior preço recebido
-  SUM(
-    COALESCE(
-      (SELECT MAX(co2.valor_total) - c.valor_total
-       FROM cotacoes co2
-       WHERE co2.requisicao_id = c.requisicao_id
-         AND co2.id != c.id
-         AND co2.status IN ('RECEBIDA', 'APROVADA')),
-      0
-    )
-  ) as saving_total,
-  -- % de economia
-  CASE
-    WHEN SUM(c.valor_total) > 0 THEN
-      (SUM(
-        COALESCE(
-          (SELECT MAX(co2.valor_total) - c.valor_total
-           FROM cotacoes co2
-           WHERE co2.requisicao_id = c.requisicao_id
-             AND co2.id != c.id
-             AND co2.status IN ('RECEBIDA', 'APROVADA')),
-          0
-        )
-      ) / SUM(c.valor_total) * 100)
-    ELSE 0
-  END as percentual_saving
-FROM cotacoes c
-WHERE c.status = 'APROVADA'
-  AND c.criado_em >= NOW() - INTERVAL '12 months'
-GROUP BY c.tenant_id, DATE_TRUNC('month', c.criado_em)
-ORDER BY mes DESC;
+-- View de saving (economia com cotações) - DESABILITADA
+-- Cotações não têm valor_total (apenas itens individuais)
+-- Será implementada quando houver agregação de valores
 
 -- View de lead time médio
 CREATE OR REPLACE VIEW vw_lead_time_pedidos AS
@@ -621,13 +586,13 @@ SELECT
   oc.tenant_id,
   f.razao_social as fornecedor,
   COUNT(*) as qtd_pedidos,
-  AVG(EXTRACT(DAY FROM oc.data_entrega - oc.criado_em))::NUMERIC(10,1) as lead_time_medio_dias,
-  MIN(EXTRACT(DAY FROM oc.data_entrega - oc.criado_em))::INT as lead_time_minimo,
-  MAX(EXTRACT(DAY FROM oc.data_entrega - oc.criado_em))::INT as lead_time_maximo
+  AVG(EXTRACT(DAY FROM oc.prazo_entrega - oc.criado_em::DATE))::NUMERIC(10,1) as lead_time_medio_dias,
+  MIN(EXTRACT(DAY FROM oc.prazo_entrega - oc.criado_em::DATE))::INT as lead_time_minimo,
+  MAX(EXTRACT(DAY FROM oc.prazo_entrega - oc.criado_em::DATE))::INT as lead_time_maximo
 FROM ordens_compra oc
 JOIN fornecedores f ON f.id = oc.fornecedor_id
-WHERE oc.status IN ('ENTREGUE', 'CONCLUIDO')
-  AND oc.data_entrega IS NOT NULL
+WHERE oc.status IN ('RECEBIDA', 'FATURADA')
+  AND oc.prazo_entrega IS NOT NULL
   AND oc.criado_em >= NOW() - INTERVAL '6 months'
 GROUP BY oc.tenant_id, f.razao_social, f.id
 HAVING COUNT(*) >= 3
