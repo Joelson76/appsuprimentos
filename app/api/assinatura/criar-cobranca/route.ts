@@ -75,6 +75,15 @@ export async function POST(request: Request) {
     // Se não existe, criar registro de assinatura
     if (!assinatura) {
       console.log('🔧 [5/8] Criando registro de assinatura...')
+      console.log('🔍 [5/8] tenant_id a inserir:', profile.tenant_id)
+      console.log('🔍 [5/8] user.id:', user.id)
+
+      // Verificar JWT tenant_id
+      const { data: { session } } = await supabase.auth.getSession()
+      const jwtTenantId = session?.user?.app_metadata?.tenant_id
+      console.log('🔍 [5/8] JWT tenant_id:', jwtTenantId)
+      console.log('🔍 [5/8] Match?', jwtTenantId === profile.tenant_id)
+
       const { data: novaAssinatura, error: insertError } = await supabase
         .from('assinaturas')
         .insert({
