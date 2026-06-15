@@ -9,20 +9,20 @@ SELECT
 
   -- Requisições
   (SELECT COUNT(*) FROM requisicoes r WHERE r.tenant_id = t.id) as total_requisicoes,
-  (SELECT COUNT(*) FROM requisicoes r WHERE r.tenant_id = t.id AND r.status = 'PENDENTE') as requisicoes_pendentes,
+  (SELECT COUNT(*) FROM requisicoes r WHERE r.tenant_id = t.id AND r.status = 'AGUARDANDO_APROVACAO') as requisicoes_pendentes,
   (SELECT COUNT(*) FROM requisicoes r WHERE r.tenant_id = t.id AND r.status = 'APROVADA') as requisicoes_aprovadas,
   (SELECT COUNT(*) FROM requisicoes r WHERE r.tenant_id = t.id AND DATE_TRUNC('month', r.criado_em) = DATE_TRUNC('month', NOW())) as requisicoes_mes,
 
   -- Cotações
   (SELECT COUNT(*) FROM cotacoes c WHERE c.tenant_id = t.id) as total_cotacoes,
-  (SELECT COUNT(*) FROM cotacoes c WHERE c.tenant_id = t.id AND c.status = 'AGUARDANDO') as cotacoes_aguardando,
+  (SELECT COUNT(*) FROM cotacoes c WHERE c.tenant_id = t.id AND c.status = 'AGUARDANDO_RESPOSTAS') as cotacoes_aguardando,
   (SELECT COUNT(*) FROM cotacoes c WHERE c.tenant_id = t.id AND DATE_TRUNC('month', c.criado_em) = DATE_TRUNC('month', NOW())) as cotacoes_mes,
 
   -- Pedidos
   (SELECT COUNT(*) FROM ordens_compra oc WHERE oc.tenant_id = t.id) as total_pedidos,
   (SELECT COALESCE(SUM(oc.valor_total), 0) FROM ordens_compra oc WHERE oc.tenant_id = t.id) as valor_total_pedidos,
   (SELECT COALESCE(SUM(oc.valor_total), 0) FROM ordens_compra oc WHERE oc.tenant_id = t.id AND DATE_TRUNC('month', oc.criado_em) = DATE_TRUNC('month', NOW())) as valor_pedidos_mes,
-  (SELECT COUNT(*) FROM ordens_compra oc WHERE oc.tenant_id = t.id AND oc.status = 'PENDENTE') as pedidos_pendentes,
+  (SELECT COUNT(*) FROM ordens_compra oc WHERE oc.tenant_id = t.id AND oc.status = 'AGUARDANDO_APROVACAO') as pedidos_pendentes,
 
   -- Fornecedores
   (SELECT COUNT(*) FROM fornecedores f WHERE f.tenant_id = t.id) as total_fornecedores,
