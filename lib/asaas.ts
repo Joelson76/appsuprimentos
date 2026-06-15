@@ -6,6 +6,13 @@ const ASAAS_API_URL = process.env.ASAAS_ENV === 'production'
 
 const ASAAS_API_KEY = process.env.ASAAS_API_KEY
 
+console.log('🔧 Asaas Config:', {
+  env: process.env.ASAAS_ENV || 'sandbox (default)',
+  url: ASAAS_API_URL,
+  keyConfigured: !!ASAAS_API_KEY,
+  keyPrefix: ASAAS_API_KEY?.substring(0, 10) + '...'
+})
+
 if (!ASAAS_API_KEY) {
   console.warn('ASAAS_API_KEY não configurada')
 }
