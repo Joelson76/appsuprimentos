@@ -8,6 +8,14 @@ const supabaseAdmin = createClient(
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
+// GET para validação do Asaas
+export async function GET() {
+  return NextResponse.json({
+    status: 'active',
+    message: 'Webhook Asaas ativo e funcionando!'
+  })
+}
+
 export async function POST(request: Request) {
   try {
     const payload = await request.json()
