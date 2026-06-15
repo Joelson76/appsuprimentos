@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { ArrowLeft } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -51,7 +52,16 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <Card className="w-full max-w-md">
+      <div className="w-full max-w-md space-y-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar ao site
+        </Link>
+
+        <Card className="w-full">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             SupriFlow
@@ -111,6 +121,7 @@ export default function LoginPage() {
           </CardFooter>
         </form>
       </Card>
+      </div>
     </div>
   )
 }

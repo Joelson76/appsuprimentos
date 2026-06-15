@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/card'
 import { formatCNPJ } from '@/lib/utils'
 import type { RegisterRequest, PlanoTipo } from '@/lib/types'
+import { ArrowLeft } from 'lucide-react'
 
 export default function CadastroPage() {
   const router = useRouter()
@@ -152,7 +153,16 @@ export default function CadastroPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <Card className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl space-y-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Voltar ao site
+        </Link>
+
+        <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
             Criar Conta - SupriFlow
@@ -347,6 +357,7 @@ export default function CadastroPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   )
 }
