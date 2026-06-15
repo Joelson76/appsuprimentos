@@ -91,24 +91,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Enviar e-mail de boas-vindas via Resend
-    try {
-      await resend.emails.send({
-        from: EMAIL_FROM,
-        to: body.admin.email,
-        subject: '🎉 Bem-vindo ao SupriFlow!',
-        react: BoasVindasEmail({
-          nomeAdmin: body.admin.nome,
-          nomeEmpresa: tenant.nome,
-          email: body.admin.email,
-          plano: tenant.plano,
-          trialFim: trialFim.toLocaleDateString('pt-BR'),
-        }),
-      })
-    } catch (emailError) {
-      // Não bloqueia o cadastro se o e-mail falhar
-      console.error('Erro ao enviar e-mail de boas-vindas:', emailError)
-    }
+    // TODO: Implementar e-mail de boas-vindas usando email-service-simple.ts
+    // Removido temporariamente até criar template inline
+    console.log('📧 E-mail de boas-vindas seria enviado para:', body.admin.email)
 
     return NextResponse.json(
       {
