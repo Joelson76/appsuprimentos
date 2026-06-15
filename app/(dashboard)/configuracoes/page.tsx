@@ -38,6 +38,12 @@ export default async function ConfiguracoesPage() {
     .eq('id', profile?.tenant_id || '')
     .single()
 
+  const { data: assinatura } = await supabase
+    .from('assinaturas')
+    .select('plano, ativa')
+    .eq('tenant_id', profile?.tenant_id || '')
+    .single()
+
   const isAdmin = profile?.perfil === 'SUPER_ADMIN' || profile?.perfil === 'ADMIN'
 
   return (
@@ -103,12 +109,14 @@ export default async function ConfiguracoesPage() {
                   <div>
                     <p className="text-muted-foreground">Plano Atual</p>
                     <p className="font-medium text-lg text-primary">
-                      {tenant?.plano || 'BASICO'}
+                      {assinatura?.plano || 'BASICO'}
                     </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Status</p>
-                    <p className="font-medium">{tenant?.status || '-'}</p>
+                    <p className="font-medium">
+                      {assinatura?.ativa ? 'ATIVA' : 'INATIVA'}
+                    </p>
                   </div>
                 </div>
                 <Button variant="outline" className="w-full mt-4">
