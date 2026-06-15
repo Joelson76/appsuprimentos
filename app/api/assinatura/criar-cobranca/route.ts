@@ -24,14 +24,19 @@ export async function POST(request: Request) {
     }
 
     // Buscar tenant e assinatura
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('tenant_id, tenants(razao_social, cnpj, email)')
       .eq('id', user.id)
       .single()
 
-    if (!profile) {
-      return NextResponse.json({ error: 'Perfil não encontrado' }, { status: 404 })
+    if (!profile || profileError) {
+      console.error('Erro ao buscar perfil:', profileError)
+      return NextResponse.json({
+        error: 'Perfil não encontrado',
+        details: profileError?.message,
+        user_id: user.id
+      }, { status: 404 })
     }
 
     const tenant = profile.tenants as any
