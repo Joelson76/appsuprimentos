@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { resend, EMAIL_FROM } from '@/lib/resend'
-import { PedidoFornecedorEmail } from '@/lib/email-templates/pedido-fornecedor'
+// Email templates foram removidos - usar email-service-simple.ts se necessário
 
 export async function POST(request: NextRequest) {
   try {

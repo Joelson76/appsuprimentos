@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createBrowserClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 
 interface DadosCNPJ {
   cnpj: string;
@@ -27,7 +27,7 @@ export function useCNPJ() {
   const [error, setError] = useState<string | null>(null);
 
   const buscarCNPJ = async (cnpj: string): Promise<DadosCNPJ | null> => {
-    const supabase = createBrowserClient();
+    const supabase = createClient();
 
     // Limpar formatação
     const cnpjLimpo = cnpj.replace(/\D/g, '');

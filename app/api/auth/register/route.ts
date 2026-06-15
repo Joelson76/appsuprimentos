@@ -2,8 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { cnpj as cnpjValidator } from 'cpf-cnpj-validator'
 import type { RegisterRequest } from '@/lib/types'
-import { resend, EMAIL_FROM } from '@/lib/resend'
-import { BoasVindasEmail } from '@/lib/email-templates/boas-vindas'
+// Email templates foram removidos - usar email-service-simple.ts se necessário
 
 export async function POST(request: NextRequest) {
   try {
