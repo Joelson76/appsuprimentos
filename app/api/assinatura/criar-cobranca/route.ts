@@ -79,7 +79,8 @@ export async function POST(request: Request) {
         .from('assinaturas')
         .insert({
           tenant_id: profile.tenant_id,
-          status: 'TRIAL'
+          plano: 'BASICO',
+          valor_mensal: plano.preco_centavos / 100
         })
         .select()
         .single()
@@ -145,11 +146,9 @@ export async function POST(request: Request) {
     await supabase
       .from('assinaturas')
       .update({
-        plano_id: planoId,
         asaas_subscription_id: subscription.id,
-        status: 'ATIVA',
-        periodo_inicio: hoje.toISOString(),
-        periodo_fim: proximaCobranca.toISOString(),
+        ativa: true,
+        forma_pagamento: metodoPagamento
       })
       .eq('id', assinatura!.id)
     console.log('✅ [6/8] Assinatura atualizada')
