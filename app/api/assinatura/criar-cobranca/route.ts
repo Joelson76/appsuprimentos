@@ -158,19 +158,19 @@ export async function POST(request: Request) {
     })
     console.log('✅ [6/8] Subscription criada:', subscription.id)
 
-    // Atualizar assinatura no banco (incluindo plano e valor)
+    // Atualizar subscription no banco (incluindo plano, mas INATIVA até pagamento)
     console.log('🔧 [6/8] Atualizando assinatura no banco...')
     await supabaseAdmin
       .from('assinaturas')
       .update({
-        plano: plano.slug, // Atualizar plano escolhido
+        plano: plano.slug, // Salvar plano escolhido
         valor_mensal: plano.preco_centavos / 100,
         asaas_subscription_id: subscription.id,
-        ativa: true,
+        ativa: false, // INATIVA até pagamento confirmado!
         forma_pagamento: metodoPagamento
       })
       .eq('id', assinatura!.id)
-    console.log('✅ [6/8] Assinatura atualizada')
+    console.log('✅ [6/8] Assinatura atualizada (aguardando pagamento)')
 
     // Buscar primeira cobrança gerada
     console.log('🔍 [7/8] Buscando primeira cobrança...')
