@@ -315,5 +315,11 @@ LEFT JOIN profiles pa ON pa.id = a.aprovador_id
 LEFT JOIN requisicoes req ON req.id = a.documento_id AND a.tipo_documento = 'REQUISICAO'
 LEFT JOIN cotacoes cot ON cot.id = a.documento_id AND a.tipo_documento = 'COTACAO'
 LEFT JOIN ordens_compra oc ON oc.id = a.documento_id AND a.tipo_documento = 'PEDIDO'
-LEFT JOIN profiles ps ON ps.id = COALESCE(req.solicitante_id, cot.criado_por, oc.criado_por)
+LEFT JOIN requisicoes req_cot ON req_cot.id = cot.requisicao_id
+LEFT JOIN requisicoes req_oc ON req_oc.id = oc.requisicao_id
+LEFT JOIN profiles ps ON ps.id = COALESCE(
+  req.solicitante_id,
+  req_cot.solicitante_id,
+  req_oc.solicitante_id
+)
 WHERE a.status = 'PENDENTE';
