@@ -64,14 +64,30 @@ export async function POST(request: Request) {
     }
     console.log('✅ [4/8] Plano:', plano.nome, plano.preco_centavos)
 
-    // Buscar ou criar cliente no Asaas
+    // Buscar ou criar assinatura e cliente no Asaas
     console.log('🔍 [5/8] Buscando assinatura...')
-    const { data: assinatura } = await supabase
+    let { data: assinatura } = await supabase
       .from('assinaturas')
       .select('*')
       .eq('tenant_id', profile.tenant_id)
-      .single()
-    console.log('✅ [5/8] Assinatura:', assinatura?.id)
+      .maybeSingle()
+
+    // Se não existe, criar registro de assinatura
+    if (!assinatura) {
+      console.log('🔧 [5/8] Criando registro de assinatura...')
+      const { data: novaAssinatura } = await supabase
+        .from('assinaturas')
+        .insert({
+          tenant_id: profile.tenant_id,
+          status: 'TRIAL'
+        })
+        .select()
+        .single()
+      assinatura = novaAssinatura
+      console.log('✅ [5/8] Assinatura criada:', assinatura?.id)
+    } else {
+      console.log('✅ [5/8] Assinatura encontrada:', assinatura.id)
+    }
 
     let customerId = assinatura?.asaas_customer_id
 
@@ -91,7 +107,7 @@ export async function POST(request: Request) {
       await supabase
         .from('assinaturas')
         .update({ asaas_customer_id: customerId })
-        .eq('tenant_id', profile.tenant_id)
+        .eq('id', assinatura!.id)
     } else {
       console.log('✅ [5/8] Cliente Asaas já existe:', customerId)
     }
@@ -124,7 +140,7 @@ export async function POST(request: Request) {
         periodo_inicio: hoje.toISOString(),
         periodo_fim: proximaCobranca.toISOString(),
       })
-      .eq('tenant_id', profile.tenant_id)
+      .eq('id', assinatura!.id)
     console.log('✅ [6/8] Assinatura atualizada')
 
     // Buscar primeira cobrança gerada
