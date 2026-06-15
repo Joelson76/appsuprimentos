@@ -5,7 +5,7 @@
 -- View de KPIs consolidados
 CREATE OR REPLACE VIEW vw_dashboard_kpis AS
 SELECT
-  tenant_id,
+  t.id as tenant_id,
 
   -- Requisições
   (SELECT COUNT(*) FROM requisicoes r WHERE r.tenant_id = t.id) as total_requisicoes,
