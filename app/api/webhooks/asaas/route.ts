@@ -137,10 +137,23 @@ async function handlePaymentRefunded(payload: any) {
 
   console.log('🔄 Processando estorno:', payment.id)
 
-  await supabaseAdmin
+  // Atualizar status da fatura
+  const { data: fatura } = await supabaseAdmin
     .from('faturas')
     .update({ status: 'ESTORNADO' })
     .eq('asaas_payment_id', payment.id)
+    .select('assinatura_id')
+    .single()
+
+  if (!fatura) return
+
+  // Desativar assinatura (pagamento foi estornado)
+  await supabaseAdmin
+    .from('assinaturas')
+    .update({ ativa: false })
+    .eq('id', fatura.assinatura_id)
+
+  console.log('✅ Assinatura desativada por estorno')
 }
 
 async function handlePaymentDeleted(payload: any) {
