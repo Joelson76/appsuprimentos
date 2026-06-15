@@ -14,12 +14,12 @@ import { SelecionarPlanoButton } from '@/components/billing/selecionar-plano-but
 export default async function PlanosPage() {
   const supabase = await createClient()
 
-  // Buscar planos disponíveis (usando API para evitar RLS temporariamente)
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const planosResponse = await fetch(`${baseUrl}/api/debug-planos`, {
-    cache: 'no-store',
-  })
-  const { planos } = await planosResponse.json()
+  // Buscar planos disponíveis direto do Supabase
+  const { data: planos } = await supabase
+    .from('planos')
+    .select('*')
+    .eq('ativo', true)
+    .order('valor_mensal', { ascending: true })
 
   // Buscar plano atual do usuário
   const {

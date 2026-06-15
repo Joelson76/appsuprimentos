@@ -11,12 +11,17 @@ import { formatCurrency } from '@/lib/utils'
 import Link from 'next/link'
 
 export default async function PlanosPublicosPage() {
-  // Buscar planos via fetch direto (sem RLS)
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const response = await fetch(`${baseUrl}/api/debug-planos`, {
-    cache: 'no-store',
-  })
-  const { planos } = await response.json()
+  // Buscar planos direto do Supabase (público)
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  const { data: planos } = await supabase
+    .from('planos')
+    .select('*')
+    .eq('ativo', true)
+    .order('valor_mensal', { ascending: true })
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-12">
