@@ -243,22 +243,24 @@ export default async function ConfiguracoesPage() {
       <div>
         <h2 className="text-xl font-semibold mb-4">Notificações</h2>
         <div className="grid gap-4 md:grid-cols-2">
-          <Card className="hover:bg-slate-50 transition-colors">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Preferências de Notificação
-              </CardTitle>
-              <CardDescription>
-                Configure alertas por e-mail e no sistema
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" disabled>
-                Em breve
-              </Button>
-            </CardContent>
-          </Card>
+          <Link href="/configuracoes/notificacoes">
+            <Card className="hover:bg-slate-50 transition-colors cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Preferências de Notificação
+                </CardTitle>
+                <CardDescription>
+                  Configure alertas por e-mail e push notification
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button variant="outline" className="w-full">
+                  Configurar
+                </Button>
+              </CardContent>
+            </Card>
+          </Link>
 
           <Card className="hover:bg-slate-50 transition-colors">
             <CardHeader>

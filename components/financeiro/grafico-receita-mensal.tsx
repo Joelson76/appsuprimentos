@@ -90,7 +90,7 @@ export function GraficoReceitaMensal({ faturas }: Props) {
               tickFormatter={(value) => formatarMoeda(value)}
             />
             <Tooltip
-              formatter={(value: number) => formatarMoeda(value)}
+              formatter={(value) => formatarMoeda(Number(value))}
               labelStyle={{ color: '#000' }}
               contentStyle={{ borderRadius: 8 }}
             />

@@ -40,7 +40,7 @@ export default async function NotasFiscaisPage() {
     .order('criado_em', { ascending: false })
 
   // Buscar pedidos aprovados/enviados para o select
-  const { data: pedidosDisponiveis } = await supabase
+  const { data: pedidosDisponiveisRaw } = await supabase
     .from('pedidos')
     .select(
       `
@@ -51,6 +51,13 @@ export default async function NotasFiscaisPage() {
     )
     .in('status', ['APROVADO', 'ENVIADO', 'RECEBIDO'])
     .order('criado_em', { ascending: false })
+
+  // Transformar para tipo correto
+  const pedidosDisponiveis = pedidosDisponiveisRaw?.map((p: any) => ({
+    id: p.id,
+    numero: p.numero,
+    fornecedor: Array.isArray(p.fornecedor) ? p.fornecedor[0] : p.fornecedor,
+  }))
 
   const getStatusBadge = (status: string) => {
     const colors: Record<string, string> = {

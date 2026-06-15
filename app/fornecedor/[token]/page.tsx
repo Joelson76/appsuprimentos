@@ -39,6 +39,8 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
   const [fornecedor, setFornecedor] = useState<any>(null)
   const [itens, setItens] = useState<any[]>([])
   const [respondido, setRespondido] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [arquivoProposta, setArquivoProposta] = useState<File | null>(null)
 
   useEffect(() => {
     loadData()
@@ -118,6 +120,29 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
         return
       }
 
+      let urlProposta = null
+
+      // Upload de proposta PDF (se houver)
+      if (arquivoProposta) {
+        setUploading(true)
+        const fileName = `proposta_${cotacao.id}_${fornecedor.razao_social.replace(/\s+/g, '_')}_${Date.now()}.pdf`
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('propostas')
+          .upload(fileName, arquivoProposta)
+
+        if (uploadError) {
+          throw new Error('Erro ao fazer upload da proposta: ' + uploadError.message)
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from('propostas')
+          .getPublicUrl(fileName)
+
+        urlProposta = publicUrlData.publicUrl
+        setUploading(false)
+      }
+
       // Atualizar itens
       for (const item of itens) {
         const { error: updateError } = await supabase
@@ -129,6 +154,7 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
               : null,
             condicao_pagamento: item.condicao_pagamento || null,
             observacoes: item.observacoes || null,
+            url_proposta: urlProposta,
           })
           .eq('id', item.id)
 
@@ -143,6 +169,7 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
       setError(err.message || 'Erro ao enviar proposta')
     } finally {
       setSubmitting(false)
+      setUploading(false)
     }
   }
 
@@ -348,6 +375,22 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
                     disabled={respondido}
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="proposta">
+                    Anexar Proposta em PDF (opcional)
+                  </Label>
+                  <Input
+                    id="proposta"
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => setArquivoProposta(e.target.files?.[0] || null)}
+                    disabled={respondido}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Você pode anexar uma proposta comercial em PDF com mais detalhes
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -359,8 +402,8 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
                 Proposta já enviada
               </div>
             ) : (
-              <Button type="submit" size="lg" disabled={submitting}>
-                {submitting ? 'Enviando...' : 'Enviar Proposta'}
+              <Button type="submit" size="lg" disabled={submitting || uploading}>
+                {uploading ? 'Enviando arquivo...' : submitting ? 'Enviando...' : 'Enviar Proposta'}
               </Button>
             )}
           </div>

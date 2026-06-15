@@ -43,7 +43,7 @@ export default async function AssinaturaPage() {
   // Buscar assinatura
   const { data: assinatura } = await supabase
     .from('assinaturas')
-    .select('*')
+    .select('*, planos(*)')
     .eq('tenant_id', profile?.tenant_id || '')
     .single()
 
@@ -54,20 +54,15 @@ export default async function AssinaturaPage() {
     .eq('id', profile?.tenant_id || '')
     .single()
 
-  // Buscar faturas
-  const { data: faturas } = await supabase
-    .from('faturas')
+  // Buscar pagamentos
+  const { data: pagamentos } = await supabase
+    .from('pagamentos')
     .select('*')
-    .eq('tenant_id', profile?.tenant_id || '')
+    .eq('assinatura_id', assinatura?.id || '')
     .order('criado_em', { ascending: false })
     .limit(10)
 
-  // Buscar informações do plano
-  const { data: planoInfo } = await supabase
-    .from('planos_precos')
-    .select('*')
-    .eq('plano', assinatura?.plano || tenant?.plano || 'BASICO')
-    .single()
+  const planoAtual = assinatura?.planos as any
 
   const getStatusBadge = (status: string) => {
     const colors: Record<string, string> = {
@@ -75,6 +70,22 @@ export default async function AssinaturaPage() {
       PAGO: 'bg-green-100 text-green-800',
       VENCIDO: 'bg-red-100 text-red-800',
       CANCELADO: 'bg-slate-100 text-slate-800',
+      ESTORNADO: 'bg-slate-100 text-slate-800',
+    }
+    return (
+      <Badge className={colors[status] || 'bg-slate-100 text-slate-800'}>
+        {status}
+      </Badge>
+    )
+  }
+
+  const getStatusAssinaturaBadge = (status: string) => {
+    const colors: Record<string, string> = {
+      TRIAL: 'bg-blue-100 text-blue-800',
+      ATIVA: 'bg-green-100 text-green-800',
+      INADIMPLENTE: 'bg-orange-100 text-orange-800',
+      SUSPENSA: 'bg-red-100 text-red-800',
+      CANCELADA: 'bg-slate-100 text-slate-800',
     }
     return (
       <Badge className={colors[status] || 'bg-slate-100 text-slate-800'}>
@@ -84,7 +95,7 @@ export default async function AssinaturaPage() {
   }
 
   // Próximo vencimento
-  const proximaFatura = faturas?.find((f) => f.status === 'PENDENTE')
+  const proximoPagamento = pagamentos?.find((p) => p.status === 'PENDENTE')
 
   return (
     <div className="space-y-6">
@@ -108,38 +119,26 @@ export default async function AssinaturaPage() {
             <div>
               <p className="text-sm text-muted-foreground">Plano</p>
               <p className="text-3xl font-bold text-primary">
-                {planoInfo?.nome || tenant?.plano}
+                {planoAtual?.nome || 'Básico'}
               </p>
             </div>
 
             <div>
               <p className="text-sm text-muted-foreground">Valor Mensal</p>
               <p className="text-2xl font-bold">
-                {formatCurrency(
-                  assinatura?.valor_mensal || planoInfo?.valor_mensal || 0
-                )}
+                {formatCurrency((planoAtual?.preco_centavos || 0) / 100)}
               </p>
             </div>
 
             <div>
               <p className="text-sm text-muted-foreground">Status</p>
-              <Badge
-                className={
-                  tenant?.status === 'ATIVO'
-                    ? 'bg-green-100 text-green-800'
-                    : tenant?.status === 'TRIAL'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-red-100 text-red-800'
-                }
-              >
-                {tenant?.status}
-              </Badge>
+              {getStatusAssinaturaBadge(assinatura?.status || 'TRIAL')}
             </div>
 
-            {tenant?.status === 'TRIAL' && tenant?.trial_fim && (
+            {assinatura?.status === 'TRIAL' && assinatura?.trial_fim && (
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                 <p className="text-sm font-medium text-blue-900">
-                  Trial ativo até {formatDate(tenant.trial_fim)}
+                  Trial ativo até {formatDate(assinatura.trial_fim)}
                 </p>
                 <p className="text-xs text-blue-700 mt-1">
                   Após este período, será necessário assinar um plano
@@ -147,11 +146,22 @@ export default async function AssinaturaPage() {
               </div>
             )}
 
-            <div className="pt-4">
+            {assinatura?.status === 'INADIMPLENTE' && (
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                <p className="text-sm font-medium text-orange-900">
+                  Pagamento pendente
+                </p>
+                <p className="text-xs text-orange-700 mt-1">
+                  Regularize sua situação para continuar usando o sistema
+                </p>
+              </div>
+            )}
+
+            <div className="pt-4 space-y-2">
               <Link href="/configuracoes/planos">
-                <Button className="w-full">
+                <Button className="w-full" variant="outline">
                   <TrendingUp className="mr-2 h-4 w-4" />
-                  Alterar Plano
+                  Ver Outros Planos
                 </Button>
               </Link>
             </div>
@@ -167,40 +177,36 @@ export default async function AssinaturaPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {proximaFatura ? (
+            {proximoPagamento ? (
               <>
                 <div>
-                  <p className="text-sm text-muted-foreground">Data</p>
+                  <p className="text-sm text-muted-foreground">Vencimento</p>
                   <p className="text-2xl font-bold">
-                    {formatDate(proximaFatura.vencimento)}
+                    {formatDate(proximoPagamento.vencimento)}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-sm text-muted-foreground">Valor</p>
                   <p className="text-2xl font-bold">
-                    {formatCurrency(proximaFatura.valor)}
+                    {formatCurrency(proximoPagamento.valor)}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-muted-foreground">Número</p>
-                  <p className="font-mono">{proximaFatura.numero}</p>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  {getStatusBadge(proximoPagamento.status)}
                 </div>
 
-                {proximaFatura.linha_digitavel && (
+                {proximoPagamento.link_pagamento && (
                   <div className="pt-4">
-                    <Button variant="outline" className="w-full">
+                    <Button
+                      variant="default"
+                      className="w-full"
+                      onClick={() => window.open(proximoPagamento.link_pagamento, '_blank')}
+                    >
                       <Download className="mr-2 h-4 w-4" />
-                      Baixar Boleto
-                    </Button>
-                  </div>
-                )}
-
-                {proximaFatura.qr_code_pix && (
-                  <div>
-                    <Button variant="default" className="w-full">
-                      Ver QR Code PIX
+                      Ver Pagamento
                     </Button>
                   </div>
                 )}
@@ -209,7 +215,7 @@ export default async function AssinaturaPage() {
               <div className="text-center py-8">
                 <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto mb-2" />
                 <p className="text-muted-foreground">
-                  Nenhuma fatura pendente
+                  Nenhum pagamento pendente
                 </p>
               </div>
             )}
@@ -218,17 +224,17 @@ export default async function AssinaturaPage() {
       </div>
 
       {/* Recursos do Plano */}
-      {planoInfo?.recursos && (
+      {planoAtual?.funcionalidades && (
         <Card>
           <CardHeader>
             <CardTitle>Recursos Inclusos</CardTitle>
           </CardHeader>
           <CardContent>
             <ul className="grid grid-cols-2 gap-3">
-              {(planoInfo.recursos as string[]).map((recurso, idx) => (
+              {planoAtual.funcionalidades.map((recurso: string, idx: number) => (
                 <li key={idx} className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <span>{recurso}</span>
+                  <span className="capitalize">{recurso.replace(/_/g, ' ')}</span>
                 </li>
               ))}
             </ul>
@@ -236,43 +242,55 @@ export default async function AssinaturaPage() {
         </Card>
       )}
 
-      {/* Histórico de Faturas */}
+      {/* Histórico de Pagamentos */}
       <Card>
         <CardHeader>
-          <CardTitle>Histórico de Faturas</CardTitle>
+          <CardTitle>Histórico de Pagamentos</CardTitle>
           <CardDescription>
-            {faturas?.length || 0} fatura(s) registrada(s)
+            {pagamentos?.length || 0} pagamento(s) registrado(s)
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Número</TableHead>
-                <TableHead>Descrição</TableHead>
                 <TableHead>Vencimento</TableHead>
                 <TableHead>Valor</TableHead>
+                <TableHead>Método</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Pagamento</TableHead>
+                <TableHead>Pago em</TableHead>
+                <TableHead>Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {faturas && faturas.length > 0 ? (
-                faturas.map((fatura) => (
-                  <TableRow key={fatura.id}>
-                    <TableCell className="font-mono">
-                      {fatura.numero}
-                    </TableCell>
-                    <TableCell>{fatura.descricao || '-'}</TableCell>
-                    <TableCell>{formatDate(fatura.vencimento)}</TableCell>
+              {pagamentos && pagamentos.length > 0 ? (
+                pagamentos.map((pagamento) => (
+                  <TableRow key={pagamento.id}>
+                    <TableCell>{formatDate(pagamento.vencimento)}</TableCell>
                     <TableCell className="font-semibold">
-                      {formatCurrency(fatura.valor)}
+                      {formatCurrency(pagamento.valor)}
                     </TableCell>
-                    <TableCell>{getStatusBadge(fatura.status)}</TableCell>
                     <TableCell>
-                      {fatura.pagamento_em
-                        ? formatDate(fatura.pagamento_em)
-                        : '-'}
+                      <Badge variant="outline">
+                        {pagamento.metodo_pagamento || '-'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(pagamento.status)}</TableCell>
+                    <TableCell>
+                      {pagamento.pago_em ? formatDate(pagamento.pago_em) : '-'}
+                    </TableCell>
+                    <TableCell>
+                      {pagamento.link_pagamento && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            window.open(pagamento.link_pagamento, '_blank')
+                          }
+                        >
+                          Ver
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -280,7 +298,7 @@ export default async function AssinaturaPage() {
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8">
                     <div className="text-muted-foreground">
-                      Nenhuma fatura registrada
+                      Nenhum pagamento registrado
                     </div>
                   </TableCell>
                 </TableRow>

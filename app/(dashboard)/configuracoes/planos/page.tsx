@@ -14,11 +14,12 @@ import { SelecionarPlanoButton } from '@/components/billing/selecionar-plano-but
 export default async function PlanosPage() {
   const supabase = await createClient()
 
-  // Buscar planos disponíveis
-  const { data: planos } = await supabase
-    .from('planos_precos')
-    .select('*')
-    .order('valor_mensal')
+  // Buscar planos disponíveis (usando API para evitar RLS temporariamente)
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const planosResponse = await fetch(`${baseUrl}/api/debug-planos`, {
+    cache: 'no-store',
+  })
+  const { planos } = await planosResponse.json()
 
   // Buscar plano atual do usuário
   const {
@@ -31,13 +32,13 @@ export default async function PlanosPage() {
     .eq('id', user?.id || '')
     .single()
 
-  const { data: tenant } = await supabase
-    .from('tenants')
-    .select('plano')
-    .eq('id', profile?.tenant_id || '')
+  const { data: assinatura } = await supabase
+    .from('assinaturas')
+    .select('plano_id')
+    .eq('tenant_id', profile?.tenant_id || '')
     .single()
 
-  const planoAtual = tenant?.plano
+  const planoAtualId = assinatura?.plano_id
 
   return (
     <div className="space-y-6">
@@ -50,12 +51,12 @@ export default async function PlanosPage() {
 
       <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
         {planos?.map((plano: any) => {
-          const isAtual = planoAtual === plano.plano
-          const isPopular = plano.plano === 'PROFISSIONAL'
+          const isAtual = planoAtualId === plano.id
+          const isPopular = plano.slug === 'profissional'
 
           return (
             <Card
-              key={plano.plano}
+              key={plano.id}
               className={`relative ${
                 isPopular
                   ? 'border-primary shadow-lg scale-105'
@@ -81,25 +82,57 @@ export default async function PlanosPage() {
 
               <CardHeader>
                 <CardTitle className="text-2xl">{plano.nome}</CardTitle>
-                <CardDescription>{plano.descricao}</CardDescription>
                 <div className="pt-4">
                   <div className="text-4xl font-bold">
-                    {formatCurrency(plano.valor_mensal)}
+                    {plano.preco_centavos === 0
+                      ? 'Sob consulta'
+                      : formatCurrency(plano.preco_centavos / 100)}
                   </div>
-                  <p className="text-sm text-muted-foreground">por mês</p>
+                  {plano.preco_centavos > 0 && (
+                    <p className="text-sm text-muted-foreground">por mês</p>
+                  )}
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-4">
+                {/* Limites */}
+                <div className="space-y-1 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Usuários:</span>
+                    <span className="font-medium">
+                      {plano.limite_usuarios === -1 ? 'Ilimitado' : plano.limite_usuarios}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">POs/mês:</span>
+                    <span className="font-medium">
+                      {plano.limite_pos_mes === -1 ? 'Ilimitado' : plano.limite_pos_mes}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Storage:</span>
+                    <span className="font-medium">
+                      {plano.limite_storage_mb === -1 ? 'Ilimitado' : `${plano.limite_storage_mb} MB`}
+                    </span>
+                  </div>
+                </div>
+
                 {/* Recursos */}
-                <ul className="space-y-2">
-                  {(plano.recursos as string[]).map(
+                <ul className="space-y-2 pt-2">
+                  {(plano.funcionalidades as string[]).slice(0, 5).map(
                     (recurso: string, idx: number) => (
                       <li key={idx} className="flex items-start gap-2">
                         <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{recurso}</span>
+                        <span className="text-sm capitalize">
+                          {recurso.replace(/_/g, ' ')}
+                        </span>
                       </li>
                     )
+                  )}
+                  {(plano.funcionalidades as string[]).length > 5 && (
+                    <li className="text-sm text-muted-foreground">
+                      + {(plano.funcionalidades as string[]).length - 5} recursos
+                    </li>
                   )}
                 </ul>
 
@@ -109,12 +142,17 @@ export default async function PlanosPage() {
                     <Button variant="outline" className="w-full" disabled>
                       Plano Atual
                     </Button>
+                  ) : plano.slug === 'enterprise' ? (
+                    <Button variant="outline" className="w-full" asChild>
+                      <a href="mailto:contato@supriflow.com.br">
+                        Falar com Vendas
+                      </a>
+                    </Button>
                   ) : (
                     <SelecionarPlanoButton
-                      plano={plano.plano}
+                      planoId={plano.id}
                       nomePlano={plano.nome}
-                      valor={plano.valor_mensal}
-                      planoAtual={planoAtual}
+                      planoAtual={planoAtualId}
                     />
                   )}
                 </div>

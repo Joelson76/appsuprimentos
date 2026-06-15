@@ -161,7 +161,7 @@ export default async function NotaFiscalDetalhesPage({
                   <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
                   <div>
                     <p className="font-medium text-red-900">{div.descricao}</p>
-                    {div.tipo === 'VALOR' && (
+                    {div.tipo === 'VALOR' && div.diferenca !== undefined && (
                       <p className="text-sm text-red-700">
                         Diferença: {formatCurrency(Math.abs(div.diferenca))}{' '}
                         {div.diferenca > 0 ? '(NF maior)' : '(PO maior)'}

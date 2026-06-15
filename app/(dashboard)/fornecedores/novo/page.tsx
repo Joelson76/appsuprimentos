@@ -22,12 +22,12 @@ import {
 } from '@/components/ui/select'
 import { ArrowLeft, Search } from 'lucide-react'
 import Link from 'next/link'
-import { cnpj as cnpjValidator } from 'cpf-cnpj-validator'
+import { useCNPJ } from '@/hooks/use-cnpj'
+import { useViaCEP } from '@/hooks/use-viacep'
 
 export default function NovoFornecedorPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [loadingCNPJ, setLoadingCNPJ] = useState(false)
   const [error, setError] = useState('')
 
   const [cnpj, setCnpj] = useState('')
@@ -38,17 +38,7 @@ export default function NovoFornecedorPage() {
   const [categorias, setCategorias] = useState('')
   const [status, setStatus] = useState<string>('EM_HOMOLOGACAO')
 
-  const formatCNPJ = (value: string) => {
-    const numbers = value.replace(/\D/g, '')
-    if (numbers.length <= 14) {
-      return numbers
-        .replace(/^(\d{2})(\d)/, '$1.$2')
-        .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-        .replace(/\.(\d{3})(\d)/, '.$1/$2')
-        .replace(/(\d{4})(\d)/, '$1-$2')
-    }
-    return value
-  }
+  const { buscarCNPJ: buscarCNPJHook, formatarCNPJ, validarCNPJ, loading: loadingCNPJ } = useCNPJ()
 
   const buscarCNPJ = async () => {
     if (!cnpj) {
@@ -56,40 +46,20 @@ export default function NovoFornecedorPage() {
       return
     }
 
-    const cnpjLimpo = cnpj.replace(/\D/g, '')
-
-    if (!cnpjValidator.isValid(cnpjLimpo)) {
+    if (!validarCNPJ(cnpj)) {
       setError('CNPJ inválido')
       return
     }
 
-    setLoadingCNPJ(true)
     setError('')
 
-    try {
-      const response = await fetch(
-        `https://www.receitaws.com.br/v1/cnpj/${cnpjLimpo}`
-      )
+    const dados = await buscarCNPJHook(cnpj)
 
-      if (!response.ok) {
-        throw new Error('Erro ao buscar CNPJ')
-      }
-
-      const data = await response.json()
-
-      if (data.status === 'ERROR') {
-        setError(data.message || 'CNPJ não encontrado')
-        return
-      }
-
-      setRazaoSocial(data.nome || '')
-      setNomeFantasia(data.fantasia || '')
-      setEmail(data.email || '')
-      setTelefone(data.telefone || '')
-    } catch (err) {
-      setError('Erro ao consultar CNPJ na Receita Federal')
-    } finally {
-      setLoadingCNPJ(false)
+    if (dados) {
+      setRazaoSocial(dados.razao_social || '')
+      setNomeFantasia(dados.nome_fantasia || '')
+      setEmail(dados.email || '')
+      setTelefone(dados.telefone || '')
     }
   }
 
@@ -123,7 +93,7 @@ export default function NovoFornecedorPage() {
 
       const cnpjLimpo = cnpj.replace(/\D/g, '')
 
-      if (!cnpjValidator.isValid(cnpjLimpo)) {
+      if (!validarCNPJ(cnpjLimpo)) {
         setError('CNPJ inválido')
         return
       }
@@ -212,7 +182,7 @@ export default function NovoFornecedorPage() {
                     id="cnpj"
                     placeholder="00.000.000/0000-00"
                     value={cnpj}
-                    onChange={(e) => setCnpj(formatCNPJ(e.target.value))}
+                    onChange={(e) => setCnpj(formatarCNPJ(e.target.value))}
                     maxLength={18}
                     required
                   />
