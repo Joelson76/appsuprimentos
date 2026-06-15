@@ -304,9 +304,8 @@ SELECT
     WHEN 'PEDIDO' THEN oc.numero
   END as documento_numero,
   CASE a.tipo_documento
-    WHEN 'REQUISICAO' THEN req.valor_total
-    WHEN 'COTACAO' THEN cot.valor_total
     WHEN 'PEDIDO' THEN oc.valor_total
+    ELSE NULL
   END as documento_valor,
   ps.nome as solicitante_nome
 FROM aprovacoes a
