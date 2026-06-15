@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     // Se não existe, criar registro de assinatura
     if (!assinatura) {
       console.log('🔧 [5/8] Criando registro de assinatura...')
-      const { data: novaAssinatura } = await supabase
+      const { data: novaAssinatura, error: insertError } = await supabase
         .from('assinaturas')
         .insert({
           tenant_id: profile.tenant_id,
@@ -83,6 +83,17 @@ export async function POST(request: Request) {
         })
         .select()
         .single()
+
+      if (insertError) {
+        console.error('❌ [5/8] Erro ao inserir assinatura:', insertError)
+        return NextResponse.json({
+          error: 'Erro ao criar registro de assinatura',
+          details: insertError.message,
+          code: insertError.code,
+          hint: insertError.hint
+        }, { status: 500 })
+      }
+
       assinatura = novaAssinatura
       console.log('✅ [5/8] Assinatura criada:', assinatura?.id)
     } else {
