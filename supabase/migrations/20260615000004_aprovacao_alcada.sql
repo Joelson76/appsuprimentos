@@ -151,11 +151,15 @@ DECLARE
   v_usuario_perfil perfil_usuario;
   v_aprovacoes_anteriores_pendentes INT;
 BEGIN
-  -- Busca aprovação e perfil do usuário
-  SELECT a.*, p.perfil INTO v_aprovacao, v_usuario_perfil
-  FROM aprovacoes a
-  JOIN profiles p ON p.id = p_usuario_id
-  WHERE a.id = p_aprovacao_id;
+  -- Busca aprovação
+  SELECT * INTO v_aprovacao
+  FROM aprovacoes
+  WHERE id = p_aprovacao_id;
+
+  -- Busca perfil do usuário
+  SELECT perfil INTO v_usuario_perfil
+  FROM profiles
+  WHERE id = p_usuario_id;
 
   -- Aprovação não existe ou já foi resolvida
   IF v_aprovacao IS NULL OR v_aprovacao.status != 'PENDENTE' THEN
