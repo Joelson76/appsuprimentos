@@ -89,9 +89,9 @@ SELECT
   oc.tenant_id,
   f.razao_social as fornecedor,
   COUNT(*) as qtd_pedidos,
-  AVG(EXTRACT(DAY FROM oc.prazo_entrega - oc.criado_em::DATE))::NUMERIC(10,1) as lead_time_medio_dias,
-  MIN(EXTRACT(DAY FROM oc.prazo_entrega - oc.criado_em::DATE))::INT as lead_time_minimo,
-  MAX(EXTRACT(DAY FROM oc.prazo_entrega - oc.criado_em::DATE))::INT as lead_time_maximo
+  AVG(oc.prazo_entrega - oc.criado_em::DATE)::NUMERIC(10,1) as lead_time_medio_dias,
+  MIN(oc.prazo_entrega - oc.criado_em::DATE) as lead_time_minimo,
+  MAX(oc.prazo_entrega - oc.criado_em::DATE) as lead_time_maximo
 FROM ordens_compra oc
 JOIN fornecedores f ON f.id = oc.fornecedor_id
 WHERE oc.status IN ('RECEBIDA', 'FATURADA')
