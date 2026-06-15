@@ -78,11 +78,12 @@ export async function POST(request: Request) {
       console.log('🔍 [5/8] tenant_id a inserir:', profile.tenant_id)
       console.log('🔍 [5/8] user.id:', user.id)
 
-      // Verificar JWT tenant_id
+      // Verificar JWT completo
       const { data: { session } } = await supabase.auth.getSession()
-      const jwtTenantId = session?.user?.app_metadata?.tenant_id
-      console.log('🔍 [5/8] JWT tenant_id:', jwtTenantId)
-      console.log('🔍 [5/8] Match?', jwtTenantId === profile.tenant_id)
+      console.log('🔍 [5/8] JWT user completo:', JSON.stringify(user, null, 2))
+      console.log('🔍 [5/8] Session user completo:', JSON.stringify(session?.user, null, 2))
+      console.log('🔍 [5/8] app_metadata:', session?.user?.app_metadata)
+      console.log('🔍 [5/8] user_metadata:', session?.user?.user_metadata)
 
       const { data: novaAssinatura, error: insertError } = await supabase
         .from('assinaturas')
