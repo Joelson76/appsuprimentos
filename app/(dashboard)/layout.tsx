@@ -27,7 +27,6 @@ export default async function DashboardLayout({
       tenants (
         id,
         nome,
-        plano,
         status,
         trial_fim,
         logo_url
@@ -45,12 +44,19 @@ export default async function DashboardLayout({
     ? profile.tenants[0]
     : profile.tenants
 
+  // Busca plano da assinatura (não do tenant)
+  const { data: assinatura } = await supabase
+    .from('assinaturas')
+    .select('plano, ativa')
+    .eq('tenant_id', tenant.id)
+    .single()
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar
         tenant={{
           nome: tenant.nome,
-          plano: tenant.plano,
+          plano: assinatura?.plano || 'BASICO',
           status: tenant.status,
           trial_fim: tenant.trial_fim,
         }}
