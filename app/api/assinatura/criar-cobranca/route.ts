@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
+    console.log('🚀 [1/8] Iniciando criar-cobranca')
     const supabase = await createClient()
 
     const {
@@ -11,12 +12,16 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser()
 
     if (!user) {
+      console.error('❌ [1/8] Usuário não autenticado')
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
     }
+    console.log('✅ [1/8] Usuário autenticado:', user.id)
 
     const { planoId, metodoPagamento } = await request.json()
+    console.log('✅ [2/8] Dados recebidos:', { planoId, metodoPagamento })
 
     if (!planoId || !metodoPagamento) {
+      console.error('❌ [2/8] Dados incompletos')
       return NextResponse.json(
         { error: 'Dados incompletos' },
         { status: 400 }
@@ -24,6 +29,7 @@ export async function POST(request: Request) {
     }
 
     // Buscar tenant e assinatura
+    console.log('🔍 [3/8] Buscando profile...')
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('tenant_id, tenants(nome, cnpj)')
@@ -31,18 +37,21 @@ export async function POST(request: Request) {
       .single()
 
     if (!profile || profileError) {
-      console.error('Erro ao buscar perfil:', profileError)
+      console.error('❌ [3/8] Erro ao buscar perfil:', profileError)
       return NextResponse.json({
         error: 'Perfil não encontrado',
         details: profileError?.message,
         user_id: user.id
       }, { status: 404 })
     }
+    console.log('✅ [3/8] Profile encontrado:', profile.tenant_id)
 
     const tenant = profile.tenants as any
     const userEmail = user.email
+    console.log('✅ [3/8] Tenant:', { nome: tenant?.nome, cnpj: tenant?.cnpj })
 
     // Buscar plano
+    console.log('🔍 [4/8] Buscando plano...')
     const { data: plano } = await supabase
       .from('planos')
       .select('*')
@@ -50,19 +59,24 @@ export async function POST(request: Request) {
       .single()
 
     if (!plano) {
+      console.error('❌ [4/8] Plano não encontrado')
       return NextResponse.json({ error: 'Plano não encontrado' }, { status: 404 })
     }
+    console.log('✅ [4/8] Plano:', plano.nome, plano.preco_centavos)
 
     // Buscar ou criar cliente no Asaas
+    console.log('🔍 [5/8] Buscando assinatura...')
     const { data: assinatura } = await supabase
       .from('assinaturas')
       .select('*')
       .eq('tenant_id', profile.tenant_id)
       .single()
+    console.log('✅ [5/8] Assinatura:', assinatura?.id)
 
     let customerId = assinatura?.asaas_customer_id
 
     if (!customerId) {
+      console.log('🔧 [5/8] Criando cliente no Asaas...')
       const customer = await asaas.createCustomer({
         name: tenant.nome,
         email: userEmail,
@@ -71,15 +85,19 @@ export async function POST(request: Request) {
       })
 
       customerId = customer.id
+      console.log('✅ [5/8] Cliente Asaas criado:', customerId)
 
       // Salvar customer_id
       await supabase
         .from('assinaturas')
         .update({ asaas_customer_id: customerId })
         .eq('tenant_id', profile.tenant_id)
+    } else {
+      console.log('✅ [5/8] Cliente Asaas já existe:', customerId)
     }
 
     // Criar cobrança recorrente (assinatura)
+    console.log('🔧 [6/8] Criando subscription no Asaas...')
     const hoje = new Date()
     const proximaCobranca = new Date(hoje)
     proximaCobranca.setMonth(proximaCobranca.getMonth() + 1)
@@ -93,8 +111,10 @@ export async function POST(request: Request) {
       description: `Assinatura ${plano.nome} - SupriFlow`,
       externalReference: profile.tenant_id,
     })
+    console.log('✅ [6/8] Subscription criada:', subscription.id)
 
     // Atualizar assinatura no banco
+    console.log('🔧 [6/8] Atualizando assinatura no banco...')
     await supabase
       .from('assinaturas')
       .update({
@@ -105,12 +125,16 @@ export async function POST(request: Request) {
         periodo_fim: proximaCobranca.toISOString(),
       })
       .eq('tenant_id', profile.tenant_id)
+    console.log('✅ [6/8] Assinatura atualizada')
 
     // Buscar primeira cobrança gerada
+    console.log('🔍 [7/8] Buscando primeira cobrança...')
     const payments = await asaas.getSubscriptionPayments(subscription.id)
     const firstPayment = payments.data[0]
+    console.log('✅ [7/8] Primeira cobrança:', firstPayment.id)
 
     // Salvar pagamento no banco
+    console.log('🔧 [7/8] Salvando pagamento no banco...')
     const { data: novoPagamento } = await supabase
       .from('pagamentos')
       .insert({
@@ -124,19 +148,25 @@ export async function POST(request: Request) {
       })
       .select()
       .single()
+    console.log('✅ [7/8] Pagamento salvo:', novoPagamento?.id)
 
     // Se for PIX, buscar QR Code
     let pixData = null
     if (metodoPagamento === 'PIX') {
+      console.log('🔧 [8/8] Buscando QR Code PIX...')
       pixData = await asaas.getPixQrCode(firstPayment.id)
+      console.log('✅ [8/8] QR Code obtido')
     }
 
     // Se for boleto, buscar URL
     let boletoUrl = null
     if (metodoPagamento === 'BOLETO') {
+      console.log('🔧 [8/8] Buscando URL do boleto...')
       boletoUrl = await asaas.getBoletoUrl(firstPayment.id)
+      console.log('✅ [8/8] Boleto obtido')
     }
 
+    console.log('✅✅✅ [8/8] SUCESSO! Retornando resposta...')
     return NextResponse.json({
       success: true,
       pagamento: novoPagamento,
@@ -149,9 +179,10 @@ export async function POST(request: Request) {
       boleto: boletoUrl ? { url: boletoUrl } : null,
     })
   } catch (error: any) {
-    console.error('Erro ao criar cobrança:', error)
+    console.error('❌❌❌ ERRO FATAL:', error)
+    console.error('Stack:', error.stack)
     return NextResponse.json(
-      { error: error.message || 'Erro ao criar cobrança' },
+      { error: error.message || 'Erro ao criar cobrança', details: error.toString() },
       { status: 500 }
     )
   }
