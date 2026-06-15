@@ -43,7 +43,7 @@ export default async function AssinaturaPage() {
   // Buscar assinatura
   const { data: assinatura } = await supabase
     .from('assinaturas')
-    .select('*, planos(*)')
+    .select('*')
     .eq('tenant_id', profile?.tenant_id || '')
     .single()
 
@@ -62,7 +62,14 @@ export default async function AssinaturaPage() {
     .order('criado_em', { ascending: false })
     .limit(10)
 
-  const planoAtual = assinatura?.planos as any
+  // Mapeamento de planos (nome e preço baseado no enum)
+  const planosMap: Record<string, { nome: string; preco_centavos: number }> = {
+    BASICO: { nome: 'Básico', preco_centavos: 9700 },
+    PROFISSIONAL: { nome: 'Profissional', preco_centavos: 29700 },
+    ENTERPRISE: { nome: 'Enterprise', preco_centavos: 99700 }
+  }
+
+  const planoAtual = assinatura?.plano ? planosMap[assinatura.plano] : planosMap.BASICO
 
   const getStatusBadge = (status: string) => {
     const colors: Record<string, string> = {
@@ -132,21 +139,12 @@ export default async function AssinaturaPage() {
 
             <div>
               <p className="text-sm text-muted-foreground">Status</p>
-              {getStatusAssinaturaBadge(assinatura?.status || 'TRIAL')}
+              <Badge className={assinatura?.ativa ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                {assinatura?.ativa ? 'ATIVA' : 'INATIVA'}
+              </Badge>
             </div>
 
-            {assinatura?.status === 'TRIAL' && assinatura?.trial_fim && (
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <p className="text-sm font-medium text-blue-900">
-                  Trial ativo até {formatDate(assinatura.trial_fim)}
-                </p>
-                <p className="text-xs text-blue-700 mt-1">
-                  Após este período, será necessário assinar um plano
-                </p>
-              </div>
-            )}
-
-            {assinatura?.status === 'INADIMPLENTE' && (
+            {!assinatura?.ativa && (
               <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
                 <p className="text-sm font-medium text-orange-900">
                   Pagamento pendente
