@@ -89,14 +89,7 @@ export default async function PlanosPage() {
                       : formatCurrency(plano.preco_centavos / 100)}
                   </div>
                   {plano.preco_centavos > 0 && (
-                    <div>
-                      <p className="text-sm text-muted-foreground">por mês</p>
-                      {plano.preco_anual_centavos && (
-                        <p className="text-xs text-green-600 mt-1">
-                          ou {formatCurrency(plano.preco_anual_centavos / 12 / 100)}/mês no anual
-                        </p>
-                      )}
-                    </div>
+                    <p className="text-sm text-muted-foreground">por mês</p>
                   )}
                 </div>
               </CardHeader>
