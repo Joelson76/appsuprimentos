@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { asaas } from '@/lib/asaas'
 import { NextResponse } from 'next/server'
 
@@ -6,6 +7,12 @@ export async function POST(request: Request) {
   try {
     console.log('🚀 [1/8] Iniciando criar-cobranca')
     const supabase = await createClient()
+
+    // Cliente admin para salvar fatura (bypass RLS)
+    const supabaseAdmin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
     const {
       data: { user },
@@ -169,10 +176,10 @@ export async function POST(request: Request) {
     const firstPayment = payments.data[0]
     console.log('✅ [7/8] Primeira cobrança:', firstPayment.id)
 
-    // Salvar fatura no banco
+    // Salvar fatura no banco (usar admin para bypass RLS)
     console.log('🔧 [7/8] Salvando fatura no banco...')
     const numeroFatura = `FAT-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
-    const { data: novaFatura } = await supabase
+    const { data: novaFatura, error: faturaError } = await supabaseAdmin
       .from('faturas')
       .insert({
         tenant_id: profile.tenant_id,
@@ -186,7 +193,16 @@ export async function POST(request: Request) {
       })
       .select()
       .single()
-    console.log('✅ [7/8] Fatura salva:', novaFatura?.id)
+
+    if (faturaError || !novaFatura) {
+      console.error('❌ [7/8] Erro ao salvar fatura:', faturaError)
+      return NextResponse.json({
+        error: 'Erro ao salvar fatura',
+        details: faturaError?.message
+      }, { status: 500 })
+    }
+
+    console.log('✅ [7/8] Fatura salva:', novaFatura.id)
 
     // Se for PIX, buscar QR Code
     let pixData = null
