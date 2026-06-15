@@ -21,7 +21,7 @@ export default async function PlanosPublicosPage() {
     .from('planos')
     .select('*')
     .eq('ativo', true)
-    .order('valor_mensal', { ascending: true })
+    .order('ordem', { ascending: true })
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-12">

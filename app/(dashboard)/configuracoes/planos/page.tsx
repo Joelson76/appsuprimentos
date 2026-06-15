@@ -19,7 +19,7 @@ export default async function PlanosPage() {
     .from('planos')
     .select('*')
     .eq('ativo', true)
-    .order('valor_mensal', { ascending: true })
+    .order('ordem', { ascending: true })
 
   // Buscar plano atual do usuário
   const {
