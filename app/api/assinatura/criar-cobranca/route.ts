@@ -92,11 +92,11 @@ export async function POST(request: Request) {
       console.log('🔍 [5/8] app_metadata:', session?.user?.app_metadata)
       console.log('🔍 [5/8] user_metadata:', session?.user?.user_metadata)
 
-      const { data: novaAssinatura, error: insertError } = await supabase
+      const { data: novaAssinatura, error: insertError } = await supabaseAdmin
         .from('assinaturas')
         .insert({
           tenant_id: profile.tenant_id,
-          plano: 'BASICO',
+          plano: plano.slug, // Usar o slug do plano escolhido (BASICO, PROFISSIONAL, ENTERPRISE)
           valor_mensal: plano.preco_centavos / 100
         })
         .select()
@@ -158,11 +158,13 @@ export async function POST(request: Request) {
     })
     console.log('✅ [6/8] Subscription criada:', subscription.id)
 
-    // Atualizar assinatura no banco
+    // Atualizar assinatura no banco (incluindo plano e valor)
     console.log('🔧 [6/8] Atualizando assinatura no banco...')
-    await supabase
+    await supabaseAdmin
       .from('assinaturas')
       .update({
+        plano: plano.slug, // Atualizar plano escolhido
+        valor_mensal: plano.preco_centavos / 100,
         asaas_subscription_id: subscription.id,
         ativa: true,
         forma_pagamento: metodoPagamento
