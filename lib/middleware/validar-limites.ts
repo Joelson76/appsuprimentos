@@ -11,11 +11,18 @@ export async function validarLimitePedidosMiddleware(tenantId: string) {
   if (!status.dentro_limite) {
     return NextResponse.json(
       {
-        error: 'Limite de pedidos atingido',
-        detalhes: status.mensagem,
-        usado: status.usado,
-        limite: status.limite,
+        error: 'LIMITE_ATINGIDO',
+        tipo: 'pedidos',
+        mensagem: 'Limite de pedidos atingido',
+        descricao: status.mensagem,
+        detalhes: {
+          usado: status.usado,
+          limite: status.limite,
+          percentual: status.percentual,
+        },
         action_required: 'upgrade',
+        upgrade_url: '/configuracoes/planos',
+        sugestao_plano: status.limite === 50 ? 'PROFISSIONAL' : 'ENTERPRISE',
       },
       { status: 403 }
     )
@@ -33,11 +40,18 @@ export async function validarLimiteUsuariosMiddleware(tenantId: string) {
   if (!status.dentro_limite) {
     return NextResponse.json(
       {
-        error: 'Limite de usuários atingido',
-        detalhes: status.mensagem,
-        usado: status.usado,
-        limite: status.limite,
+        error: 'LIMITE_ATINGIDO',
+        tipo: 'usuarios',
+        mensagem: 'Limite de usuários atingido',
+        descricao: status.mensagem,
+        detalhes: {
+          usado: status.usado,
+          limite: status.limite,
+          percentual: status.percentual,
+        },
         action_required: 'upgrade',
+        upgrade_url: '/configuracoes/planos',
+        sugestao_plano: status.limite === 3 ? 'PROFISSIONAL' : 'ENTERPRISE',
       },
       { status: 403 }
     )

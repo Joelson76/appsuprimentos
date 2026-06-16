@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
+import { ProviderLimite } from '@/components/limites/provider-limite'
 
 export default async function DashboardLayout({
   children,
@@ -52,27 +53,29 @@ export default async function DashboardLayout({
     .single()
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar
-        tenant={{
-          nome: tenant.nome,
-          plano: assinatura?.plano || 'BASICO',
-          status: tenant.status,
-          trial_fim: tenant.trial_fim,
-        }}
-      />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header
-          user={{
-            nome: profile.nome,
-            email: user.email!,
-            perfil: profile.perfil,
+    <ProviderLimite>
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar
+          tenant={{
+            nome: tenant.nome,
+            plano: assinatura?.plano || 'BASICO',
+            status: tenant.status,
+            trial_fim: tenant.trial_fim,
           }}
         />
-        <main className="flex-1 overflow-y-auto bg-muted/30 p-6">
-          {children}
-        </main>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Header
+            user={{
+              nome: profile.nome,
+              email: user.email!,
+              perfil: profile.perfil,
+            }}
+          />
+          <main className="flex-1 overflow-y-auto bg-muted/30 p-6">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </ProviderLimite>
   )
 }
