@@ -83,7 +83,7 @@ export default async function PedidosPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total de POs
+              Total de Pedidos
             </CardTitle>
           </CardHeader>
           <CardContent>

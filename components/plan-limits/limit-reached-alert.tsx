@@ -24,8 +24,8 @@ export function LimitReachedAlert({
       description: `Você está usando ${currentUsage} de ${limit} usuários do seu plano. Faça upgrade para adicionar mais usuários à sua equipe.`,
     },
     po: {
-      title: 'Limite de POs/Mês Atingido',
-      description: `Você criou ${currentUsage} de ${limit} POs este mês. Faça upgrade do plano ou aguarde o reset no próximo mês.`,
+      title: 'Limite de Pedidos/Mês Atingido',
+      description: `Você criou ${currentUsage} de ${limit} pedidos este mês. Faça upgrade do plano ou aguarde o reset no próximo mês.`,
     },
     storage: {
       title: 'Limite de Storage Atingido',

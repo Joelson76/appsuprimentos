@@ -171,7 +171,7 @@ export function useCheckLimit(type: 'usuario' | 'po' | 'storage') {
         if (!limits.canCreatePO) {
           return {
             allowed: false,
-            message: `Limite de ${limits.poUsage.limit} POs/mês atingido. Faça upgrade do plano ou aguarde o reset mensal.`,
+            message: `Limite de ${limits.poUsage.limit} pedidos/mês atingido. Faça upgrade do plano ou aguarde o reset mensal.`,
           }
         }
         break

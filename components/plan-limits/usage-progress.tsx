@@ -26,7 +26,7 @@ export function UsageProgress({ type, used, limit, showUpgrade = true }: UsagePr
 
   const labels = {
     usuario: 'Usuários',
-    po: 'POs / Mês',
+    po: 'Pedidos / Mês',
     storage: 'Armazenamento',
   }
 
