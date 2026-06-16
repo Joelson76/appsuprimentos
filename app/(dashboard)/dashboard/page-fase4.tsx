@@ -156,7 +156,7 @@ export default async function DashboardPage() {
               {kpis?.pos_abertas || 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {kpis?.pos_mes_atual || 0} POs criadas este mês
+              {kpis?.pos_mes_atual || 0} pedidos criados este mês
             </p>
           </CardContent>
         </Card>

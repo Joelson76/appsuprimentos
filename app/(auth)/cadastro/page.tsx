@@ -121,7 +121,7 @@ export default function CadastroPage() {
         'Até 5 usuários',
         'Gestão de compras',
         'Cadastro de fornecedores',
-        '50 POs por mês',
+        '50 pedidos por mês',
       ],
     },
     {
@@ -133,7 +133,7 @@ export default function CadastroPage() {
         'Todos os recursos do Básico',
         'Gestão de estoque',
         'Notas fiscais e contratos',
-        'POs ilimitadas',
+        'Pedidos ilimitados',
       ],
       popular: true,
     },

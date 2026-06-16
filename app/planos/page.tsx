@@ -87,7 +87,7 @@ export default async function PlanosPublicosPage() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">POs/mês:</span>
+                        <span className="text-muted-foreground">Pedidos/mês:</span>
                         <span className="font-semibold">
                           {plano.limite_pos_mes === -1
                             ? 'Ilimitado'

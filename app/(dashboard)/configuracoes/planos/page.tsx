@@ -104,7 +104,7 @@ export default async function PlanosPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">POs/mês:</span>
+                    <span className="text-muted-foreground">Pedidos/mês:</span>
                     <span className="font-medium">
                       {plano.limite_pos_mes === -1 ? 'Ilimitado' : plano.limite_pos_mes}
                     </span>

@@ -192,7 +192,7 @@ function CheckoutContent() {
             </div>
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• {plano.limite_usuarios === -1 ? 'Usuários ilimitados' : `Até ${plano.limite_usuarios} usuários`}</li>
-              <li>• {plano.limite_pos_mes === -1 ? 'POs ilimitadas' : `${plano.limite_pos_mes} POs/mês`}</li>
+              <li>• {plano.limite_pos_mes === -1 ? 'Pedidos ilimitados' : `${plano.limite_pos_mes} pedidos/mês`}</li>
             </ul>
           </div>
 
