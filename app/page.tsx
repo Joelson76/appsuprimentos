@@ -243,28 +243,28 @@ export default function LandingPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-2xl">Básico</CardTitle>
-                  <CardDescription>Para pequenas empresas</CardDescription>
+                  <CardDescription>Ideal para pequenas empresas</CardDescription>
                   <div className="mt-4">
-                    <span className="text-4xl font-bold">R$ 97</span>
+                    <span className="text-4xl font-bold">R$ 149</span>
                     <span className="text-muted-foreground">/mês</span>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Até 50 requisições/mês</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <span>5 usuários</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Portal do fornecedor</span>
+                    <span>Requisições ilimitadas</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Relatórios básicos</span>
+                    <span>Cotações ilimitadas</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Suporte por email</span>
                   </div>
                   <Link href="/cadastro" className="block">
                     <Button className="w-full mt-6" variant="outline">
@@ -290,23 +290,23 @@ export default function LandingPage() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Até 500 requisições/mês</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <span>20 usuários</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Tudo do Básico +</span>
+                    <span>Todos recursos do Básico</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Dashboards avançados</span>
+                    <span>Gestão de contratos</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Integração com ERP</span>
+                    <span>Gestão de estoque</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Suporte prioritário</span>
                   </div>
                   <Link href="/cadastro" className="block">
                     <Button className="w-full mt-6">
@@ -320,31 +320,32 @@ export default function LandingPage() {
               <Card>
                 <CardHeader>
                   <CardTitle className="text-2xl">Enterprise</CardTitle>
-                  <CardDescription>Para grandes operações</CardDescription>
+                  <CardDescription>Para grandes empresas</CardDescription>
                   <div className="mt-4">
-                    <span className="text-4xl font-bold">Customizado</span>
+                    <span className="text-4xl font-bold">R$ 997</span>
+                    <span className="text-muted-foreground">/mês</span>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Requisições ilimitadas</span>
-                  </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <span>Usuários ilimitados</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Tudo do Profissional +</span>
+                    <span>Todos recursos</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Suporte prioritário</span>
+                    <span>API dedicada</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-                    <span>Onboarding dedicado</span>
+                    <span>Suporte 24/7</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <span>Gerente de conta</span>
                   </div>
                   <Button className="w-full mt-6" variant="outline">
                     Falar com Vendas

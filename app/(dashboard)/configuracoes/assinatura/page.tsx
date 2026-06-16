@@ -64,7 +64,7 @@ export default async function AssinaturaPage() {
 
   // Mapeamento de planos (nome e preço baseado no enum)
   const planosMap: Record<string, { nome: string; preco_centavos: number }> = {
-    BASICO: { nome: 'Básico', preco_centavos: 9700 },
+    BASICO: { nome: 'Básico', preco_centavos: 14900 },
     PROFISSIONAL: { nome: 'Profissional', preco_centavos: 29700 },
     ENTERPRISE: { nome: 'Enterprise', preco_centavos: 99700 }
   }
