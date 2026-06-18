@@ -167,7 +167,7 @@ export default function CadastroPage() {
         <CardHeader>
           <div className="flex flex-col items-center gap-3 mb-4">
             <Image
-              src="/logo-jls.png"
+              src="/logo-jls.jpg"
               alt="JLS Tecnologia"
               width={70}
               height={70}

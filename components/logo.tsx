@@ -42,7 +42,7 @@ export function Logo({
   return (
     <div className={cn('flex items-center gap-3', className)}>
       <Image
-        src="/logo-jls.png"
+        src="/logo-jls.jpg"
         alt="JLS Tecnologia"
         width={imgSize}
         height={imgSize}
@@ -73,7 +73,7 @@ export function LogoIcon({ size = 'md', className }: Pick<LogoProps, 'size' | 'c
 
   return (
     <Image
-      src="/logo-jls.png"
+      src="/logo-jls.jpg"
       alt="JLS Tecnologia"
       width={imgSize}
       height={imgSize}

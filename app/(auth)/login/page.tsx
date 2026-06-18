@@ -66,7 +66,7 @@ export default function LoginPage() {
         <CardHeader className="space-y-3">
           <div className="flex flex-col items-center gap-3">
             <Image
-              src="/logo-jls.png"
+              src="/logo-jls.jpg"
               alt="JLS Tecnologia"
               width={80}
               height={80}

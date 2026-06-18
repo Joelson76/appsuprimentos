@@ -30,7 +30,7 @@ export default function LandingPage() {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/logo-jls.png"
+              src="/logo-jls.jpg"
               alt="JLS Tecnologia"
               width={40}
               height={40}
@@ -478,7 +478,7 @@ export default function LandingPage() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <Image
-                  src="/logo-jls.png"
+                  src="/logo-jls.jpg"
                   alt="JLS Tecnologia"
                   width={50}
                   height={50}

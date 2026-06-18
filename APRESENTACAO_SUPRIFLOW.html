@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SupriFlow - Sistema de Gestão de Compras e Suprimentos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .header .logo {
+            max-width: 150px;
+            margin: 0 auto 24px auto;
+            display: block;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .header .tagline {
+            font-size: 20px;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .header .powered-by {
+            margin-top: 20px;
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        .section {
+            padding: 50px 40px;
+        }
+
+        .section-alt {
+            background-color: #f9fafb;
+        }
+
+        .section h2 {
+            font-size: 32px;
+            color: #1f2937;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .section p {
+            font-size: 16px;
+            color: #4b5563;
+            margin-bottom: 16px;
+        }
+
+        .benefits {
+            display: grid;
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .benefit-card {
+            background: white;
+            padding: 24px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .benefit-card h3 {
+            font-size: 20px;
+            color: #1f2937;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .benefit-card h3::before {
+            content: "✓";
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-color: #10b981;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .benefit-card p {
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .feature-item {
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .feature-item h4 {
+            font-size: 18px;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .feature-item ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-item li {
+            padding: 6px 0;
+            color: #6b7280;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .feature-item li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .pricing-table {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .pricing-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 32px 24px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+
+        .pricing-card.featured {
+            border-color: #667eea;
+            position: relative;
+        }
+
+        .pricing-card.featured::before {
+            content: "Mais Popular";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #667eea;
+            color: white;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pricing-card h3 {
+            font-size: 24px;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .pricing-card .price {
+            font-size: 40px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 16px 0;
+        }
+
+        .pricing-card .price span {
+            font-size: 16px;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .pricing-card .description {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .pricing-card ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .pricing-card li {
+            padding: 8px 0;
+            color: #4b5563;
+            font-size: 14px;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .pricing-card li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .cta-button:hover {
+            background: #5568d3;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+            margin-top: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-item .number {
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-item .label {
+            font-size: 16px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        .footer {
+            background-color: #1f2937;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .footer .logo-footer {
+            max-width: 120px;
+            margin: 0 auto 16px auto;
+            display: block;
+            opacity: 0.9;
+        }
+
+        .footer p {
+            color: #d1d5db;
+            margin: 8px 0;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 36px;
+            }
+
+            .section {
+                padding: 40px 24px;
+            }
+
+            .pricing-table {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <img src="jls2.jpg" alt="JLS Tecnologia" class="logo">
+            <h1>SupriFlow</h1>
+            <p class="tagline">Sistema Completo de Gestão de Compras e Suprimentos</p>
+            <p class="powered-by">Powered by JLS Tecnologia</p>
+        </div>
+
+        <!-- Introdução -->
+        <div class="section">
+            <h2>Transforme sua Gestão de Compras</h2>
+            <p>
+                O <strong>SupriFlow</strong> é uma plataforma SaaS completa e moderna, desenvolvida especificamente
+                para empresas brasileiras que buscam profissionalizar e otimizar seus processos de compras,
+                suprimentos e gestão de fornecedores.
+            </p>
+            <p>
+                Ideal para <strong>indústrias, manufaturas e empresas do varejo</strong>, o SupriFlow
+                centraliza todas as etapas do processo de compras em uma única plataforma intuitiva e segura.
+            </p>
+        </div>
+
+        <!-- Benefícios -->
+        <div class="section section-alt">
+            <h2>Por que escolher o SupriFlow?</h2>
+            <div class="benefits">
+                <div class="benefit-card">
+                    <h3>Redução de Custos</h3>
+                    <p>
+                        Compare cotações automaticamente, negocie melhores preços e acompanhe o histórico
+                        de custos para tomar decisões mais inteligentes.
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <h3>Ganho de Tempo</h3>
+                    <p>
+                        Automatize requisições, cotações e aprovações. Elimine planilhas e e-mails dispersos.
+                        Reduza o tempo de processo em até 70%.
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <h3>Controle Total</h3>
+                    <p>
+                        Rastreie cada etapa do processo de compras em tempo real. Dashboards e relatórios
+                        completos para análise de performance.
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <h3>Compliance e Auditoria</h3>
+                    <p>
+                        Histórico completo de todas as operações, fluxos de aprovação configuráveis e
+                        rastreabilidade total para auditorias.
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <h3>Multi-tenant Seguro</h3>
+                    <p>
+                        Isolamento completo de dados entre empresas com segurança nível bancário (RLS).
+                        Seus dados são exclusivamente seus.
+                    </p>
+                </div>
+
+                <div class="benefit-card">
+                    <h3>100% na Nuvem</h3>
+                    <p>
+                        Acesse de qualquer lugar, sem instalações. Atualizações automáticas, backup contínuo
+                        e disponibilidade 24/7.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Funcionalidades Principais -->
+        <div class="section">
+            <h2>Funcionalidades Principais</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h4>📋 Requisições de Compra</h4>
+                    <ul>
+                        <li>Criação rápida e intuitiva</li>
+                        <li>Fluxo de aprovação por alçada</li>
+                        <li>Numeração automática</li>
+                        <li>Histórico completo</li>
+                    </ul>
+                </div>
+
+                <div class="feature-item">
+                    <h4>💰 Cotações</h4>
+                    <ul>
+                        <li>Envio automático para fornecedores</li>
+                        <li>Comparação lado a lado</li>
+                        <li>Análise de melhor custo-benefício</li>
+                        <li>Histórico de preços</li>
+                    </ul>
+                </div>
+
+                <div class="feature-item">
+                    <h4>🛒 Pedidos de Compra</h4>
+                    <ul>
+                        <li>Geração automática da cotação</li>
+                        <li>Rastreamento de entregas</li>
+                        <li>Integração com NF-e</li>
+                        <li>Controle de pagamentos</li>
+                    </ul>
+                </div>
+
+                <div class="feature-item">
+                    <h4>🏢 Gestão de Fornecedores</h4>
+                    <ul>
+                        <li>Cadastro completo (CNPJ validado)</li>
+                        <li>Avaliação de performance</li>
+                        <li>Documentação e contratos</li>
+                        <li>Análise de riscos</li>
+                    </ul>
+                </div>
+
+                <div class="feature-item">
+                    <h4>📦 Controle de Estoque</h4>
+                    <ul>
+                        <li>Entrada e saída automática</li>
+                        <li>Níveis mínimos e alertas</li>
+                        <li>Rastreamento por lote</li>
+                        <li>Inventário periódico</li>
+                    </ul>
+                </div>
+
+                <div class="feature-item">
+                    <h4>📊 Dashboards e KPIs</h4>
+                    <ul>
+                        <li>Tempo médio de aprovação</li>
+                        <li>Economia por cotação</li>
+                        <li>Performance de fornecedores</li>
+                        <li>Análise de gastos por categoria</li>
+                    </ul>
+                </div>
+
+                <div class="feature-item">
+                    <h4>📄 Gestão de Contratos</h4>
+                    <ul>
+                        <li>Armazenamento centralizado</li>
+                        <li>Alertas de vencimento</li>
+                        <li>Controle de renovações</li>
+                        <li>Histórico de versões</li>
+                    </ul>
+                </div>
+
+                <div class="feature-item">
+                    <h4>🔔 Notificações e Alertas</h4>
+                    <ul>
+                        <li>E-mail automático</li>
+                        <li>Notificações em tempo real</li>
+                        <li>Lembretes personalizáveis</li>
+                        <li>Escalação automática</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diferenciais Técnicos -->
+        <div class="section section-alt">
+            <h2>Diferenciais Técnicos</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h4>🇧🇷 Totalmente Brasileiro</h4>
+                    <ul>
+                        <li>Validação de CNPJ em tempo real</li>
+                        <li>Integração com Receita Federal</li>
+                        <li>Busca automática de CEP</li>
+                        <li>Leitura de XML de NF-e</li>
+                        <li>Pagamentos via PIX, Boleto e Cartão</li>
+                    </ul>
+                </div>
+
+                <div class="feature-item">
+                    <h4>🔒 Segurança Bancária</h4>
+                    <ul>
+                        <li>Criptografia end-to-end</li>
+                        <li>Row Level Security (RLS)</li>
+                        <li>Autenticação multi-fator</li>
+                        <li>Logs de auditoria completos</li>
+                        <li>Backup automático diário</li>
+                    </ul>
+                </div>
+
+                <div class="feature-item">
+                    <h4>⚡ Performance</h4>
+                    <ul>
+                        <li>Resposta em milissegundos</li>
+                        <li>Escalável para milhões de registros</li>
+                        <li>CDN global para assets</li>
+                        <li>Cache inteligente</li>
+                        <li>Otimizado para mobile</li>
+                    </ul>
+                </div>
+
+                <div class="feature-item">
+                    <h4>🔄 Integrações</h4>
+                    <ul>
+                        <li>API REST completa</li>
+                        <li>Webhooks personalizáveis</li>
+                        <li>Importação via Excel/CSV</li>
+                        <li>Exportação de relatórios</li>
+                        <li>Integração com ERPs</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Planos e Preços -->
+        <div class="section">
+            <h2>Planos e Investimento</h2>
+            <p style="text-align: center; color: #6b7280; margin-bottom: 32px;">
+                Escolha o plano ideal para o tamanho da sua empresa. Todos os planos incluem 14 dias de teste grátis.
+            </p>
+
+            <div class="pricing-table">
+                <div class="pricing-card">
+                    <h3>Básico</h3>
+                    <div class="price">
+                        R$ 149<span>/mês</span>
+                    </div>
+                    <p class="description">Ideal para pequenas empresas</p>
+                    <ul>
+                        <li>Até 5 usuários</li>
+                        <li>Requisições ilimitadas</li>
+                        <li>Cotações ilimitadas</li>
+                        <li>Gestão de fornecedores</li>
+                        <li>Dashboards básicos</li>
+                        <li>Suporte por email</li>
+                    </ul>
+                    <a href="mailto:joelson76@gmail.com?subject=Interesse no Plano Básico SupriFlow" class="cta-button">Começar Teste Grátis</a>
+                </div>
+
+                <div class="pricing-card featured">
+                    <h3>Profissional</h3>
+                    <div class="price">
+                        R$ 297<span>/mês</span>
+                    </div>
+                    <p class="description">Para empresas em crescimento</p>
+                    <ul>
+                        <li>Até 20 usuários</li>
+                        <li>Todos recursos do Básico</li>
+                        <li>Gestão de contratos</li>
+                        <li>Controle de estoque</li>
+                        <li>Fluxo de aprovação por alçada</li>
+                        <li>Integração NF-e XML</li>
+                        <li>KPIs avançados</li>
+                        <li>Suporte prioritário</li>
+                    </ul>
+                    <a href="mailto:joelson76@gmail.com?subject=Interesse no Plano Profissional SupriFlow" class="cta-button">Começar Teste Grátis</a>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>Enterprise</h3>
+                    <div class="price">
+                        R$ 997<span>/mês</span>
+                    </div>
+                    <p class="description">Para grandes empresas</p>
+                    <ul>
+                        <li>Usuários ilimitados</li>
+                        <li>Todos recursos anteriores</li>
+                        <li>API dedicada</li>
+                        <li>Webhooks customizados</li>
+                        <li>SLA garantido 99.9%</li>
+                        <li>Suporte 24/7</li>
+                        <li>Gerente de conta dedicado</li>
+                        <li>Treinamento personalizado</li>
+                    </ul>
+                    <a href="mailto:joelson76@gmail.com?subject=Interesse no Plano Enterprise SupriFlow" class="cta-button">Falar com Consultor</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="section section-alt">
+            <h2>Resultados Comprovados</h2>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="number">70%</span>
+                    <span class="label">Redução no tempo de processo</span>
+                </div>
+                <div class="stat-item">
+                    <span class="number">45%</span>
+                    <span class="label">Economia em compras</span>
+                </div>
+                <div class="stat-item">
+                    <span class="number">99.9%</span>
+                    <span class="label">Disponibilidade da plataforma</span>
+                </div>
+                <div class="stat-item">
+                    <span class="number">100%</span>
+                    <span class="label">Satisfação dos clientes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action Final -->
+        <div class="section" style="text-align: center; padding: 60px 40px;">
+            <h2>Pronto para Transformar suas Compras?</h2>
+            <p style="font-size: 18px; color: #6b7280; margin: 24px 0 32px 0;">
+                Comece seu teste gratuito de 14 dias agora mesmo. Sem cartão de crédito. Sem compromisso.
+            </p>
+            <a href="mailto:joelson76@gmail.com?subject=Quero testar o SupriFlow gratuitamente" class="cta-button" style="font-size: 18px; padding: 18px 48px;">
+                Iniciar Teste Grátis
+            </a>
+            <p style="font-size: 14px; color: #9ca3af; margin-top: 24px;">
+                Ou agende uma demonstração personalizada
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <img src="jls2.jpg" alt="JLS Tecnologia" class="logo-footer">
+            <p><strong>SupriFlow</strong> - Sistema de Gestão de Compras e Suprimentos</p>
+            <p>Uma solução <strong>JLS Tecnologia</strong></p>
+            <p>📧 Contato: <a href="mailto:joelson76@gmail.com">joelson76@gmail.com</a></p>
+            <p style="margin-top: 24px; font-size: 14px;">
+                © 2026 JLS Tecnologia - SupriFlow. Todos os direitos reservados.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

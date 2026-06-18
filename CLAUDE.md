@@ -5,7 +5,7 @@ SaaS multi-tenant para gestão de compras, suprimentos e fornecedores.
 Setores: Indústria/Manufatura e Varejo/Comércio. Mercado brasileiro.
 
 **Desenvolvido por:** JLS Tecnologia  
-**Logo:** `jls2.png` (assets/logo-jls.png)
+**Logo:** `jls2.jpg` (assets/logo-jls.jpg)
 
 ## Identidade da Marca
 - **Produto:** SupriFlow
