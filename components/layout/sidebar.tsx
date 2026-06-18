@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -116,7 +117,20 @@ export function Sidebar({ tenant }: SidebarProps) {
   return (
     <aside className="w-64 border-r bg-background flex flex-col h-screen">
       <div className="p-6 border-b">
-        <h1 className="text-2xl font-bold text-primary">SupriFlow</h1>
+        <div className="flex items-center gap-3 mb-1">
+          <Image
+            src="/logo-jls.jpg"
+            alt="JLS Tecnologia"
+            width={40}
+            height={40}
+            className="object-contain"
+            priority
+          />
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold text-primary">SupriFlow</h1>
+            <p className="text-[10px] text-muted-foreground -mt-1">by JLS Tecnologia</p>
+          </div>
+        </div>
         <p className="text-sm text-muted-foreground mt-1">{tenant.nome}</p>
         <div className="mt-3 flex items-center gap-2">
           <Badge className={cn('text-xs', getPlanoColor(tenant.plano))}>
@@ -157,7 +171,10 @@ export function Sidebar({ tenant }: SidebarProps) {
           <ThemeToggle />
         </div>
         <p className="text-xs text-muted-foreground text-center">
-          © 2026 SupriFlow
+          © 2026 JLS Tecnologia
+        </p>
+        <p className="text-[10px] text-muted-foreground text-center">
+          SupriFlow v1.0
         </p>
       </div>
     </aside>
