@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -62,10 +63,22 @@ export default function LoginPage() {
         </Link>
 
         <Card className="w-full">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            SupriFlow
-          </CardTitle>
+        <CardHeader className="space-y-3">
+          <div className="flex flex-col items-center gap-3">
+            <Image
+              src="/logo-jls.png"
+              alt="JLS Tecnologia"
+              width={80}
+              height={80}
+              className="object-contain"
+            />
+            <div className="text-center">
+              <CardTitle className="text-2xl font-bold">
+                SupriFlow
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">by JLS Tecnologia</p>
+            </div>
+          </div>
           <CardDescription className="text-center">
             Entre com suas credenciais para acessar o sistema
           </CardDescription>

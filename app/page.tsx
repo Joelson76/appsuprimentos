@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -27,13 +28,22 @@ export default function LandingPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-white" />
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo-jls.png"
+              alt="JLS Tecnologia"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
+            <div className="flex flex-col">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                SupriFlow
+              </span>
+              <span className="text-[10px] text-muted-foreground -mt-1">
+                by JLS Tecnologia
+              </span>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-              SupriFlow
-            </span>
           </div>
           <nav className="hidden md:flex gap-6">
             <a href="#features" className="text-sm font-medium hover:text-primary transition-colors">
@@ -466,11 +476,18 @@ export default function LandingPage() {
         <div className="container px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-white" />
+              <div className="flex items-center gap-3 mb-4">
+                <Image
+                  src="/logo-jls.png"
+                  alt="JLS Tecnologia"
+                  width={50}
+                  height={50}
+                  className="object-contain"
+                />
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold">SupriFlow</span>
+                  <span className="text-xs text-muted-foreground">by JLS Tecnologia</span>
                 </div>
-                <span className="text-xl font-bold">SupriFlow</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Gestão de compras inteligente para sua empresa crescer.
@@ -509,7 +526,8 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t mt-12 pt-8 text-center text-sm text-muted-foreground">
-            © 2026 SupriFlow. Todos os direitos reservados.
+            <p>© 2026 JLS Tecnologia - SupriFlow. Todos os direitos reservados.</p>
+            <p className="mt-2 text-xs">Uma solução <span className="font-semibold">JLS Tecnologia</span></p>
           </div>
         </div>
       </footer>

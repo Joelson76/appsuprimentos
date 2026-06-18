@@ -4,6 +4,17 @@
 SaaS multi-tenant para gestão de compras, suprimentos e fornecedores.
 Setores: Indústria/Manufatura e Varejo/Comércio. Mercado brasileiro.
 
+**Desenvolvido por:** JLS Tecnologia  
+**Logo:** `jls2.png` (assets/logo-jls.png)
+
+## Identidade da Marca
+- **Produto:** SupriFlow
+- **Empresa:** JLS Tecnologia
+- **Slogan:** Sistema Completo de Gestão de Compras e Suprimentos
+- **Contato:** joelson76@gmail.com
+- **Cores principais:** Gradiente roxo/azul (#667eea → #764ba2)
+- **Logo:** Azul/Teal da JLS Tecnologia presente em todas apresentações e comunicações
+
 ## Stack
 - Frontend: Next.js 14 App Router + TypeScript + TailwindCSS + shadcn/ui
 - Backend: Supabase (PostgreSQL + Auth + Storage + Edge Functions)

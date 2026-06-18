@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cnpj as cnpjValidator } from 'cpf-cnpj-validator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -164,9 +165,21 @@ export default function CadastroPage() {
 
         <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            Criar Conta - SupriFlow
-          </CardTitle>
+          <div className="flex flex-col items-center gap-3 mb-4">
+            <Image
+              src="/logo-jls.png"
+              alt="JLS Tecnologia"
+              width={70}
+              height={70}
+              className="object-contain"
+            />
+            <div className="text-center">
+              <CardTitle className="text-2xl font-bold">
+                Criar Conta - SupriFlow
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">by JLS Tecnologia</p>
+            </div>
+          </div>
           <CardDescription className="text-center">
             14 dias de teste grátis • Sem cartão de crédito
           </CardDescription>
