@@ -34,11 +34,12 @@ export default async function PlanosPage() {
 
   const { data: assinatura } = await supabase
     .from('assinaturas')
-    .select('plano_id')
+    .select('plano')
     .eq('tenant_id', profile?.tenant_id || '')
     .single()
 
-  const planoAtualId = assinatura?.plano_id
+  // Mapear plano enum para slug do plano
+  const planoAtualSlug = assinatura?.plano?.toLowerCase() || null
 
   return (
     <div className="space-y-6">
@@ -51,7 +52,7 @@ export default async function PlanosPage() {
 
       <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto">
         {planos?.map((plano: any) => {
-          const isAtual = planoAtualId === plano.id
+          const isAtual = planoAtualSlug === plano.slug
           const isPopular = plano.slug === 'profissional'
 
           return (
@@ -152,7 +153,7 @@ export default async function PlanosPage() {
                     <SelecionarPlanoButton
                       planoId={plano.id}
                       nomePlano={plano.nome}
-                      planoAtual={planoAtualId}
+                      planoAtual={planoAtualSlug}
                     />
                   )}
                 </div>
