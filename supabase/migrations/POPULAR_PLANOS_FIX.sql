@@ -7,7 +7,7 @@ TRUNCATE TABLE planos CASCADE;
 
 -- Inserir planos (preco_centavos = valor em centavos)
 INSERT INTO planos (nome, slug, preco_centavos, limite_usuarios, limite_pos_mes, limite_storage_mb, funcionalidades, ativo, ordem) VALUES
-('Básico', 'BASICO', 9700, 5, 50, 1024, ARRAY['requisicoes','pedidos','fornecedores','aprovacoes','relatorios_basicos'], true, 1),
+('Básico', 'BASICO', 14900, 5, 50, 1024, ARRAY['requisicoes','pedidos','fornecedores','aprovacoes','relatorios_basicos'], true, 1),
 ('Profissional', 'PROFISSIONAL', 29700, 20, 500, 10240, ARRAY['requisicoes','pedidos','fornecedores','aprovacoes','cotacoes','contratos','relatorios_avancados'], true, 2),
 ('Enterprise', 'ENTERPRISE', 99700, -1, -1, -1, ARRAY['tudo'], true, 3);
 
