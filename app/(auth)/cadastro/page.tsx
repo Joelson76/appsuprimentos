@@ -117,7 +117,7 @@ export default function CadastroPage() {
     {
       tipo: 'BASICO' as PlanoTipo,
       nome: 'Básico',
-      preco: 'R$ 299',
+      preco: 'R$ 149',
       recursos: [
         'Até 5 usuários',
         'Gestão de compras',
@@ -128,7 +128,7 @@ export default function CadastroPage() {
     {
       tipo: 'PROFISSIONAL' as PlanoTipo,
       nome: 'Profissional',
-      preco: 'R$ 799',
+      preco: 'R$ 297',
       recursos: [
         'Até 20 usuários',
         'Todos os recursos do Básico',
@@ -141,7 +141,7 @@ export default function CadastroPage() {
     {
       tipo: 'ENTERPRISE' as PlanoTipo,
       nome: 'Enterprise',
-      preco: 'Sob consulta',
+      preco: 'R$ 997',
       recursos: [
         'Usuários ilimitados',
         'Todos os recursos',

@@ -19,7 +19,7 @@ SELECT
   -- Cotações
   (SELECT COUNT(*) FROM cotacoes c WHERE c.tenant_id = t.id) as total_cotacoes,
   (SELECT COUNT(*) FROM cotacoes c WHERE c.tenant_id = t.id AND c.status = 'AGUARDANDO_RESPOSTAS') as cotacoes_aguardando,
-  (SELECT COUNT(*) FROM cotacoes c WHERE c.tenant_id = t.id AND DATE_TRUNC('month', r.criado_em) = DATE_TRUNC('month', NOW())) as cotacoes_mes,
+  (SELECT COUNT(*) FROM cotacoes c WHERE c.tenant_id = t.id AND DATE_TRUNC('month', c.criado_em) = DATE_TRUNC('month', NOW())) as cotacoes_mes,
 
   -- Pedidos (CORRIGIDO: usando tabela 'pedidos' ao invés de 'ordens_compra')
   (SELECT COUNT(*) FROM pedidos p WHERE p.tenant_id = t.id) as total_pedidos,
