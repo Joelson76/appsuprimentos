@@ -46,6 +46,14 @@ export async function POST(request: NextRequest) {
     const trialFim = new Date()
     trialFim.setDate(trialFim.getDate() + 14)
 
+    console.log('📋 Criando tenant com dados:', {
+      nome: body.empresa.nome,
+      cnpj: body.empresa.cnpj,
+      plano: body.plano,
+      status: 'TRIAL',
+      trial_fim: trialFim.toISOString(),
+    })
+
     const { data: tenant, error: tenantError } = await supabaseAdmin
       .from('tenants')
       .insert({
@@ -60,15 +68,28 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (tenantError) {
-      console.error('Erro ao criar tenant:', tenantError)
+      console.error('❌ Erro ao criar tenant:', {
+        message: tenantError.message,
+        details: tenantError.details,
+        hint: tenantError.hint,
+        code: tenantError.code,
+      })
       return NextResponse.json(
-        { error: 'Erro ao criar empresa' },
+        {
+          error: 'Erro ao criar empresa',
+          details: tenantError.message,
+          code: tenantError.code
+        },
         { status: 500 }
       )
     }
 
+    console.log('✅ Tenant criado:', tenant.id)
+
     // Criar usuário admin via Supabase Auth
     // O trigger handle_new_user criará o profile automaticamente
+    console.log('👤 Criando usuário admin:', body.admin.email)
+
     const { data: authData, error: authError } =
       await supabaseAdmin.auth.admin.createUser({
         email: body.admin.email,
@@ -82,14 +103,23 @@ export async function POST(request: NextRequest) {
       })
 
     if (authError) {
-      console.error('Erro ao criar usuário:', authError)
+      console.error('❌ Erro ao criar usuário:', {
+        message: authError.message,
+        status: authError.status,
+        name: authError.name,
+      })
       // Rollback: deletar tenant se falhar ao criar usuário
       await supabaseAdmin.from('tenants').delete().eq('id', tenant.id)
       return NextResponse.json(
-        { error: 'Erro ao criar usuário administrador' },
+        {
+          error: 'Erro ao criar usuário administrador',
+          details: authError.message
+        },
         { status: 500 }
       )
     }
+
+    console.log('✅ Usuário criado:', authData.user.id)
 
     // TODO: Implementar e-mail de boas-vindas usando email-service-simple.ts
     // Removido temporariamente até criar template inline
