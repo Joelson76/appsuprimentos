@@ -10,12 +10,14 @@ interface EnviarFornecedorButtonProps {
   pedidoId: string
   numero: string
   fornecedorEmail?: string
+  reenvio?: boolean
 }
 
 export function EnviarFornecedorButton({
   pedidoId,
   numero,
   fornecedorEmail,
+  reenvio = false,
 }: EnviarFornecedorButtonProps) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -31,7 +33,7 @@ export function EnviarFornecedorButton({
 
     if (
       !confirm(
-        `Enviar pedido ${numero} para o fornecedor?\n\nE-mail: ${fornecedorEmail}\n\nUm e-mail será enviado com os detalhes do pedido.`
+        `${reenvio ? 'Reenviar' : 'Enviar'} pedido ${numero} para o fornecedor?\n\nE-mail: ${fornecedorEmail}\n\nUm e-mail será enviado com os detalhes do pedido.`
       )
     ) {
       return
@@ -40,16 +42,18 @@ export function EnviarFornecedorButton({
     setLoading(true)
 
     try {
-      // Atualizar status para ENVIADO
-      const { error } = await supabase
-        .from('pedidos')
-        .update({
-          status: 'ENVIADO',
-          atualizado_em: new Date().toISOString(),
-        })
-        .eq('id', pedidoId)
+      // Atualizar status para ENVIADO (apenas se não for reenvio)
+      if (!reenvio) {
+        const { error } = await supabase
+          .from('pedidos')
+          .update({
+            status: 'ENVIADO',
+            atualizado_em: new Date().toISOString(),
+          })
+          .eq('id', pedidoId)
 
-      if (error) throw error
+        if (error) throw error
+      }
 
       // Enviar e-mail para o fornecedor
       const emailResponse = await fetch('/api/pedidos/enviar-email', {
@@ -65,11 +69,11 @@ export function EnviarFornecedorButton({
       if (!emailResponse.ok) {
         console.error('Erro ao enviar e-mail:', emailData)
         alert(
-          `Pedido ${numero} marcado como ENVIADO.\n\n⚠️ Porém houve erro ao enviar o e-mail:\n${emailData.error}\n\nPor favor, envie manualmente.`
+          `${!reenvio ? `Pedido ${numero} marcado como ENVIADO.\n\n` : ''}⚠️ Porém houve erro ao enviar o e-mail:\n${emailData.error}\n\nPor favor, envie manualmente.`
         )
       } else {
         alert(
-          `✅ Pedido ${numero} enviado com sucesso!\n\nE-mail enviado para: ${fornecedorEmail}`
+          `✅ Pedido ${numero} ${reenvio ? 'reenviado' : 'enviado'} com sucesso!\n\nE-mail enviado para: ${fornecedorEmail}`
         )
       }
 
@@ -83,13 +87,18 @@ export function EnviarFornecedorButton({
   }
 
   return (
-    <Button onClick={handleEnviar} disabled={loading} size="sm">
+    <Button
+      onClick={handleEnviar}
+      disabled={loading}
+      size="sm"
+      variant={reenvio ? "outline" : "default"}
+    >
       {loading ? (
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
       ) : (
         <Mail className="mr-2 h-4 w-4" />
       )}
-      Enviar para Fornecedor
+      {reenvio ? 'Reenviar para Fornecedor' : 'Enviar para Fornecedor'}
     </Button>
   )
 }

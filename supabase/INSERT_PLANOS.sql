@@ -4,11 +4,11 @@
 
 -- Inserir os 3 planos
 INSERT INTO planos_precos (plano, nome, valor_mensal, max_usuarios, descricao, recursos) VALUES
-('BASICO', 'Básico', 99.90, 5, 'Ideal para pequenas empresas',
+('BASICO', 'Básico', 149.00, 5, 'Ideal para pequenas empresas',
   '["5 usuários", "Requisições ilimitadas", "Cotações ilimitadas", "Suporte por email"]'::JSONB),
-('PROFISSIONAL', 'Profissional', 249.90, 20, 'Para empresas em crescimento',
+('PROFISSIONAL', 'Profissional', 297.00, 20, 'Para empresas em crescimento',
   '["20 usuários", "Todos recursos do Básico", "Gestão de contratos", "Gestão de estoque", "Suporte prioritário"]'::JSONB),
-('ENTERPRISE', 'Enterprise', 599.90, NULL, 'Para grandes empresas',
+('ENTERPRISE', 'Enterprise', 997.00, NULL, 'Para grandes empresas',
   '["Usuários ilimitados", "Todos recursos", "API dedicada", "Suporte 24/7", "Gerente de conta"]'::JSONB)
 ON CONFLICT (plano) DO NOTHING;
 

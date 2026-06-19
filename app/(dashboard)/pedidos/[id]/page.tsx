@@ -35,6 +35,7 @@ import Link from 'next/link'
 import { AprovarPedidoButton } from '@/components/pedidos/aprovar-pedido-button'
 import { CancelarPedidoButton } from '@/components/pedidos/cancelar-pedido-button'
 import { EnviarFornecedorButton } from '@/components/pedidos/enviar-fornecedor-button'
+import { EnviarWhatsAppButton } from '@/components/pedidos/enviar-whatsapp-button'
 import { ConfirmarRecebimentoButton } from '@/components/pedidos/confirmar-recebimento-button'
 
 interface PageProps {
@@ -94,6 +95,16 @@ export default async function PedidoDetalhesPage({ params }: PageProps) {
   }
 
   console.log('✅ Pedido encontrado:', pedido.numero)
+
+  // Buscar dados da empresa (tenant)
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('tenant_id, tenants(nome_fantasia, razao_social, cnpj, telefone)')
+    .eq('id', user?.id || '')
+    .single()
+
+  const empresa = profile?.tenants as any
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; color: string }> = {
@@ -169,19 +180,69 @@ export default async function PedidoDetalhesPage({ params }: PageProps) {
             </>
           )}
           {pedido.status === 'APROVADO' && (
-            <EnviarFornecedorButton
-              pedidoId={pedido.id}
-              numero={pedido.numero}
-              fornecedorEmail={pedido.fornecedores.email}
-            />
+            <>
+              <EnviarFornecedorButton
+                pedidoId={pedido.id}
+                numero={pedido.numero}
+                fornecedorEmail={pedido.fornecedores.email}
+              />
+              <EnviarWhatsAppButton
+                pedido={{
+                  numero: pedido.numero,
+                  valor_total: pedido.valor_total,
+                  condicao_pagamento: pedido.condicao_pagamento,
+                  observacoes: pedido.observacoes,
+                  criado_em: pedido.criado_em,
+                }}
+                fornecedor={{
+                  razao_social: pedido.fornecedores.razao_social,
+                  nome_fantasia: pedido.fornecedores.nome_fantasia,
+                  telefone: pedido.fornecedores.telefone,
+                }}
+                itens={pedido.itens_pedido}
+                empresa={{
+                  nome: empresa?.nome_fantasia || empresa?.razao_social || 'Nossa Empresa',
+                  cnpj: empresa?.cnpj,
+                  telefone: empresa?.telefone,
+                }}
+              />
+            </>
           )}
           {(pedido.status === 'ENVIADO' ||
             pedido.status === 'PARCIALMENTE_RECEBIDO') && (
-            <ConfirmarRecebimentoButton
-              pedidoId={pedido.id}
-              numero={pedido.numero}
-              itens={pedido.itens_pedido}
-            />
+            <>
+              <EnviarFornecedorButton
+                pedidoId={pedido.id}
+                numero={pedido.numero}
+                fornecedorEmail={pedido.fornecedores.email}
+                reenvio
+              />
+              <EnviarWhatsAppButton
+                pedido={{
+                  numero: pedido.numero,
+                  valor_total: pedido.valor_total,
+                  condicao_pagamento: pedido.condicao_pagamento,
+                  observacoes: pedido.observacoes,
+                  criado_em: pedido.criado_em,
+                }}
+                fornecedor={{
+                  razao_social: pedido.fornecedores.razao_social,
+                  nome_fantasia: pedido.fornecedores.nome_fantasia,
+                  telefone: pedido.fornecedores.telefone,
+                }}
+                itens={pedido.itens_pedido}
+                empresa={{
+                  nome: empresa?.nome_fantasia || empresa?.razao_social || 'Nossa Empresa',
+                  cnpj: empresa?.cnpj,
+                  telefone: empresa?.telefone,
+                }}
+              />
+              <ConfirmarRecebimentoButton
+                pedidoId={pedido.id}
+                numero={pedido.numero}
+                itens={pedido.itens_pedido}
+              />
+            </>
           )}
         </div>
       </div>

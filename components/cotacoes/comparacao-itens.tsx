@@ -37,55 +37,85 @@ interface Props {
 export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
+  const [vencedoresLocais, setVencedoresLocais] = useState<Record<string, boolean>>({})
 
-  // Agrupar itens por descrição
+  // Agrupar itens por descrição mantendo a ordem original
   const itensAgrupados: ItemComparacao[] = []
-  const descricoes = new Set(itens.map((i) => i.descricao))
+  const descricoesVistas = new Set<string>()
 
-  descricoes.forEach((desc) => {
-    const itensDesc = itens.filter((i) => i.descricao === desc)
-    const quantidade = itensDesc[0]?.quantidade || 0
+  itens.forEach((item) => {
+    if (!descricoesVistas.has(item.descricao)) {
+      descricoesVistas.add(item.descricao)
 
-    const propostas = itensDesc.map((item) => ({
-      itemId: item.id,
-      fornecedorId: item.fornecedor_id,
-      fornecedorNome:
-        item.fornecedor?.nome_fantasia || item.fornecedor?.razao_social || 'N/A',
-      valorUnitario: item.valor_unitario,
-      prazoEntrega: item.prazo_entrega,
-      vencedor: item.vencedor,
-    }))
+      const itensDesc = itens.filter((i) => i.descricao === item.descricao)
+      const quantidade = itensDesc[0]?.quantidade || 0
 
-    itensAgrupados.push({
-      descricao: desc,
-      quantidade,
-      propostas,
-    })
+      const propostas = itensDesc.map((it) => ({
+        itemId: it.id,
+        fornecedorId: it.fornecedor_id,
+        fornecedorNome:
+          it.fornecedor?.nome_fantasia || it.fornecedor?.razao_social || 'N/A',
+        valorUnitario: it.valor_unitario,
+        prazoEntrega: it.prazo_entrega,
+        vencedor: vencedoresLocais[it.id] ?? it.vencedor,
+      }))
+
+      itensAgrupados.push({
+        descricao: item.descricao,
+        quantidade,
+        propostas,
+      })
+    }
   })
 
   const marcarVencedor = async (itemId: string, descricao: string) => {
     setLoading(itemId)
+
+    // Atualização otimista da UI
+    const novosVencedores: Record<string, boolean> = {}
+    itens.forEach((item) => {
+      if (item.descricao === descricao) {
+        novosVencedores[item.id] = item.id === itemId
+      } else {
+        novosVencedores[item.id] = vencedoresLocais[item.id] ?? item.vencedor
+      }
+    })
+    setVencedoresLocais(novosVencedores)
+
     try {
       const supabase = createClient()
 
       // Marcar este item como vencedor
-      await supabase
+      const { error: updateError1 } = await supabase
         .from('itens_cotacao')
         .update({ vencedor: true })
         .eq('id', itemId)
 
+      if (updateError1) {
+        console.error('Erro ao marcar vencedor:', updateError1)
+        throw updateError1
+      }
+
       // Desmarcar outros itens com a mesma descrição nesta cotação
-      await supabase
+      const { error: updateError2 } = await supabase
         .from('itens_cotacao')
         .update({ vencedor: false })
         .eq('cotacao_id', cotacaoId)
         .eq('descricao', descricao)
         .neq('id', itemId)
 
+      if (updateError2) {
+        console.error('Erro ao desmarcar outros:', updateError2)
+        throw updateError2
+      }
+
+      console.log('✅ Item marcado como vencedor:', itemId)
       router.refresh()
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao marcar vencedor:', err)
-      alert('Erro ao marcar vencedor')
+      alert(`Erro ao marcar vencedor: ${err.message || 'Erro desconhecido'}`)
+      // Reverter em caso de erro
+      setVencedoresLocais({})
     } finally {
       setLoading(null)
     }
@@ -105,6 +135,22 @@ export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Pro
 
   const autoSelecionarMelhoresPrecos = async () => {
     setLoading('auto')
+
+    // Atualização otimista da UI
+    const novosVencedores: Record<string, boolean> = {}
+    itensAgrupados.forEach((item) => {
+      const melhorPreco = getMelhorPreco(item.propostas)
+      if (melhorPreco) {
+        const propostaMelhorPreco = item.propostas.find(
+          (p) => p.valorUnitario === melhorPreco
+        )
+        item.propostas.forEach((p) => {
+          novosVencedores[p.itemId] = p.itemId === propostaMelhorPreco?.itemId
+        })
+      }
+    })
+    setVencedoresLocais(novosVencedores)
+
     try {
       const supabase = createClient()
 
@@ -137,6 +183,8 @@ export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Pro
     } catch (err) {
       console.error('Erro ao auto-selecionar melhores preços:', err)
       alert('Erro ao selecionar melhores preços')
+      // Reverter em caso de erro
+      setVencedoresLocais({})
     } finally {
       setLoading(null)
     }
@@ -208,10 +256,17 @@ export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Pro
                         className={
                           proposta.vencedor
                             ? 'bg-green-50 border-l-4 border-l-green-500 hover:bg-green-100'
-                            : 'hover:bg-slate-50 cursor-pointer'
+                            : statusCotacao !== 'ENCERRADA' && proposta.valorUnitario && !loading
+                            ? 'hover:bg-slate-50 cursor-pointer'
+                            : ''
                         }
                         onClick={() => {
-                          if (statusCotacao !== 'ENCERRADA' && proposta.valorUnitario) {
+                          if (
+                            statusCotacao !== 'ENCERRADA' &&
+                            proposta.valorUnitario &&
+                            !loading &&
+                            !proposta.vencedor
+                          ) {
                             marcarVencedor(proposta.itemId, item.descricao)
                           }
                         }}

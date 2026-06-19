@@ -65,7 +65,7 @@ export default async function CotacaoDetalhesPage({ params }: PageProps) {
     .select(
       `
       *,
-      fornecedor:fornecedores (razao_social, nome_fantasia)
+      fornecedor:fornecedores (razao_social, nome_fantasia, email, telefone)
     `
     )
     .eq('cotacao_id', params.id)
@@ -91,6 +91,7 @@ export default async function CotacaoDetalhesPage({ params }: PageProps) {
         razao_social: data.fornecedor?.razao_social || 'Desconhecido',
         nome_fantasia: data.fornecedor?.nome_fantasia,
         email: data.fornecedor?.email,
+        telefone: data.fornecedor?.telefone,
       }))
     : []
 
