@@ -151,7 +151,8 @@ export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Pro
               Seleção por Melhor Preço
             </h3>
             <p className="text-sm text-blue-700 mt-1">
-              Selecione automaticamente os melhores preços para cada item, independente do fornecedor
+              Clique em "Auto-Selecionar" para escolher automaticamente os melhores preços,<br />
+              ou clique na linha de qualquer fornecedor para selecionar manualmente
             </p>
           </div>
           <Button
@@ -205,25 +206,50 @@ export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Pro
                       <TableRow
                         key={proposta.itemId}
                         className={
-                          proposta.vencedor ? 'bg-green-50 border-green-200' : ''
+                          proposta.vencedor
+                            ? 'bg-green-50 border-l-4 border-l-green-500 hover:bg-green-100'
+                            : 'hover:bg-slate-50 cursor-pointer'
                         }
+                        onClick={() => {
+                          if (statusCotacao !== 'ENCERRADA' && proposta.valorUnitario) {
+                            marcarVencedor(proposta.itemId, item.descricao)
+                          }
+                        }}
                       >
                         <TableCell className="font-medium">
-                          {proposta.fornecedorNome}
-                          {proposta.vencedor && (
-                            <Trophy className="inline ml-2 h-4 w-4 text-yellow-600" />
-                          )}
+                          <div className="flex items-center gap-2">
+                            {proposta.vencedor && (
+                              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500">
+                                <Check className="h-4 w-4 text-white" />
+                              </div>
+                            )}
+                            {!proposta.vencedor && proposta.valorUnitario && statusCotacao !== 'ENCERRADA' && (
+                              <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-slate-300 hover:border-green-500 hover:bg-green-50">
+                                <span className="text-xs text-slate-400"></span>
+                              </div>
+                            )}
+                            <span className={proposta.vencedor ? 'font-semibold text-green-900' : ''}>
+                              {proposta.fornecedorNome}
+                            </span>
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           {proposta.valorUnitario ? (
                             <div className="flex items-center justify-end gap-2">
-                              {new Intl.NumberFormat('pt-BR', {
-                                style: 'currency',
-                                currency: 'BRL',
-                              }).format(proposta.valorUnitario)}
-                              {isMelhorPreco && (
-                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
-                                  Melhor
+                              <span className={proposta.vencedor ? 'font-bold text-green-900' : ''}>
+                                {new Intl.NumberFormat('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
+                                }).format(proposta.valorUnitario)}
+                              </span>
+                              {isMelhorPreco && !proposta.vencedor && (
+                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded font-medium">
+                                  Menor preço
+                                </span>
+                              )}
+                              {proposta.vencedor && (
+                                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-medium">
+                                  Selecionado
                                 </span>
                               )}
                             </div>
@@ -231,13 +257,17 @@ export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Pro
                             <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-right font-medium">
-                          {proposta.valorUnitario
-                            ? new Intl.NumberFormat('pt-BR', {
+                        <TableCell className="text-right">
+                          {proposta.valorUnitario ? (
+                            <span className={proposta.vencedor ? 'font-bold text-green-900' : 'font-medium'}>
+                              {new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
                                 currency: 'BRL',
-                              }).format(proposta.valorUnitario * item.quantidade)
-                            : '-'}
+                              }).format(proposta.valorUnitario * item.quantidade)}
+                            </span>
+                          ) : (
+                            '-'
+                          )}
                         </TableCell>
                         <TableCell className="text-right">
                           {proposta.prazoEntrega ? (
@@ -254,21 +284,28 @@ export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Pro
                           )}
                         </TableCell>
                         {statusCotacao !== 'ENCERRADA' && (
-                          <TableCell className="text-right">
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                             {proposta.valorUnitario ? (
                               proposta.vencedor ? (
-                                <div className="flex items-center justify-end gap-1 text-green-600 text-sm font-medium">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="gap-1 border-green-500 text-green-700 hover:bg-green-50"
+                                  disabled
+                                >
                                   <Check className="h-4 w-4" />
                                   Selecionado
-                                </div>
+                                </Button>
                               ) : (
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  onClick={() =>
+                                  onClick={(e) => {
+                                    e.stopPropagation()
                                     marcarVencedor(proposta.itemId, item.descricao)
-                                  }
+                                  }}
                                   disabled={loading === proposta.itemId}
+                                  className="hover:bg-green-50 hover:border-green-500 hover:text-green-700"
                                 >
                                   {loading === proposta.itemId
                                     ? 'Salvando...'
@@ -277,7 +314,7 @@ export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Pro
                               )
                             ) : (
                               <span className="text-muted-foreground text-sm">
-                                Aguardando
+                                Aguardando proposta
                               </span>
                             )}
                           </TableCell>
