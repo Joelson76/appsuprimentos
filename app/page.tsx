@@ -21,6 +21,7 @@ import {
   ArrowRight,
   Star,
 } from 'lucide-react'
+import { FloatingContactButtons } from '@/components/ui/floating-contact-buttons'
 
 export default function LandingPage() {
   return (
@@ -531,6 +532,9 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Floating Contact Buttons */}
+      <FloatingContactButtons />
     </div>
   )
 }
