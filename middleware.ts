@@ -46,20 +46,28 @@ export async function middleware(request: NextRequest) {
 
   // Se está autenticado, validar tenant_id e assinatura
   if (user && !isPublicPath) {
+    console.log('🔍 Middleware: Buscando profile para usuário', user.id)
+
     // Buscar profile do usuário
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('tenant_id, perfil')
       .eq('id', user.id)
       .single()
 
+    if (profileError) {
+      console.error('❌ Erro ao buscar profile:', profileError)
+    }
+
     // Validar profile
     if (!profile || !profile.tenant_id) {
-      console.error('❌ Usuário sem profile/tenant:', user.id)
+      console.error('❌ Usuário sem profile/tenant:', user.id, 'profile:', profile)
       const redirectUrl = new URL('/login', request.url)
       redirectUrl.searchParams.set('error', 'invalid_profile')
       return NextResponse.redirect(redirectUrl)
     }
+
+    console.log('✅ Profile encontrado:', profile.tenant_id, profile.perfil)
 
     // Adicionar headers com info do usuário (seguro, server-side only)
     supabaseResponse.headers.set('x-tenant-id', profile.tenant_id)
@@ -68,11 +76,19 @@ export async function middleware(request: NextRequest) {
 
     // Verificar assinatura (exceto super admin)
     if (profile.perfil !== 'SUPER_ADMIN') {
-      const { data: assinatura } = await supabase
+      console.log('🔍 Middleware: Buscando assinatura para tenant', profile.tenant_id)
+
+      const { data: assinatura, error: assinaturaError } = await supabase
         .from('assinaturas')
         .select('status, trial_fim')
         .eq('tenant_id', profile.tenant_id)
         .single()
+
+      if (assinaturaError) {
+        console.error('❌ Erro ao buscar assinatura:', assinaturaError)
+      } else {
+        console.log('✅ Assinatura encontrada:', assinatura?.status)
+      }
 
       // Se assinatura suspensa/cancelada, bloquear acesso
       if (
