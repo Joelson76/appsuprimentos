@@ -20,7 +20,6 @@ import { ArrowLeft, Calendar, FileText } from 'lucide-react'
 import Link from 'next/link'
 import { formatDate } from '@/lib/utils'
 import EnviarLinksButton from '@/components/cotacoes/enviar-links-button'
-import MarcarVencedorButton from '@/components/cotacoes/marcar-vencedor-button'
 import ComparacaoItens from '@/components/cotacoes/comparacao-itens'
 import GerarPedidoButton from '@/components/cotacoes/gerar-pedido-button'
 
@@ -313,23 +312,6 @@ export default async function CotacaoDetalhesPage({ params }: PageProps) {
                             )}
                           </div>
                         </div>
-                        {cotacao.status !== 'ENCERRADA' && (
-                          <MarcarVencedorButton
-                            cotacaoId={cotacao.id}
-                            fornecedorId={fornecedorId}
-                            fornecedorNome={
-                              data.fornecedor?.nome_fantasia ||
-                              data.fornecedor?.razao_social ||
-                              'Fornecedor'
-                            }
-                            valorTotal={data.itens.reduce(
-                              (sum: number, item: any) =>
-                                sum + (item.valor_unitario || 0) * item.quantidade,
-                              0
-                            )}
-                            itens={data.itens}
-                          />
-                        )}
                       </div>
                     ) : (
                       <span className="text-sm text-muted-foreground italic">

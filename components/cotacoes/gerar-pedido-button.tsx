@@ -158,13 +158,13 @@ export default function GerarPedidoButton({
               Gerar Pedidos de Compra
             </DialogTitle>
             <DialogDescription>
-              Criar pedido(s) com os itens vencedores selecionados
+              Criar pedido(s) com base nos melhores preços selecionados por item
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="rounded-lg border p-4 space-y-3">
-              <h4 className="font-semibold">Resumo dos Pedidos:</h4>
+              <h4 className="font-semibold">Resumo dos Pedidos (por Melhor Preço):</h4>
               {Object.entries(itensPorFornecedor).map(
                 ([fornecedorId, data]: [string, any]) => (
                   <div

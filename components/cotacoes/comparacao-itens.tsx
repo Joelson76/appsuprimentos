@@ -103,8 +103,69 @@ export default function ComparacaoItens({ cotacaoId, itens, statusCotacao }: Pro
     return Math.min(...comPrazo.map((p) => p.prazoEntrega!))
   }
 
+  const autoSelecionarMelhoresPrecos = async () => {
+    setLoading('auto')
+    try {
+      const supabase = createClient()
+
+      // Para cada item, selecionar o de menor preço
+      for (const item of itensAgrupados) {
+        const melhorPreco = getMelhorPreco(item.propostas)
+        if (!melhorPreco) continue
+
+        const propostaMelhorPreco = item.propostas.find(
+          (p) => p.valorUnitario === melhorPreco
+        )
+        if (!propostaMelhorPreco) continue
+
+        // Marcar o melhor preço como vencedor
+        await supabase
+          .from('itens_cotacao')
+          .update({ vencedor: true })
+          .eq('id', propostaMelhorPreco.itemId)
+
+        // Desmarcar outros itens com a mesma descrição
+        await supabase
+          .from('itens_cotacao')
+          .update({ vencedor: false })
+          .eq('cotacao_id', cotacaoId)
+          .eq('descricao', item.descricao)
+          .neq('id', propostaMelhorPreco.itemId)
+      }
+
+      router.refresh()
+    } catch (err) {
+      console.error('Erro ao auto-selecionar melhores preços:', err)
+      alert('Erro ao selecionar melhores preços')
+    } finally {
+      setLoading(null)
+    }
+  }
+
   return (
     <div className="space-y-6">
+      {statusCotacao !== 'ENCERRADA' && (
+        <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div>
+            <h3 className="font-medium text-blue-900">
+              Seleção por Melhor Preço
+            </h3>
+            <p className="text-sm text-blue-700 mt-1">
+              Selecione automaticamente os melhores preços para cada item, independente do fornecedor
+            </p>
+          </div>
+          <Button
+            onClick={autoSelecionarMelhoresPrecos}
+            disabled={loading === 'auto'}
+            variant="default"
+            className="gap-2"
+          >
+            <Trophy className="h-4 w-4" />
+            {loading === 'auto' ? 'Selecionando...' : 'Auto-Selecionar Melhores Preços'}
+          </Button>
+        </div>
+      )}
+
       {itensAgrupados.map((item, idx) => {
         const melhorPreco = getMelhorPreco(item.propostas)
         const melhorPrazo = getMelhorPrazo(item.propostas)
