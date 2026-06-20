@@ -192,8 +192,9 @@ Páginas visitadas são automaticamente cacheadas:
 Arquivos sempre em cache:
 - `/` (homepage)
 - `/login`
-- `/offline`
 - `/manifest.json`
+
+**Nota:** A página offline é gerada dinamicamente pelo Service Worker quando necessário (não precisa estar em cache).
 
 ---
 
@@ -273,9 +274,9 @@ Edite `public/manifest.json`:
 
 ### Página offline não aparece
 
-1. Visite `/offline` uma vez estando online
-2. Vai para o cache
-3. Teste indo offline depois
+1. Certifique-se que o Service Worker está ativo (DevTools > Application > Service Workers)
+2. Teste acessando qualquer página enquanto offline
+3. A página offline será gerada automaticamente pelo Service Worker
 
 ### Cache antigo não atualiza
 

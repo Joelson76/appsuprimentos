@@ -6,7 +6,6 @@ const RUNTIME_CACHE = 'supriflow-runtime'
 const STATIC_ASSETS = [
   '/',
   '/login',
-  '/dashboard',
   '/manifest.json',
 ]
 
