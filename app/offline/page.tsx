@@ -2,6 +2,8 @@ import { WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
+export const dynamic = 'force-static'
+
 export default function OfflinePage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
