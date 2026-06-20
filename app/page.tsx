@@ -27,8 +27,8 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="header-solid sticky top-0 z-[100] w-full border-b relative">
-        <div className="header-solid container flex h-16 items-center justify-between">
+      <header className="fixed top-0 left-0 right-0 z-[100] w-full border-b bg-white shadow-sm">
+        <div className="container flex h-16 items-center justify-between bg-white">
           <div className="flex items-center gap-3">
             <Image
               src="/logo-jls.jpg"
@@ -68,7 +68,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 pt-16">{/* pt-16 = altura do header fixo */}
         {/* Hero Section */}
         <section className="relative py-20 md:py-32 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-background -z-10" />
