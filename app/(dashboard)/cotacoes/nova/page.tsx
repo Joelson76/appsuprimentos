@@ -42,13 +42,20 @@ export default function NovaCotacaoPage() {
     loadData()
   }, [])
 
+  // Recarregar requisições quando filial mudar
+  useEffect(() => {
+    if (filialId) {
+      loadRequisicoesFilial(filialId)
+    }
+  }, [filialId])
+
   const loadData = async () => {
     const supabase = createClient()
 
-    // Buscar requisições aprovadas
+    // Buscar requisições aprovadas (sem filtro de filial inicialmente)
     const { data: reqs } = await supabase
       .from('requisicoes')
-      .select('id, numero, descricao')
+      .select('id, numero, descricao, filial_id')
       .eq('status', 'APROVADA')
       .order('criado_em', { ascending: false })
 
@@ -62,6 +69,38 @@ export default function NovaCotacaoPage() {
       .order('razao_social')
 
     setFornecedores(forn || [])
+  }
+
+  const loadRequisicoesFilial = async (filialSelecionada: string) => {
+    const supabase = createClient()
+
+    // Buscar apenas requisições da filial selecionada
+    const { data: reqs } = await supabase
+      .from('requisicoes')
+      .select('id, numero, descricao, filial_id')
+      .eq('status', 'APROVADA')
+      .eq('filial_id', filialSelecionada)
+      .order('criado_em', { ascending: false })
+
+    setRequisicoes(reqs || [])
+
+    // Buscar apenas fornecedores da filial selecionada
+    const { data: forn } = await supabase
+      .from('fornecedores')
+      .select('id, razao_social, nome_fantasia, filial_id')
+      .eq('status', 'ATIVO')
+      .eq('filial_id', filialSelecionada)
+      .order('razao_social')
+
+    setFornecedores(forn || [])
+
+    // Limpar requisição selecionada se não estiver mais na lista
+    if (requisicaoId && !reqs?.find(r => r.id === requisicaoId)) {
+      setRequisicaoId('')
+    }
+
+    // Limpar fornecedores selecionados
+    setFornecedoresSelecionados([''])
   }
 
   const addFornecedor = () => {
