@@ -23,7 +23,7 @@ import Link from 'next/link'
 export default async function CotacoesPage() {
   const supabase = await createClient()
 
-  const { data: cotacoes } = await supabase
+  const { data: cotacoes, error } = await supabase
     .from('cotacoes')
     .select(
       `
@@ -32,6 +32,12 @@ export default async function CotacoesPage() {
     `
     )
     .order('criado_em', { ascending: false })
+
+  if (error) {
+    console.error('Erro ao buscar cotações:', error)
+  }
+
+  console.log('[Cotações] Total encontradas:', cotacoes?.length)
 
   const getStatusBadge = (status: string) => {
     const colors: Record<string, string> = {
