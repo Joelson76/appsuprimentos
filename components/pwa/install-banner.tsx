@@ -54,30 +54,30 @@ export function InstallBanner() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
+    // Fallback: se o evento não disparar em 5 segundos, mostrar mesmo assim
+    // (útil para teste e para iOS que não dispara o evento)
+    const fallbackTimer = setTimeout(() => {
+      if (!deferredPrompt && !isIOSDevice) {
+        console.log('[PWA Banner] Evento não disparou, mostrando banner fallback')
+        setShowBanner(true)
+      }
+    }, 5000)
+
     // Se for iOS, mostrar banner após alguns segundos
     if (isIOSDevice) {
-      console.log('[PWA Banner] iOS detectado, mostrar banner em 5s')
+      console.log('[PWA Banner] iOS detectado, mostrar banner em 3s')
       const timer = setTimeout(() => {
         console.log('[PWA Banner] Mostrando banner para iOS')
-        setShowBanner(true)
-      }, 5000)
-      return () => clearTimeout(timer)
-    }
-
-    // Para desktop/Android em dev, forçar mostrar depois de 3 segundos
-    // (o evento beforeinstallprompt só dispara em produção com HTTPS)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[PWA Banner] Modo DEV - forçar mostrar em 3s para teste')
-      const timer = setTimeout(() => {
         setShowBanner(true)
       }, 3000)
       return () => {
         clearTimeout(timer)
-        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+        clearTimeout(fallbackTimer)
       }
     }
 
     return () => {
+      clearTimeout(fallbackTimer)
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     }
   }, [])
