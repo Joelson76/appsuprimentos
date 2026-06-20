@@ -57,3 +57,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .header-solid {
+    background-color: #ffffff !important;
+    opacity: 1 !important;
+  }
+  .dark .header-solid {
+    background-color: #020617 !important;
+  }
+}

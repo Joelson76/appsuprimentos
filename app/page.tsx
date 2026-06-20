@@ -27,7 +27,7 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-slate-950">
+      <header className="header-solid sticky top-0 z-50 w-full border-b">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
