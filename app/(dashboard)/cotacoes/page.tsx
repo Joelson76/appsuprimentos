@@ -28,7 +28,8 @@ export default async function CotacoesPage() {
     .select(
       `
       *,
-      requisicao:requisicoes (numero)
+      requisicao:requisicoes (numero),
+      filial:filiais (id, nome, cnpj)
     `
     )
     .order('criado_em', { ascending: false })
@@ -135,6 +136,7 @@ export default async function CotacoesPage() {
               <TableRow>
                 <TableHead>Número</TableHead>
                 <TableHead>Requisição</TableHead>
+                <TableHead>Filial/CNPJ</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Data Limite</TableHead>
                 <TableHead>Criada em</TableHead>
@@ -151,6 +153,16 @@ export default async function CotacoesPage() {
                     <TableCell>
                       {cot.requisicao?.numero || 'Sem requisição'}
                     </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">
+                          {cot.filial?.nome || 'N/A'}
+                        </span>
+                        <span className="text-xs text-muted-foreground font-mono">
+                          {cot.filial?.cnpj || 'N/A'}
+                        </span>
+                      </div>
+                    </TableCell>
                     <TableCell>{getStatusBadge(cot.status)}</TableCell>
                     <TableCell>{formatDate(cot.data_limite)}</TableCell>
                     <TableCell>{formatDate(cot.criado_em)}</TableCell>
@@ -165,7 +177,7 @@ export default async function CotacoesPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <div className="text-muted-foreground">
                       Nenhuma cotação encontrada
                     </div>
