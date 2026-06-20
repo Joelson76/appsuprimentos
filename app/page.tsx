@@ -27,8 +27,32 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-[100] w-full border-b bg-white shadow-sm">
-        <div className="container flex h-16 items-center justify-between bg-white">
+      <header
+        className="fixed top-0 left-0 right-0 w-full border-b shadow-sm"
+        style={{
+          backgroundColor: '#FFFFFF',
+          zIndex: 9999,
+          opacity: 1,
+          backdropFilter: 'none',
+          WebkitBackdropFilter: 'none',
+        }}
+      >
+        {/* Camada extra de fundo branco sólido */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: '#FFFFFF',
+            zIndex: -1,
+          }}
+        />
+        <div
+          className="container flex h-16 items-center justify-between"
+          style={{ backgroundColor: '#FFFFFF', position: 'relative', zIndex: 1 }}
+        >
           <div className="flex items-center gap-3">
             <Image
               src="/logo-jls.jpg"
