@@ -62,6 +62,8 @@
   .header-solid {
     background-color: #ffffff !important;
     opacity: 1 !important;
+    position: relative !important;
+    z-index: 100 !important;
   }
   .dark .header-solid {
     background-color: #020617 !important;
