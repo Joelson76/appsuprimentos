@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { SelectFilial } from '@/components/filiais/select-filial'
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -30,6 +31,7 @@ export default function NovaCotacaoPage() {
   const [requisicoes, setRequisicoes] = useState<any[]>([])
   const [fornecedores, setFornecedores] = useState<any[]>([])
 
+  const [filialId, setFilialId] = useState('')
   const [requisicaoId, setRequisicaoId] = useState('')
   const [dataLimite, setDataLimite] = useState('')
   const [fornecedoresSelecionados, setFornecedoresSelecionados] = useState<
@@ -126,11 +128,18 @@ export default function NovaCotacaoPage() {
         return
       }
 
+      // Validar filial
+      if (!filialId) {
+        setError('Selecione a filial')
+        return
+      }
+
       // Criar cotação
       const { data: cotacao, error: cotError } = await supabase
         .from('cotacoes')
         .insert({
           tenant_id: profile.tenant_id,
+          filial_id: filialId,
           requisicao_id: requisicaoId,
           data_limite: new Date(dataLimite).toISOString(),
           status: 'AGUARDANDO_RESPOSTAS',
@@ -212,6 +221,14 @@ export default function NovaCotacaoPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Seletor de Filial */}
+              <SelectFilial
+                value={filialId}
+                onChange={setFilialId}
+                required
+                label="Filial / Unidade"
+              />
+
               <div className="space-y-2">
                 <Label htmlFor="requisicao">Requisição Aprovada *</Label>
                 <Select value={requisicaoId} onValueChange={setRequisicaoId}>

@@ -20,6 +20,10 @@ import { ExportarRequisicoes } from '@/components/relatorios/exportar-requisicoe
 import { ExportarPedidos } from '@/components/relatorios/exportar-pedidos'
 import { ExportarFornecedores } from '@/components/relatorios/exportar-fornecedores'
 import { ExportarEstoque } from '@/components/relatorios/exportar-estoque'
+import { ExportarEvolucaoCompras } from '@/components/relatorios/exportar-evolucao-compras'
+import { ExportarBreakdownFiliais } from '@/components/relatorios/exportar-breakdown-filiais'
+import { ExportarDesempenhoFornecedores } from '@/components/relatorios/exportar-desempenho-fornecedores'
+import { ExportarGastoCategoria } from '@/components/relatorios/exportar-gasto-categoria'
 
 export default async function RelatoriosPage() {
   const supabase = await createClient()
@@ -164,6 +168,70 @@ export default async function RelatoriosPage() {
           </CardHeader>
           <CardContent>
             <ExportarEstoque />
+          </CardContent>
+        </Card>
+
+        {/* Evolução de Compras */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Evolução de Compras
+            </CardTitle>
+            <CardDescription>
+              Histórico mensal de compras e gastos
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ExportarEvolucaoCompras />
+          </CardContent>
+        </Card>
+
+        {/* Breakdown por Filial */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Relatório por Filial/CNPJ
+            </CardTitle>
+            <CardDescription>
+              Pedidos e valores por cada filial
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ExportarBreakdownFiliais />
+          </CardContent>
+        </Card>
+
+        {/* Desempenho de Fornecedores */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Desempenho de Fornecedores
+            </CardTitle>
+            <CardDescription>
+              Análise de performance e lead time
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ExportarDesempenhoFornecedores />
+          </CardContent>
+        </Card>
+
+        {/* Gasto por Categoria */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5" />
+              Gasto por Categoria
+            </CardTitle>
+            <CardDescription>
+              Distribuição de gastos por categoria de produto
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ExportarGastoCategoria />
           </CardContent>
         </Card>
       </div>

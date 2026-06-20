@@ -16,9 +16,8 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Plus, AlertTriangle, Eye, Folder } from 'lucide-react'
+import { Plus, AlertTriangle, Eye, Folder, Edit } from 'lucide-react'
 import type { Produto } from '@/lib/types'
-import { NovoProdutoDialog } from '@/components/estoque/novo-produto-dialog'
 import { MovimentarEstoqueDialog } from '@/components/estoque/movimentar-estoque-dialog'
 import Link from 'next/link'
 
@@ -87,7 +86,12 @@ export default async function EstoquePage() {
               Categorias
             </Button>
           </Link>
-          <NovoProdutoDialog categorias={categorias || []} />
+          <Link href="/estoque/produtos/novo">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Produto
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -215,6 +219,11 @@ export default async function EstoquePage() {
                     <TableCell>{getStatusEstoque(produto)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Link href={`/estoque/produtos/${produto.id}/editar`}>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </Link>
                         <MovimentarEstoqueDialog
                           produtoId={produto.id}
                           produtoNome={produto.descricao}

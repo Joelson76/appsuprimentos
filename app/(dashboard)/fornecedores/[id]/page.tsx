@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Mail, Phone, Star, Building2 } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, Star, Building2, Pencil } from 'lucide-react'
 import Link from 'next/link'
 
 interface PageProps {
@@ -101,6 +101,12 @@ export default async function FornecedorDetalhesPage({ params }: PageProps) {
         </div>
         <div className="flex items-center gap-2">
           {getStatusBadge(fornecedor.status)}
+          <Link href={`/fornecedores/${params.id}/editar`}>
+            <Button variant="outline">
+              <Pencil className="h-4 w-4 mr-2" />
+              Editar
+            </Button>
+          </Link>
         </div>
       </div>
 

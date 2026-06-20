@@ -93,6 +93,28 @@ export default async function ConfiguracoesPage() {
             </Card>
           </Link>
 
+          <Link href="/configuracoes/filiais">
+            <Card className="hover:bg-slate-50 transition-colors cursor-pointer h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Filiais
+                </CardTitle>
+                <CardDescription>
+                  Gerencie matriz e filiais (multi-CNPJ)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Cadastre e controle operações de múltiplas unidades
+                </p>
+                <Button variant="outline" className="w-full">
+                  Ver Filiais
+                </Button>
+              </CardContent>
+            </Card>
+          </Link>
+
           <Link href="/configuracoes/assinatura">
             <Card className="hover:bg-slate-50 transition-colors cursor-pointer h-full">
               <CardHeader>

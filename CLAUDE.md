@@ -32,6 +32,15 @@ TODA tabela que contém dados de tenant DEVE ter:
 NUNCA usar o cliente Supabase com a service_role key no frontend.
 O frontend SEMPRE usa o cliente anon com a sessão do usuário autenticado.
 
+## Sistema de Filiais (Multi-CNPJ)
+Desde 2026-06-19, o sistema suporta múltiplas filiais por tenant.
+- Cada tenant pode ter 1 matriz + N filiais, cada uma com CNPJ próprio
+- Tabela `filiais`: armazena CNPJ, endereço, status
+- Coluna `filial_id` adicionada em: profiles, requisicoes, cotacoes, ordens_compra, fornecedores
+- RLS: filiais visíveis apenas para o tenant dono
+- Validação: apenas 1 matriz por tenant (constraint `uq_tenant_matriz`)
+- Migration: `20260619000001_add_filiais.sql`
+
 ## Autenticação
 - Supabase Auth gerencia login, cadastro, recuperação de senha e tokens
 - Perfil e tenant_id são armazenados em `public.profiles` vinculado ao `auth.users`

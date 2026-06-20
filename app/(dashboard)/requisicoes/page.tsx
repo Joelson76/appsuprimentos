@@ -29,7 +29,8 @@ export default async function RequisicoesPage() {
     .select(
       `
       *,
-      profiles!requisicoes_solicitante_id_fkey (nome)
+      profiles!requisicoes_solicitante_id_fkey (nome),
+      filial:filiais (nome, cnpj, is_matriz)
     `
     )
     .order('criado_em', { ascending: false })
@@ -147,6 +148,7 @@ export default async function RequisicoesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Número</TableHead>
+                <TableHead>Filial/CNPJ</TableHead>
                 <TableHead>Solicitante</TableHead>
                 <TableHead>Descrição</TableHead>
                 <TableHead>Urgência</TableHead>
@@ -161,6 +163,21 @@ export default async function RequisicoesPage() {
                   <TableRow key={req.id}>
                     <TableCell className="font-mono font-medium">
                       {req.numero}
+                    </TableCell>
+                    <TableCell>
+                      {req.filial ? (
+                        <div className="text-sm">
+                          <div className="font-medium">
+                            {req.filial.nome}
+                            {req.filial.is_matriz && ' (Matriz)'}
+                          </div>
+                          <div className="text-xs text-muted-foreground font-mono">
+                            {formatCNPJ(req.filial.cnpj)}
+                          </div>
+                        </div>
+                      ) : (
+                        '-'
+                      )}
                     </TableCell>
                     <TableCell>{req.profiles?.nome || '-'}</TableCell>
                     <TableCell className="max-w-xs truncate">
@@ -180,7 +197,7 @@ export default async function RequisicoesPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     <div className="text-muted-foreground">
                       Nenhuma requisição encontrada
                     </div>
@@ -198,5 +215,15 @@ export default async function RequisicoesPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+function formatCNPJ(cnpj: string): string {
+  if (!cnpj) return ''
+  const digits = cnpj.replace(/\D/g, '')
+  if (digits.length !== 14) return cnpj
+  return digits.replace(
+    /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+    '$1.$2.$3/$4-$5'
   )
 }

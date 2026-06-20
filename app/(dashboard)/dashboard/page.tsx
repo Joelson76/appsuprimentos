@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { KPICard } from '@/components/dashboard/kpi-card'
 import { AlertasWidget } from '@/components/dashboard/alertas-widget'
 import { AprovacoesWidget } from '@/components/dashboard/aprovacoes-widget'
+import { BreakdownFiliaisChart } from '@/components/dashboard/breakdown-filiais-chart'
 import {
   Card,
   CardContent,
@@ -31,11 +32,19 @@ export default async function DashboardPage() {
     .single()
 
   // Busca KPIs consolidados
-  const { data: kpis } = await supabase
+  const { data: kpis, error: kpisError } = await supabase
     .from('vw_dashboard_kpis')
     .select('*')
     .eq('tenant_id', profile?.tenant_id || '')
     .single()
+
+  // Debug
+  if (kpisError) {
+    console.error('❌ Erro ao buscar KPIs:', kpisError)
+  }
+  if (!kpis) {
+    console.log('⚠️ KPIs retornou null. Profile tenant_id:', profile?.tenant_id)
+  }
 
   // Busca evolução mensal
   const { data: evolucao } = await supabase
@@ -51,6 +60,12 @@ export default async function DashboardPage() {
     .select('*')
     .eq('tenant_id', profile?.tenant_id || '')
     .limit(5)
+
+  // Busca breakdown por filial
+  const { data: breakdownFiliais } = await supabase
+    .from('vw_breakdown_por_filial')
+    .select('*')
+    .eq('tenant_id', profile?.tenant_id || '')
 
   return (
     <div className="space-y-6">
@@ -116,6 +131,58 @@ export default async function DashboardPage() {
         <AlertasWidget />
         <AprovacoesWidget />
       </div>
+
+      {/* Gráfico e Breakdown por Filial - Só mostra se houver filiais */}
+      {breakdownFiliais && breakdownFiliais.length > 0 && (
+        <>
+          {/* Gráfico de Pedidos por Filial */}
+          <BreakdownFiliaisChart data={breakdownFiliais} />
+
+          {/* Breakdown por Filial - Tabela Detalhada */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Detalhamento por Filial / CNPJ</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {breakdownFiliais.map((filial: any) => (
+                  <div key={filial.filial_id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium">{filial.filial_nome}</p>
+                        {filial.is_matriz && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                            Matriz
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        CNPJ: {filial.cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-6 text-right">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Requisições</p>
+                        <p className="text-sm font-semibold">{filial.total_requisicoes || 0}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Pedidos</p>
+                        <p className="text-sm font-semibold">{filial.total_pedidos || 0}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Valor Total</p>
+                        <p className="text-sm font-semibold">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(filial.valor_pedidos || 0)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
       {/* Top Fornecedores */}
       <Card>

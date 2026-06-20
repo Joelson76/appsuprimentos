@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { SelectFilial } from '@/components/filiais/select-filial'
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -37,6 +38,7 @@ export default function NovaRequisicaoPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const [filialId, setFilialId] = useState('')
   const [descricao, setDescricao] = useState('')
   const [urgencia, setUrgencia] = useState<'BAIXA' | 'NORMAL' | 'ALTA' | 'CRITICA'>('NORMAL')
   const [itens, setItens] = useState<Item[]>([
@@ -106,11 +108,18 @@ export default function NovaRequisicaoPage() {
         return
       }
 
+      // Validar filial
+      if (!filialId) {
+        setError('Selecione a filial')
+        return
+      }
+
       // Criar requisição
       const { data: requisicao, error: reqError } = await supabase
         .from('requisicoes')
         .insert({
           tenant_id: profile.tenant_id,
+          filial_id: filialId,
           solicitante_id: user.id,
           descricao: descricao.trim(),
           urgencia,
@@ -187,6 +196,14 @@ export default function NovaRequisicaoPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Seletor de Filial */}
+              <SelectFilial
+                value={filialId}
+                onChange={setFilialId}
+                required
+                label="Filial / Unidade"
+              />
+
               <div className="space-y-2">
                 <Label htmlFor="descricao">
                   Descrição / Justificativa *

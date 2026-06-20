@@ -55,6 +55,7 @@ export default async function RequisicaoDetalhesPage({ params }: PageProps) {
       *,
       solicitante:profiles!requisicoes_solicitante_id_fkey (nome),
       aprovador:profiles!requisicoes_aprovado_por_fkey (nome),
+      filial:filiais (id, nome, cnpj, is_matriz),
       itens_requisicao (*)
     `
     )
@@ -176,6 +177,23 @@ export default async function RequisicaoDetalhesPage({ params }: PageProps) {
                 {requisicao.solicitante?.nome}
               </span>
             </div>
+            {requisicao.filial && (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Filial:</span>
+                  <span className="text-sm font-medium">
+                    {requisicao.filial.nome}
+                    {requisicao.filial.is_matriz && ' (Matriz)'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">CNPJ:</span>
+                  <span className="text-sm font-medium font-mono">
+                    {formatCNPJ(requisicao.filial.cnpj)}
+                  </span>
+                </div>
+              </>
+            )}
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">
                 Criada em:
@@ -346,5 +364,15 @@ export default async function RequisicaoDetalhesPage({ params }: PageProps) {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+function formatCNPJ(cnpj: string): string {
+  if (!cnpj) return ''
+  const digits = cnpj.replace(/\D/g, '')
+  if (digits.length !== 14) return cnpj
+  return digits.replace(
+    /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+    '$1.$2.$3/$4-$5'
   )
 }
