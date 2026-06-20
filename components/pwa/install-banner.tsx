@@ -131,6 +131,7 @@ export function InstallBanner() {
             </div>
           </div>
         </div>
+        </div>
       </div>
     </>
   )
