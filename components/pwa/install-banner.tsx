@@ -82,9 +82,14 @@ export function InstallBanner() {
   if (!showBanner) return null
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 animate-in slide-in-from-top-4">
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+    <>
+      {/* Backdrop - escurece o fundo levemente */}
+      <div className="fixed inset-0 bg-black/5 z-[99] pointer-events-none" />
+
+      {/* Banner */}
+      <div className="fixed top-0 left-0 right-0 z-[100] animate-in slide-in-from-top-4">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-2xl border-b-2 border-purple-400">
+          <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 flex-1">
               <Smartphone className="h-6 w-6 flex-shrink-0" />
@@ -127,6 +132,6 @@ export function InstallBanner() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
