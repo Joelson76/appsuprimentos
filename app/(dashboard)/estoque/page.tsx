@@ -25,17 +25,26 @@ export default async function EstoquePage() {
   const supabase = await createClient()
 
   // Buscar produtos
-  const { data: produtos } = await supabase
+  const { data: produtos, error: produtosError } = await supabase
     .from('produtos')
     .select('*, categorias(nome)')
     .eq('ativo', true)
     .order('descricao')
 
+  if (produtosError) {
+    console.error('Erro ao buscar produtos:', produtosError)
+    throw new Error(`Erro ao buscar produtos: ${produtosError.message}`)
+  }
+
   // Buscar categorias para o select
-  const { data: categorias } = await supabase
+  const { data: categorias, error: categoriasError } = await supabase
     .from('categorias')
     .select('id, nome')
     .order('nome')
+
+  if (categoriasError) {
+    console.error('Erro ao buscar categorias:', categoriasError)
+  }
 
   const getStatusEstoque = (produto: Produto) => {
     if (!produto.estoque_minimo_alerta) {
