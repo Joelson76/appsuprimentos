@@ -22,7 +22,7 @@ export function InstallBanner() {
 
     setIsIOS(isIOSDevice)
 
-    console.log('[PWA Banner] Inicializando...', { isIOSDevice })
+    console.log('[PWA Banner] Inicializando (apenas uma vez)...', { isIOSDevice })
 
     // Verificar se já está instalado
     if (window.matchMedia('(display-mode: standalone)').matches) {
@@ -54,16 +54,7 @@ export function InstallBanner() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
 
-    // Fallback: se o evento não disparar em 5 segundos, mostrar mesmo assim
-    // (útil para teste e para iOS que não dispara o evento)
-    const fallbackTimer = setTimeout(() => {
-      if (!deferredPrompt && !isIOSDevice) {
-        console.log('[PWA Banner] Evento não disparou, mostrando banner fallback')
-        setShowBanner(true)
-      }
-    }, 5000)
-
-    // Se for iOS, mostrar banner após alguns segundos
+    // Se for iOS, mostrar banner após alguns segundos (apenas uma vez)
     if (isIOSDevice) {
       console.log('[PWA Banner] iOS detectado, mostrar banner em 3s')
       const timer = setTimeout(() => {
@@ -72,15 +63,14 @@ export function InstallBanner() {
       }, 3000)
       return () => {
         clearTimeout(timer)
-        clearTimeout(fallbackTimer)
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       }
     }
 
     return () => {
-      clearTimeout(fallbackTimer)
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
     }
-  }, [])
+  }, []) // ← Array vazio: executar apenas uma vez na montagem do componente
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return
