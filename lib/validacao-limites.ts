@@ -62,7 +62,7 @@ export async function verificarLimitePedidos(
       }
     }
 
-    // @ts-ignore
+    // @ts-expect-error - planos relationship might not be fully typed
     const limitePedidosMes = assinatura.planos?.limite_pos_mes || 0
 
     // Se limite = -1, é ilimitado
@@ -142,7 +142,7 @@ export async function verificarLimiteUsuarios(
       .eq('tenant_id', tenantId)
       .single()
 
-    // @ts-ignore
+    // @ts-expect-error - planos relationship might not be fully typed
     const limiteUsuarios = assinatura?.planos?.limite_usuarios || 0
 
     if (limiteUsuarios === -1) {
@@ -204,8 +204,8 @@ export async function verificarLimiteFornecedores(
       .eq('tenant_id', tenantId)
       .single()
 
-    // @ts-ignore
-    const limites = assinatura?.planos?.limites as any
+    // @ts-expect-error - planos relationship might not be fully typed
+    const limites = assinatura?.planos?.limites as Record<string, number> | undefined
     const limiteFornecedores = limites?.fornecedores || 999999
 
     if (limiteFornecedores >= 999999) {
@@ -235,7 +235,7 @@ export async function verificarLimiteFornecedores(
         ? `${usado}/${limiteFornecedores} fornecedores`
         : `Limite atingido! Faça upgrade.`,
     }
-  } catch (error) {
+  } catch {
     return {
       dentro_limite: true, // Em caso de erro, permite continuar
       usado: 0,
