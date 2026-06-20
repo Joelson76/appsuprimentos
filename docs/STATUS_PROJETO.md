@@ -241,7 +241,6 @@ Sistema de notificações existe no banco. Falta:
 - [ ] Supabase Realtime para notificar aprovadores
 - [ ] Badge de notificações não lidas no header
 - [ ] Página de histórico de notificações
-- [ ] Push notifications (PWA)
 
 **Estimativa:** 3-4 horas
 **Impacto:** Baixo (nice to have)

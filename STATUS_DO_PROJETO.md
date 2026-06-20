@@ -272,8 +272,7 @@ supabase/FIX_ITENS_COTACAO_RLS.sql  # Fix de RLS para itens de cotação
 
 ### Prioridade Baixa (Nice to Have)
 7. **Dark mode** - Acessibilidade
-8. **Mobile app** - PWA ou React Native
-9. **Integrações** - ERPs, e-commerce, etc.
+8. **Integrações** - ERPs, e-commerce, etc.
 
 ---
 

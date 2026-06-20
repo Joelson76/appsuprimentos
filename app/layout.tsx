@@ -3,9 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
-import { ServiceWorkerRegister } from '@/components/pwa/service-worker-register';
-import { InstallBanner } from '@/components/pwa/install-banner';
-import { DebugPWA } from '@/components/pwa/debug-pwa';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,24 +18,12 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "SupriFlow - Gestão de Compras e Suprimentos",
   description: "Sistema Completo de Gestão de Compras e Suprimentos para Indústria e Varejo",
-  applicationName: "SupriFlow",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "SupriFlow",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
   themeColor: "#667eea",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -48,12 +33,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icon-192x192.png" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -63,9 +42,6 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ServiceWorkerRegister />
-          <InstallBanner />
-          <DebugPWA />
           {children}
           <Toaster position="top-right" richColors />
         </ThemeProvider>
