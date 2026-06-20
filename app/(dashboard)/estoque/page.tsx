@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Plus, AlertTriangle, Eye, Folder, Edit } from 'lucide-react'
 import type { Produto } from '@/lib/types'
 import { MovimentarEstoqueDialog } from '@/components/estoque/movimentar-estoque-dialog'
+import { NovoProdutoDialog } from '@/components/estoque/novo-produto-dialog'
 import Link from 'next/link'
 
 export default async function EstoquePage() {
