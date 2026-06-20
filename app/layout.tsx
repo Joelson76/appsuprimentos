@@ -4,7 +4,7 @@ import "./globals.css";
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ServiceWorkerRegister } from '@/components/pwa/service-worker-register';
-import { InstallPrompt } from '@/components/pwa/install-prompt';
+import { InstallBanner } from '@/components/pwa/install-banner';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -63,8 +63,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ServiceWorkerRegister />
+          <InstallBanner />
           {children}
-          <InstallPrompt />
           <Toaster position="top-right" richColors />
         </ThemeProvider>
       </body>

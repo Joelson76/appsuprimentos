@@ -89,7 +89,7 @@ export function InstallPrompt() {
   if (!showPrompt) return null
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm animate-in slide-in-from-bottom-4">
+    <div className="fixed bottom-4 left-4 md:left-auto md:right-4 md:bottom-4 z-40 max-w-sm animate-in slide-in-from-bottom-4">
       <Card className="border-2 border-primary shadow-lg">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
