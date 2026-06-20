@@ -292,22 +292,24 @@ export default async function ConfiguracoesPage() {
             </Card>
           </Link>
 
-          <Card className="hover:bg-slate-50 transition-colors">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
-                Templates de E-mail
-              </CardTitle>
-              <CardDescription>
-                Personalize e-mails enviados pelo sistema
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" disabled>
-                Em breve
-              </Button>
-            </CardContent>
-          </Card>
+          <Link href="/configuracoes/templates-email">
+            <Card className="hover:bg-slate-50 transition-colors cursor-pointer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Templates de E-mail
+                </CardTitle>
+                <CardDescription>
+                  Personalize e-mails enviados pelo sistema
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button variant="outline" className="w-full">
+                  Configurar Templates
+                </Button>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       </div>
 
