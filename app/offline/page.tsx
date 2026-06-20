@@ -2,7 +2,7 @@ import { WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-export const dynamic = 'force-static'
+export const dynamic = 'force-dynamic'
 
 export default function OfflinePage() {
   return (
