@@ -57,20 +57,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-@layer components {
-  .header-solid {
-    background-color: #ffffff !important;
-    opacity: 1 !important;
-    position: relative !important;
-    z-index: 100 !important;
-    width: 100% !important;
-  }
-  .header-solid::before,
-  .header-solid::after {
-    display: none !important;
-  }
-  .dark .header-solid {
-    background-color: #020617 !important;
-  }
-}
