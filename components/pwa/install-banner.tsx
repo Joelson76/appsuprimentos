@@ -22,8 +22,11 @@ export function InstallBanner() {
 
     setIsIOS(isIOSDevice)
 
+    console.log('[PWA Banner] Inicializando...', { isIOSDevice })
+
     // Verificar se já está instalado
     if (window.matchMedia('(display-mode: standalone)').matches) {
+      console.log('[PWA Banner] App já instalado, não mostrar banner')
       return
     }
 
@@ -32,13 +35,18 @@ export function InstallBanner() {
     if (dismissed) {
       const dismissedTime = parseInt(dismissed)
       const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24)
+      console.log('[PWA Banner] Banner foi dispensado', { daysSinceDismissed })
       if (daysSinceDismissed < 30) {
+        console.log('[PWA Banner] Ainda dentro do período de 30 dias, não mostrar')
         return
       }
     }
 
+    console.log('[PWA Banner] Condições OK, aguardando evento...')
+
     // Listener para evento de instalação
     const handleBeforeInstallPrompt = (e: Event) => {
+      console.log('[PWA Banner] Evento beforeinstallprompt recebido!')
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       setShowBanner(true)
@@ -48,10 +56,25 @@ export function InstallBanner() {
 
     // Se for iOS, mostrar banner após alguns segundos
     if (isIOSDevice) {
+      console.log('[PWA Banner] iOS detectado, mostrar banner em 5s')
       const timer = setTimeout(() => {
+        console.log('[PWA Banner] Mostrando banner para iOS')
         setShowBanner(true)
       }, 5000)
       return () => clearTimeout(timer)
+    }
+
+    // Para desktop/Android em dev, forçar mostrar depois de 3 segundos
+    // (o evento beforeinstallprompt só dispara em produção com HTTPS)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[PWA Banner] Modo DEV - forçar mostrar em 3s para teste')
+      const timer = setTimeout(() => {
+        setShowBanner(true)
+      }, 3000)
+      return () => {
+        clearTimeout(timer)
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+      }
     }
 
     return () => {

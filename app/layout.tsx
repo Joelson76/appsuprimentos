@@ -5,6 +5,7 @@ import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ServiceWorkerRegister } from '@/components/pwa/service-worker-register';
 import { InstallBanner } from '@/components/pwa/install-banner';
+import { DebugPWA } from '@/components/pwa/debug-pwa';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -64,6 +65,7 @@ export default function RootLayout({
         >
           <ServiceWorkerRegister />
           <InstallBanner />
+          <DebugPWA />
           {children}
           <Toaster position="top-right" richColors />
         </ThemeProvider>

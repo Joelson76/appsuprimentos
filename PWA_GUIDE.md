@@ -43,7 +43,7 @@
 
 ### Android (Chrome)
 
-1. Acesse https://appsuprimentos.vercel.app
+1. Acesse https://appsuprimentosnao.vercel.app
 2. Um banner aparecerá na tela: "Instalar SupriFlow"
 3. Clique em **"Instalar Agora"**
 4. Pronto! O app estará na sua tela inicial
