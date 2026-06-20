@@ -3,8 +3,16 @@
 import { Button } from '@/components/ui/button'
 import { RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
+import { useEffect, useState } from 'react'
 
 export function DebugPWA() {
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    // Verificar no cliente se é desenvolvimento
+    setShow(process.env.NODE_ENV === 'development')
+  }, [])
+
   const resetBanner = () => {
     localStorage.removeItem('pwa-banner-dismissed')
     localStorage.removeItem('pwa-install-dismissed')
@@ -34,8 +42,7 @@ export function DebugPWA() {
     }
   }
 
-  // Apenas mostrar em desenvolvimento
-  if (process.env.NODE_ENV !== 'development') {
+  if (!show) {
     return null
   }
 
