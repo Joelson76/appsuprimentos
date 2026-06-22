@@ -36,6 +36,7 @@ export async function middleware(request: NextRequest) {
     '/api/test-email',
     '/api/debug-planos',
     '/fornecedor/', // Links de cotação para fornecedores (acesso via token)
+    '/c/', // Short links de cotação (ex: /c/a3m5n9k2)
     '/api/cotacao-fornecedor', // Rota alternativa de redirecionamento
     '/api/debug-token', // Debug de tokens
   ]

@@ -52,9 +52,22 @@ export default function EnviarLinksButton({ cotacaoId, fornecedores }: Props) {
           .single()
 
         if (item?.token_resposta) {
-          // Link direto (funciona quando copiado/colado)
-          novosLinks[fornecedor.id] =
-            `${window.location.origin}/fornecedor/${item.token_resposta}`
+          // Buscar short link existente
+          const { data: shortLink } = await supabase
+            .from('cotacao_short_links')
+            .select('short_code')
+            .eq('token_original', item.token_resposta)
+            .single()
+
+          if (shortLink?.short_code) {
+            // Usar short link (muito mais curto, não trunca no WhatsApp)
+            novosLinks[fornecedor.id] =
+              `${window.location.origin}/c/${shortLink.short_code}`
+          } else {
+            // Fallback para link longo (se short link não existir)
+            novosLinks[fornecedor.id] =
+              `${window.location.origin}/fornecedor/${item.token_resposta}`
+          }
         }
       }
 
