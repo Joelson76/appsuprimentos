@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,6 +38,20 @@ export function EditarEmpresaForm({ tenant }: Props) {
     estado: tenant.estado || '',
     cep: tenant.cep || '',
   })
+
+  // Sincronizar formData quando tenant mudar
+  useEffect(() => {
+    setFormData({
+      nome: tenant.nome || '',
+      cnpj: tenant.cnpj || '',
+      email: tenant.email || '',
+      telefone: tenant.telefone || '',
+      endereco: tenant.endereco || '',
+      cidade: tenant.cidade || '',
+      estado: tenant.estado || '',
+      cep: tenant.cep || '',
+    })
+  }, [tenant])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
