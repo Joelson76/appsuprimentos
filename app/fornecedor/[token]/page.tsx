@@ -65,13 +65,23 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
         .single()
 
       if (itemError || !itemData) {
-        setError('Link inválido ou expirado')
+        setError('Link inválido ou expirado. Verifique se o link foi copiado corretamente.')
         setLoading(false)
         return
       }
 
+      // Verificar se a cotação ainda está dentro do prazo
+      const dataLimite = new Date(itemData.cotacao.data_limite)
+      const hoje = new Date()
+      const cotacaoExpirada = dataLimite < hoje
+
       setCotacao(itemData.cotacao)
       setFornecedor(itemData.fornecedor)
+
+      // Mostrar aviso se a cotação expirou (mas ainda permitir visualizar)
+      if (cotacaoExpirada && !itemData.valor_unitario) {
+        setError(`⚠️ Atenção: O prazo desta cotação venceu em ${dataLimite.toLocaleDateString('pt-BR')}. Entre em contato com o comprador.`)
+      }
 
       // Buscar todos os itens desta cotação para este fornecedor
       const { data: itensData, error: itensError } = await supabase

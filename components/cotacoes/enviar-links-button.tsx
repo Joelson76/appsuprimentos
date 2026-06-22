@@ -169,6 +169,10 @@ export default function EnviarLinksButton({ cotacaoId, fornecedores }: Props) {
       return
     }
 
+    // Debug: mostrar o link que será enviado
+    console.log('🔗 Link gerado:', link)
+    console.log('📱 Telefone:', fornecedor.telefone)
+
     // Limpar telefone (apenas números)
     const telefone = fornecedor.telefone.replace(/\D/g, '')
 
@@ -180,19 +184,20 @@ export default function EnviarLinksButton({ cotacaoId, fornecedores }: Props) {
     // Formatar mensagem
     const nomeFornecedor = fornecedor.nome_fantasia || fornecedor.razao_social
 
-    let mensagem = `*📋 SOLICITAÇÃO DE COTAÇÃO*\n\n`
-    mensagem += `Olá *${nomeFornecedor}*!\n\n`
+    // IMPORTANTE: Não usar quebras de linha extras ou emojis decorativos
+    // O WhatsApp pode quebrar links longos se houver muita formatação
+    let mensagem = `📋 SOLICITAÇÃO DE COTAÇÃO\n\n`
+    mensagem += `Olá ${nomeFornecedor}!\n\n`
     mensagem += `Você foi convidado a participar de uma cotação.\n\n`
-    mensagem += `Para visualizar os itens e enviar sua proposta, acesse o link abaixo:\n\n`
-    mensagem += `🔗 ${link}\n\n`
-    mensagem += `━━━━━━━━━━━━━━━━━━━━\n\n`
-    mensagem += `⚠️ *IMPORTANTE:*\n`
-    mensagem += `• Este link é exclusivo para sua empresa\n`
-    mensagem += `• Preencha os valores e prazos solicitados\n`
-    mensagem += `• Envie sua proposta pelo sistema\n\n`
-    mensagem += `_Solicitação enviada pelo sistema SupriFlow_`
+    mensagem += `Acesse o link abaixo para visualizar os itens e enviar sua proposta:\n\n`
+    mensagem += `${link}\n\n`
+    mensagem += `IMPORTANTE:\n`
+    mensagem += `- Este link é exclusivo para sua empresa\n`
+    mensagem += `- Preencha os valores e prazos solicitados\n`
+    mensagem += `- Envie sua proposta pelo sistema\n\n`
+    mensagem += `Solicitação enviada pelo sistema SupriFlow`
 
-    // Codificar mensagem
+    // Codificar APENAS a mensagem, NÃO o link dentro dela
     const mensagemCodificada = encodeURIComponent(mensagem)
 
     // Abrir WhatsApp
@@ -269,15 +274,18 @@ export default function EnviarLinksButton({ cotacaoId, fornecedores }: Props) {
                     </Button>
                   )}
                   {fornecedor.telefone && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => enviarWhatsAppIndividual(fornecedor)}
-                      className="gap-1 border-green-500 text-green-700 hover:bg-green-50"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      WhatsApp
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => enviarWhatsAppIndividual(fornecedor)}
+                        className="gap-1 border-green-500 text-green-700 hover:bg-green-50"
+                        title="Enviar mensagem automática (pode falhar em alguns dispositivos)"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        WhatsApp
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
@@ -306,12 +314,15 @@ export default function EnviarLinksButton({ cotacaoId, fornecedores }: Props) {
               </Button>
             </div>
 
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg space-y-2">
               <p className="text-sm text-blue-900">
-                <strong>💡 Dica:</strong> Clique em "Enviar E-mails
-                Automaticamente" para enviar os links por e-mail, ou copie os
-                links manualmente para enviar via WhatsApp.
+                <strong>💡 Dicas:</strong>
               </p>
+              <ul className="text-sm text-blue-800 list-disc list-inside space-y-1">
+                <li>Use <strong>"Enviar E-mails Automaticamente"</strong> para envio em massa</li>
+                <li>Botão <strong>"WhatsApp"</strong> abre o app com mensagem pré-formatada</li>
+                <li>Se o link não funcionar pelo WhatsApp, use <strong>"Copiar"</strong> e cole manualmente na conversa</li>
+              </ul>
             </div>
           </div>
         </DialogContent>
