@@ -1,21 +1,29 @@
-# 🔧 Problema: Links de Cotação Inválidos no WhatsApp
+# 🔧 Problema: Links de Cotação Inválidos
 
 ## 📋 Descrição do Problema
 
-Quando links de cotação são enviados via WhatsApp (usando o botão automático), os fornecedores recebem erro de "Link inválido ou expirado" ao clicar.
+Fornecedores recebem erro de "Link inválido ou expirado" ao tentar acessar links de cotação.
 
 **Sintomas:**
-- ✅ Copiar/colar o link manualmente → **FUNCIONA**
-- ❌ Clicar no link recebido via WhatsApp → **ERRO**
+- ❌ Link não funciona nem copiando/colando
+- ❌ Erro: "permission denied for table cotacoes"
 
-## 🔍 Causa Raiz
+## 🔍 Causas Raiz (RESOLVIDAS)
 
-O WhatsApp pode **quebrar ou corromper** links longos quando enviados com muito texto formatado, especialmente:
+### 1. **Middleware bloqueando acesso público** ✅ CORRIGIDO
+- Rota `/fornecedor/[token]` não estava na lista de rotas públicas
+- Middleware exigia autenticação para acessar
+- **Solução:** Adicionada à lista `publicPaths`
 
-1. **Links muito longos** (tokens de 64 caracteres hex)
-2. **Formatação excessiva** (emojis decorativos, asteriscos, linhas)
-3. **Codificação dupla** (URL dentro de texto já encodado)
-4. **Quebras de linha** próximas ao link
+### 2. **RLS (Row Level Security) bloqueando JOINs** 🔴 REQUER MIGRATION
+- `itens_cotacao` não tem RLS (por design)
+- Mas faz JOIN com `cotacoes` que TEM RLS
+- RLS bloqueava o SELECT em `cotacoes` sem autenticação
+- **Solução:** Criar policies de leitura pública
+
+### 3. **WhatsApp quebrando links** (MENOR PRIORIDADE)
+- WhatsApp pode quebrar links longos com formatação excessiva
+- **Solução:** Mensagem simplificada
 
 ## ✅ Soluções Implementadas
 
