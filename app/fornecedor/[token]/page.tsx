@@ -61,45 +61,83 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
       const tokenLimpo = params.token.trim().replace(/\s+/g, '')
       console.log('🔍 Token limpo:', tokenLimpo)
 
-      // Buscar item pelo token (um dos itens terá este token)
+      // Buscar item pelo token (SEM JOIN - queries separadas para evitar RLS)
       const { data: itemData, error: itemError } = await supabase
         .from('itens_cotacao')
-        .select(
-          `
-          *,
-          cotacao:cotacoes (*),
-          fornecedor:fornecedores (razao_social, nome_fantasia)
-        `
-        )
+        .select('*')
         .eq('token_resposta', tokenLimpo)
         .limit(1)
         .single()
 
-      console.log('🔍 Resultado da busca:', { itemData, itemError })
+      console.log('🔍 Resultado da busca do item:', { itemData, itemError })
+
+      if (itemError || !itemData) {
+        console.error('❌ Erro ao buscar token:', itemError)
+        setDebugInfo({
+          tokenOriginal: params.token,
+          tokenLimpo,
+          tamanho: tokenLimpo.length,
+          encontrado: false,
+          erro: itemError?.message || 'Item não encontrado',
+        })
+        setError('Link inválido ou expirado.')
+        setLoading(false)
+        return
+      }
+
+      // Buscar cotação separadamente
+      const { data: cotacaoData, error: cotacaoError } = await supabase
+        .from('cotacoes')
+        .select('*')
+        .eq('id', itemData.cotacao_id)
+        .single()
+
+      console.log('🔍 Resultado da busca da cotação:', { cotacaoData, cotacaoError })
+
+      if (cotacaoError || !cotacaoData) {
+        console.error('❌ Erro ao buscar cotação:', cotacaoError)
+        setDebugInfo({
+          tokenOriginal: params.token,
+          tokenLimpo,
+          tamanho: tokenLimpo.length,
+          encontrado: true,
+          erro: `Cotação não encontrada: ${cotacaoError?.message}`,
+        })
+        setError('Erro ao carregar cotação.')
+        setLoading(false)
+        return
+      }
+
+      // Buscar fornecedor separadamente
+      const { data: fornecedorData, error: fornecedorError } = await supabase
+        .from('fornecedores')
+        .select('razao_social, nome_fantasia')
+        .eq('id', itemData.fornecedor_id)
+        .single()
+
+      console.log('🔍 Resultado da busca do fornecedor:', { fornecedorData, fornecedorError })
+
+      if (fornecedorError || !fornecedorData) {
+        console.error('❌ Erro ao buscar fornecedor:', fornecedorError)
+        // Continuar mesmo sem fornecedor (não é crítico)
+      }
+
+      // Verificar se a cotação ainda está dentro do prazo
+      const dataLimite = new Date(cotacaoData.data_limite)
+      const hoje = new Date()
+      const cotacaoExpirada = dataLimite < hoje
+
+      setCotacao(cotacaoData)
+      setFornecedor(fornecedorData || { razao_social: 'Fornecedor', nome_fantasia: null })
 
       // Salvar informações de debug
       setDebugInfo({
         tokenOriginal: params.token,
         tokenLimpo,
         tamanho: tokenLimpo.length,
-        encontrado: !!itemData,
-        erro: itemError?.message,
+        encontrado: true,
+        erro: null,
       })
-
-      if (itemError || !itemData) {
-        console.error('❌ Erro ao buscar token:', itemError)
-        setError('Link inválido ou expirado.')
-        setLoading(false)
-        return
-      }
-
-      // Verificar se a cotação ainda está dentro do prazo
-      const dataLimite = new Date(itemData.cotacao.data_limite)
-      const hoje = new Date()
-      const cotacaoExpirada = dataLimite < hoje
-
-      setCotacao(itemData.cotacao)
-      setFornecedor(itemData.fornecedor)
 
       // Mostrar aviso se a cotação expirou (mas ainda permitir visualizar)
       if (cotacaoExpirada && !itemData.valor_unitario) {
