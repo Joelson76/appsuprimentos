@@ -52,8 +52,9 @@ export default function EnviarLinksButton({ cotacaoId, fornecedores }: Props) {
           .single()
 
         if (item?.token_resposta) {
+          // Usar link com query parameter (mais compatível com WhatsApp)
           novosLinks[fornecedor.id] =
-            `${window.location.origin}/fornecedor/${item.token_resposta}`
+            `${window.location.origin}/api/cotacao-fornecedor?token=${item.token_resposta}`
         }
       }
 
@@ -184,24 +185,22 @@ export default function EnviarLinksButton({ cotacaoId, fornecedores }: Props) {
     // Formatar mensagem
     const nomeFornecedor = fornecedor.nome_fantasia || fornecedor.razao_social
 
-    // IMPORTANTE: Não usar quebras de linha extras ou emojis decorativos
-    // O WhatsApp pode quebrar links longos se houver muita formatação
-    let mensagem = `📋 SOLICITAÇÃO DE COTAÇÃO\n\n`
-    mensagem += `Olá ${nomeFornecedor}!\n\n`
-    mensagem += `Você foi convidado a participar de uma cotação.\n\n`
-    mensagem += `Acesse o link abaixo para visualizar os itens e enviar sua proposta:\n\n`
-    mensagem += `${link}\n\n`
-    mensagem += `IMPORTANTE:\n`
-    mensagem += `- Este link é exclusivo para sua empresa\n`
-    mensagem += `- Preencha os valores e prazos solicitados\n`
-    mensagem += `- Envie sua proposta pelo sistema\n\n`
-    mensagem += `Solicitação enviada pelo sistema SupriFlow`
+    // SOLUÇÃO: Enviar link SIMPLES, sem formatação
+    // O WhatsApp vai criar preview automaticamente do link
+    const mensagem = `Olá ${nomeFornecedor}! Você foi convidado para uma cotação. Acesse: ${link}`
 
-    // Codificar APENAS a mensagem, NÃO o link dentro dela
+    console.log('📝 Mensagem original:', mensagem)
+
+    // Codificar mensagem
     const mensagemCodificada = encodeURIComponent(mensagem)
+
+    console.log('📝 Mensagem codificada:', mensagemCodificada)
 
     // Abrir WhatsApp
     const linkWhatsApp = `https://wa.me/55${telefone}?text=${mensagemCodificada}`
+
+    console.log('🔗 Link WhatsApp completo:', linkWhatsApp)
+
     window.open(linkWhatsApp, '_blank')
   }
 

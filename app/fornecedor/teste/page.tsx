@@ -1,9 +1,34 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
 
 export default function TesteLinkFornecedor() {
+  const [token, setToken] = useState('')
+  const [resultado, setResultado] = useState<any>(null)
+  const [testando, setTestando] = useState(false)
+
+  const testarToken = async () => {
+    if (!token) {
+      alert('Digite um token para testar')
+      return
+    }
+
+    setTestando(true)
+    try {
+      const response = await fetch(`/api/debug-token?token=${encodeURIComponent(token)}`)
+      const data = await response.json()
+      setResultado(data)
+    } catch (error) {
+      console.error('Erro ao testar:', error)
+      alert('Erro ao testar token')
+    } finally {
+      setTestando(false)
+    }
+  }
   const testCases = [
     {
       titulo: 'Link normal (copiar/colar)',
@@ -35,6 +60,63 @@ export default function TesteLinkFornecedor() {
               Use esta página para diagnosticar problemas com links de cotação
             </CardDescription>
           </CardHeader>
+        </Card>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>🧪 Testar Token</CardTitle>
+            <CardDescription>
+              Cole um token de cotação para verificar se ele é válido
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Token ou URL Completa:</label>
+              <Input
+                value={token}
+                onChange={(e) => setToken(e.target.value)}
+                placeholder="Cole o token ou URL completa aqui"
+                className="font-mono text-sm"
+              />
+            </div>
+            <Button onClick={testarToken} disabled={testando}>
+              {testando ? 'Testando...' : 'Testar Token'}
+            </Button>
+
+            {resultado && (
+              <div className="mt-4 space-y-4">
+                <div className="bg-slate-100 p-4 rounded space-y-2">
+                  <h3 className="font-semibold">📊 Informações do Token:</h3>
+                  <pre className="text-xs overflow-auto">
+                    {JSON.stringify(resultado.debug, null, 2)}
+                  </pre>
+                </div>
+
+                <div className="bg-slate-100 p-4 rounded space-y-2">
+                  <h3 className="font-semibold">🔍 Resultados das Buscas:</h3>
+                  <pre className="text-xs overflow-auto">
+                    {JSON.stringify(resultado.buscas, null, 2)}
+                  </pre>
+                </div>
+
+                {resultado.buscas?.exato?.encontrado ? (
+                  <div className="p-4 bg-green-50 border border-green-200 rounded">
+                    <p className="text-green-900 font-medium">✅ Token válido encontrado!</p>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded">
+                    <p className="text-red-900 font-medium">❌ Token não encontrado no banco</p>
+                    {resultado.buscas?.similares?.quantidade > 0 && (
+                      <p className="text-sm mt-2">
+                        💡 Encontrados {resultado.buscas.similares.quantidade} tokens similares.
+                        O token pode estar corrompido ou modificado.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
         </Card>
 
         <div className="space-y-4">

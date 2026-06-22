@@ -34,6 +34,7 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [debugInfo, setDebugInfo] = useState<any>(null)
 
   const [cotacao, setCotacao] = useState<any>(null)
   const [fornecedor, setFornecedor] = useState<any>(null)
@@ -50,6 +51,16 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
     try {
       const supabase = createClient()
 
+      // DEBUG: Mostrar o token recebido
+      console.log('🔍 Token recebido:', params.token)
+      console.log('🔍 Tamanho do token:', params.token?.length)
+      console.log('🔍 Token contém espaços?', params.token?.includes(' '))
+      console.log('🔍 Token original (URL):', window.location.pathname)
+
+      // Limpar o token (remover espaços e caracteres especiais que podem vir do WhatsApp)
+      const tokenLimpo = params.token.trim().replace(/\s+/g, '')
+      console.log('🔍 Token limpo:', tokenLimpo)
+
       // Buscar item pelo token (um dos itens terá este token)
       const { data: itemData, error: itemError } = await supabase
         .from('itens_cotacao')
@@ -60,12 +71,24 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
           fornecedor:fornecedores (razao_social, nome_fantasia)
         `
         )
-        .eq('token_resposta', params.token)
+        .eq('token_resposta', tokenLimpo)
         .limit(1)
         .single()
 
+      console.log('🔍 Resultado da busca:', { itemData, itemError })
+
+      // Salvar informações de debug
+      setDebugInfo({
+        tokenOriginal: params.token,
+        tokenLimpo,
+        tamanho: tokenLimpo.length,
+        encontrado: !!itemData,
+        erro: itemError?.message,
+      })
+
       if (itemError || !itemData) {
-        setError('Link inválido ou expirado. Verifique se o link foi copiado corretamente.')
+        console.error('❌ Erro ao buscar token:', itemError)
+        setError('Link inválido ou expirado.')
         setLoading(false)
         return
       }
@@ -196,13 +219,39 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
 
   if (error && !cotacao) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Card className="max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+        <Card className="max-w-2xl w-full">
           <CardHeader>
-            <CardTitle className="text-red-600">Erro</CardTitle>
+            <CardTitle className="text-red-600">❌ Erro ao Carregar Cotação</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <p className="text-muted-foreground">{error}</p>
+
+            {debugInfo && (
+              <details className="bg-slate-100 p-4 rounded text-xs">
+                <summary className="cursor-pointer font-medium text-sm mb-2">
+                  🔍 Informações de Debug (clique para expandir)
+                </summary>
+                <pre className="overflow-auto mt-2">
+                  {JSON.stringify(debugInfo, null, 2)}
+                </pre>
+              </details>
+            )}
+
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded space-y-2">
+              <h3 className="font-medium text-blue-900">💡 Possíveis Soluções:</h3>
+              <ul className="text-sm text-blue-800 list-disc list-inside space-y-1">
+                <li>Verifique se você copiou o link completo</li>
+                <li>Tente abrir o link diretamente no navegador (não pelo WhatsApp)</li>
+                <li>Peça ao comprador para reenviar o link</li>
+                <li>Entre em contato com o comprador para verificar o prazo</li>
+              </ul>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              <strong>Dica:</strong> Se você recebeu este link pelo WhatsApp, tente copiar
+              o link e colar diretamente no navegador.
+            </div>
           </CardContent>
         </Card>
       </div>
