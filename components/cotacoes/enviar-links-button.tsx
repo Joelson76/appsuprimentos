@@ -52,9 +52,9 @@ export default function EnviarLinksButton({ cotacaoId, fornecedores }: Props) {
           .single()
 
         if (item?.token_resposta) {
-          // Usar link com query parameter (mais compatível com WhatsApp)
+          // Link direto (funciona quando copiado/colado)
           novosLinks[fornecedor.id] =
-            `${window.location.origin}/api/cotacao-fornecedor?token=${item.token_resposta}`
+            `${window.location.origin}/fornecedor/${item.token_resposta}`
         }
       }
 

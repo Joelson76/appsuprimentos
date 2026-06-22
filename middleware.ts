@@ -27,7 +27,18 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Rotas públicas (não precisam autenticação)
-  const publicPaths = ['/login', '/cadastro', '/planos', '/', '/api/webhooks', '/api/test-email', '/api/debug-planos']
+  const publicPaths = [
+    '/login',
+    '/cadastro',
+    '/planos',
+    '/',
+    '/api/webhooks',
+    '/api/test-email',
+    '/api/debug-planos',
+    '/fornecedor/', // Links de cotação para fornecedores (acesso via token)
+    '/api/cotacao-fornecedor', // Rota alternativa de redirecionamento
+    '/api/debug-token', // Debug de tokens
+  ]
   const isPublicPath = publicPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   )
