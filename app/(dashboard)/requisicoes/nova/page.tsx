@@ -21,12 +21,24 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { SelectFilial } from '@/components/filiais/select-filial'
+import { SelectorProduto } from '@/components/requisicoes/selector-produto'
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { toast } from 'sonner'
+
+interface Produto {
+  id: string
+  descricao: string
+  codigo: string | null
+  unidade: string
+  estoque_atual: number
+  custo_medio: number | null
+  classificacao: string | null
+}
 
 interface Item {
-  produto: string
-  descricao: string
+  produto_id: string
+  produto_descricao: string
   quantidade: number
   unidade: string
   valor_estimado: number
@@ -42,13 +54,13 @@ export default function NovaRequisicaoPage() {
   const [descricao, setDescricao] = useState('')
   const [urgencia, setUrgencia] = useState<'BAIXA' | 'NORMAL' | 'ALTA' | 'CRITICA'>('NORMAL')
   const [itens, setItens] = useState<Item[]>([
-    { produto: '', descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0, observacao: '' },
+    { produto_id: '', produto_descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0, observacao: '' },
   ])
 
   const addItem = () => {
     setItens([
       ...itens,
-      { produto: '', descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0, observacao: '' },
+      { produto_id: '', produto_descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0, observacao: '' },
     ])
   }
 
@@ -61,6 +73,28 @@ export default function NovaRequisicaoPage() {
   const updateItem = (index: number, field: keyof Item, value: any) => {
     const newItens = [...itens]
     newItens[index] = { ...newItens[index], [field]: value }
+    setItens(newItens)
+  }
+
+  const handleProdutoChange = (index: number, produto: Produto | null) => {
+    const newItens = [...itens]
+    if (produto) {
+      newItens[index] = {
+        ...newItens[index],
+        produto_id: produto.id,
+        produto_descricao: produto.descricao,
+        unidade: produto.unidade,
+        valor_estimado: produto.custo_medio || 0
+      }
+    } else {
+      newItens[index] = {
+        ...newItens[index],
+        produto_id: '',
+        produto_descricao: '',
+        unidade: 'UN',
+        valor_estimado: 0
+      }
+    }
     setItens(newItens)
   }
 
@@ -100,11 +134,11 @@ export default function NovaRequisicaoPage() {
       }
 
       const itensValidos = itens.filter(
-        (item) => (item.produto.trim() || item.descricao.trim()) && item.quantidade > 0
+        (item) => item.produto_id && item.quantidade > 0
       )
 
       if (itensValidos.length === 0) {
-        setError('Adicione pelo menos um item válido')
+        setError('Adicione pelo menos um item válido com produto selecionado')
         return
       }
 
@@ -135,8 +169,8 @@ export default function NovaRequisicaoPage() {
       // Criar itens da requisição
       const itensParaInserir = itensValidos.map((item) => ({
         requisicao_id: requisicao.id,
-        produto: item.produto.trim() || null,
-        descricao: item.descricao.trim(),
+        produto_id: item.produto_id,
+        descricao: item.produto_descricao,
         quantidade: item.quantidade,
         unidade: item.unidade,
         valor_estimado: item.valor_estimado > 0 ? item.valor_estimado : null,
@@ -150,6 +184,13 @@ export default function NovaRequisicaoPage() {
       if (itensError) {
         throw itensError
       }
+
+      // Sucesso
+      toast.success(
+        saveAsDraft
+          ? 'Requisição salva como rascunho!'
+          : 'Requisição enviada para aprovação!'
+      )
 
       // Redirecionar para lista de requisições
       router.push('/requisicoes')
@@ -271,30 +312,11 @@ export default function NovaRequisicaoPage() {
                     </Button>
                   )}
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Produto / Serviço</Label>
-                      <Input
-                        placeholder="Ex: Parafuso M8"
-                        value={item.produto}
-                        onChange={(e) =>
-                          updateItem(index, 'produto', e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Descrição *</Label>
-                      <Input
-                        placeholder="Ex: Aço inox, 100 unidades"
-                        value={item.descricao}
-                        onChange={(e) =>
-                          updateItem(index, 'descricao', e.target.value)
-                        }
-                        required
-                      />
-                    </div>
-                  </div>
+                  <SelectorProduto
+                    value={item.produto_id}
+                    onChange={(produto) => handleProdutoChange(index, produto)}
+                    required
+                  />
 
                   <div className="grid gap-4 md:grid-cols-4">
                     <div className="space-y-2">
@@ -316,27 +338,14 @@ export default function NovaRequisicaoPage() {
 
                     <div className="space-y-2">
                       <Label>Unidade</Label>
-                      <Select
+                      <Input
                         value={item.unidade}
-                        onValueChange={(value) =>
-                          updateItem(index, 'unidade', value)
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="UN">Unidade</SelectItem>
-                          <SelectItem value="CX">Caixa</SelectItem>
-                          <SelectItem value="KG">Quilograma</SelectItem>
-                          <SelectItem value="L">Litro</SelectItem>
-                          <SelectItem value="M">Metro</SelectItem>
-                          <SelectItem value="M2">Metro²</SelectItem>
-                          <SelectItem value="M3">Metro³</SelectItem>
-                          <SelectItem value="PC">Peça</SelectItem>
-                          <SelectItem value="PCT">Pacote</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        disabled
+                        className="bg-muted"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Unidade definida pelo produto
+                      </p>
                     </div>
 
                     <div className="space-y-2">

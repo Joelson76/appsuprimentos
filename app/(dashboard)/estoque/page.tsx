@@ -22,6 +22,20 @@ import { MovimentarEstoqueDialog } from '@/components/estoque/movimentar-estoque
 import { NovoProdutoDialog } from '@/components/estoque/novo-produto-dialog'
 import Link from 'next/link'
 
+const classificacaoLabels: Record<string, string> = {
+  COMPRAS_DIRETAS: 'Compras Diretas',
+  COMPRAS_INDIRETAS: 'Compras Indiretas',
+  ATIVOS_IMOBILIZADOS: 'Ativos Imobilizados',
+  USO_IMEDIATO: 'Uso Imediato'
+}
+
+const classificacaoColors: Record<string, string> = {
+  COMPRAS_DIRETAS: 'bg-blue-100 text-blue-800',
+  COMPRAS_INDIRETAS: 'bg-purple-100 text-purple-800',
+  ATIVOS_IMOBILIZADOS: 'bg-orange-100 text-orange-800',
+  USO_IMEDIATO: 'bg-teal-100 text-teal-800'
+}
+
 export default async function EstoquePage() {
   const supabase = await createClient()
 
@@ -180,6 +194,7 @@ export default async function EstoquePage() {
                 <TableHead>Descrição</TableHead>
                 <TableHead>Código</TableHead>
                 <TableHead>Categoria</TableHead>
+                <TableHead>Classificação</TableHead>
                 <TableHead>Estoque Atual</TableHead>
                 <TableHead>Estoque Mínimo</TableHead>
                 <TableHead>Status</TableHead>
@@ -197,6 +212,15 @@ export default async function EstoquePage() {
                       {produto.codigo || '-'}
                     </TableCell>
                     <TableCell>{produto.categorias?.nome || '-'}</TableCell>
+                    <TableCell>
+                      {produto.classificacao ? (
+                        <Badge className={classificacaoColors[produto.classificacao]}>
+                          {classificacaoLabels[produto.classificacao]}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">-</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <div className="space-y-1">
                         <div className="font-semibold">
@@ -251,7 +275,7 @@ export default async function EstoquePage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     <div className="text-muted-foreground">
                       Nenhum produto cadastrado
                     </div>

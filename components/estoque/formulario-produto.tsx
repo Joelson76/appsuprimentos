@@ -40,6 +40,7 @@ export function FormularioProduto({
     ncm: produto?.ncm || '',
     unidade: produto?.unidade || 'UN',
     categoria_id: produto?.categoria_id || '',
+    classificacao: produto?.classificacao || '',
 
     // Estoque
     estoque_atual: produto?.estoque_atual || '0',
@@ -78,6 +79,13 @@ export function FormularioProduto({
     'PAR', 'DUZIA', 'CENTO', 'MILHEIRO', 'TON', 'GALAO', 'ROLO', 'FARDO'
   ]
 
+  const classificacoes = [
+    { value: 'COMPRAS_DIRETAS', label: 'Compras Diretas', description: 'Produtos para produção ou revenda' },
+    { value: 'COMPRAS_INDIRETAS', label: 'Compras Indiretas', description: 'Insumos operacionais (MRO)' },
+    { value: 'ATIVOS_IMOBILIZADOS', label: 'Ativos Imobilizados', description: 'Bens de capital (máquinas, equipamentos)' },
+    { value: 'USO_IMEDIATO', label: 'Uso Imediato', description: 'Consumo direto sem estocagem' }
+  ]
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -110,6 +118,7 @@ export function FormularioProduto({
         ncm: formData.ncm || null,
         unidade: formData.unidade,
         categoria_id: formData.categoria_id || null,
+        classificacao: formData.classificacao || null,
         estoque_atual: parseFloat(formData.estoque_atual) || 0,
         estoque_minimo_alerta: formData.estoque_minimo_alerta
           ? parseFloat(formData.estoque_minimo_alerta)
@@ -236,7 +245,7 @@ export function FormularioProduto({
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="categoria_id">Categoria</Label>
               <Select
@@ -256,6 +265,30 @@ export function FormularioProduto({
               </Select>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="classificacao">Classificação de Compra</Label>
+              <Select
+                value={formData.classificacao}
+                onValueChange={(value) => setFormData({ ...formData, classificacao: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {classificacoes.map((classif) => (
+                    <SelectItem key={classif.value} value={classif.value}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{classif.label}</span>
+                        <span className="text-xs text-muted-foreground">{classif.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="marca">Marca</Label>
               <Input

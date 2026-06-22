@@ -41,6 +41,32 @@ Desde 2026-06-19, o sistema suporta múltiplas filiais por tenant.
 - Validação: apenas 1 matriz por tenant (constraint `uq_tenant_matriz`)
 - Migration: `20260619000001_add_filiais.sql`
 
+## Classificação de Produtos
+Desde 2026-06-22, produtos podem ser classificados para melhor gestão de compras.
+- **COMPRAS_DIRETAS**: Produtos para produção/revenda (matérias-primas, componentes)
+- **COMPRAS_INDIRETAS**: Insumos operacionais MRO (limpeza, escritório, manutenção)
+- **ATIVOS_IMOBILIZADOS**: Bens de capital (máquinas, equipamentos, veículos)
+- **USO_IMEDIATO**: Consumo direto sem estocagem (serviços, pequenos valores)
+- Enum `classificacao_produto` criado no banco
+- Coluna `classificacao` adicionada em `produtos`
+- View `vw_produtos_por_classificacao` para análise por tipo
+- Relatório disponível em `/relatorios/classificacao-produtos`
+- Migration: `20260622000000_classificacao_produtos_SAFE.sql`
+- Documentação: `docs/CLASSIFICACAO_PRODUTOS.md`
+
+## Vínculo de Produtos em Requisições/Cotações/Pedidos
+Desde 2026-06-22, requisições, cotações e pedidos **usam apenas produtos cadastrados**.
+- Coluna `produto_id` adicionada em: `itens_requisicao`, `itens_cotacao`, `itens_pedido`
+- Campo `descricao` se tornou opcional (preenchido automaticamente pelo produto)
+- View `vw_itens_requisicao_completo` combina item + dados do produto
+- View `vw_produtos_mais_requisitados` para análise de demanda
+- Função `validar_estoque_requisicao()` verifica disponibilidade
+- Componente `SelectorProduto` com alertas de estoque (Crítico/Baixo/Normal)
+- Unidade e valor estimado preenchidos automaticamente
+- Compatibilidade: itens antigos com texto livre continuam funcionando
+- Migration: `20260622000001_vincular_produtos_requisicoes.sql`
+- Documentação: `docs/PRODUTOS_REQUISICOES.md`
+
 ## Autenticação
 - Supabase Auth gerencia login, cadastro, recuperação de senha e tokens
 - Perfil e tenant_id são armazenados em `public.profiles` vinculado ao `auth.users`

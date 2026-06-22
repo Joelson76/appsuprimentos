@@ -42,6 +42,7 @@ export function NovoProdutoDialog({ categorias = [] }: NovoProdutoDialogProps) {
     codigo: '',
     unidade: 'UN',
     categoria_id: '',
+    classificacao: '',
     estoque_atual: '0',
     estoque_minimo_alerta: '',
     localizacao: '',
@@ -59,6 +60,13 @@ export function NovoProdutoDialog({ categorias = [] }: NovoProdutoDialogProps) {
     'CM', // Centímetro
     'M²', // Metro quadrado
     'M³', // Metro cúbico
+  ]
+
+  const classificacoes = [
+    { value: 'COMPRAS_DIRETAS', label: 'Compras Diretas', icon: '🏭' },
+    { value: 'COMPRAS_INDIRETAS', label: 'Compras Indiretas', icon: '🔧' },
+    { value: 'ATIVOS_IMOBILIZADOS', label: 'Ativos Imobilizados', icon: '🏗️' },
+    { value: 'USO_IMEDIATO', label: 'Uso Imediato', icon: '⚡' }
   ]
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,6 +106,7 @@ export function NovoProdutoDialog({ categorias = [] }: NovoProdutoDialogProps) {
           codigo: formData.codigo || null,
           unidade: formData.unidade,
           categoria_id: formData.categoria_id || null,
+          classificacao: formData.classificacao || null,
           estoque_atual: parseFloat(formData.estoque_atual),
           estoque_minimo_alerta: formData.estoque_minimo_alerta
             ? parseFloat(formData.estoque_minimo_alerta)
@@ -120,6 +129,7 @@ export function NovoProdutoDialog({ categorias = [] }: NovoProdutoDialogProps) {
         codigo: '',
         unidade: 'UN',
         categoria_id: '',
+        classificacao: '',
         estoque_atual: '0',
         estoque_minimo_alerta: '',
         localizacao: '',
@@ -203,26 +213,52 @@ export function NovoProdutoDialog({ categorias = [] }: NovoProdutoDialogProps) {
             </div>
           </div>
 
-          {/* Categoria */}
-          <div className="space-y-2">
-            <Label htmlFor="categoria_id">Categoria</Label>
-            <Select
-              value={formData.categoria_id}
-              onValueChange={(value) =>
-                setFormData({ ...formData, categoria_id: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione uma categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {categorias.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Categoria e Classificação */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="categoria_id">Categoria</Label>
+              <Select
+                value={formData.categoria_id}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, categoria_id: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categorias.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="classificacao">Classificação</Label>
+              <Select
+                value={formData.classificacao}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, classificacao: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {classificacoes.map((classif) => (
+                    <SelectItem key={classif.value} value={classif.value}>
+                      <span className="flex items-center gap-2">
+                        <span>{classif.icon}</span>
+                        <span>{classif.label}</span>
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Estoque Atual e Mínimo */}

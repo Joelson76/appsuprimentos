@@ -61,6 +61,7 @@ export default async function DashboardLayout({
             plano: assinatura?.plano || 'BASICO',
             status: tenant.status,
             trial_fim: tenant.trial_fim,
+            logo_url: tenant.logo_url,
           }}
         />
         <div className="flex-1 flex flex-col overflow-hidden">

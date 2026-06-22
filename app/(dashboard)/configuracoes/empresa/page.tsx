@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { ArrowLeft, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { EditarEmpresaForm } from '@/components/configuracoes/editar-empresa-form'
+import { UploadLogoForm } from '@/components/empresa/upload-logo-form'
 
 export default async function EmpresaPage() {
   const supabase = await createClient()
@@ -68,20 +69,40 @@ export default async function EmpresaPage() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            Informações Gerais
-          </CardTitle>
-          <CardDescription>
-            Mantenha os dados da empresa atualizados
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EditarEmpresaForm tenant={tenant} />
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Informações Gerais */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Informações Gerais
+            </CardTitle>
+            <CardDescription>
+              Mantenha os dados da empresa atualizados
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <EditarEmpresaForm tenant={tenant} />
+          </CardContent>
+        </Card>
+
+        {/* Logo da Empresa */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Logo da Empresa</CardTitle>
+            <CardDescription>
+              Personalize a identidade visual do sistema
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UploadLogoForm
+              tenantId={tenant.id}
+              currentLogoUrl={tenant.logo_url}
+              tenantNome={tenant.nome}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

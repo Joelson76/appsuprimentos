@@ -26,6 +26,7 @@ interface SidebarProps {
     plano: string
     status: string
     trial_fim?: string
+    logo_url?: string | null
   }
 }
 
@@ -118,20 +119,27 @@ export function Sidebar({ tenant }: SidebarProps) {
     <aside className="w-64 border-r bg-background flex flex-col h-screen">
       <div className="p-6 border-b">
         <div className="flex items-center gap-3 mb-1">
-          <Image
-            src="/logo-jls.jpg"
-            alt="JLS Tecnologia"
-            width={40}
-            height={40}
-            className="object-contain"
-            priority
-          />
+          {tenant.logo_url ? (
+            <Image
+              src={tenant.logo_url}
+              alt={`Logo ${tenant.nome}`}
+              width={40}
+              height={40}
+              className="rounded object-contain"
+              priority
+            />
+          ) : (
+            <div className="w-10 h-10 rounded bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">
+                {tenant.nome.substring(0, 2).toUpperCase()}
+              </span>
+            </div>
+          )}
           <div className="flex flex-col">
-            <h1 className="text-2xl font-bold text-primary">SupriFlow</h1>
-            <p className="text-[10px] text-muted-foreground -mt-1">by JLS Tecnologia</p>
+            <h1 className="text-xl font-bold text-primary">{tenant.nome}</h1>
+            <p className="text-[10px] text-muted-foreground -mt-1">powered by SupriFlow</p>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">{tenant.nome}</p>
         <div className="mt-3 flex items-center gap-2">
           <Badge className={cn('text-xs', getPlanoColor(tenant.plano))}>
             {tenant.plano}
