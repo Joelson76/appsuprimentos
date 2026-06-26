@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Mail, Phone, Star, Building2, Pencil } from 'lucide-react'
+import { ArrowLeft, Mail, Phone, Star, Building2, Pencil, MapPin } from 'lucide-react'
 import Link from 'next/link'
 
 interface PageProps {
@@ -48,6 +48,11 @@ export default async function FornecedorDetalhesPage({ params }: PageProps) {
       /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
       '$1.$2.$3/$4-$5'
     )
+  }
+
+  const formatCEP = (cep: string) => {
+    if (!cep) return ''
+    return cep.replace(/^(\d{5})(\d{3})$/, '$1-$2')
   }
 
   const getStatusBadge = (status: string) => {
@@ -197,6 +202,49 @@ export default async function FornecedorDetalhesPage({ params }: PageProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Endereço */}
+      {fornecedor.endereco && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Endereço
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              {fornecedor.endereco.cep && (
+                <p>
+                  <span className="text-muted-foreground">CEP:</span>{' '}
+                  {formatCEP(fornecedor.endereco.cep)}
+                </p>
+              )}
+              {fornecedor.endereco.logradouro && (
+                <p>
+                  {fornecedor.endereco.logradouro}
+                  {fornecedor.endereco.numero && `, ${fornecedor.endereco.numero}`}
+                  {fornecedor.endereco.complemento &&
+                    ` - ${fornecedor.endereco.complemento}`}
+                </p>
+              )}
+              {fornecedor.endereco.bairro && (
+                <p>
+                  <span className="text-muted-foreground">Bairro:</span>{' '}
+                  {fornecedor.endereco.bairro}
+                </p>
+              )}
+              {(fornecedor.endereco.cidade || fornecedor.endereco.estado) && (
+                <p>
+                  {fornecedor.endereco.cidade}
+                  {fornecedor.endereco.estado &&
+                    ` - ${fornecedor.endereco.estado}`}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Categorias e Score */}
       <div className="grid gap-6 md:grid-cols-2">

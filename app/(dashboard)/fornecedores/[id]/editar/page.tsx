@@ -23,6 +23,7 @@ import {
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { useViaCEP } from '@/hooks/use-viacep'
 
 interface PageProps {
   params: {
@@ -46,6 +47,17 @@ export default function EditarFornecedorPage({ params }: PageProps) {
   const [categorias, setCategorias] = useState('')
   const [status, setStatus] = useState<string>('ATIVO')
 
+  // Campos de endereço
+  const [cep, setCep] = useState('')
+  const [logradouro, setLogradouro] = useState('')
+  const [numero, setNumero] = useState('')
+  const [complemento, setComplemento] = useState('')
+  const [bairro, setBairro] = useState('')
+  const [cidade, setCidade] = useState('')
+  const [estado, setEstado] = useState('')
+
+  const { buscarCEP, loading: loadingCEP } = useViaCEP()
+
   useEffect(() => {
     loadFornecedor()
   }, [params.id])
@@ -68,6 +80,18 @@ export default function EditarFornecedorPage({ params }: PageProps) {
         setTelefone(data.telefone || '')
         setCategorias(data.categorias?.join(', ') || '')
         setStatus(data.status || 'ATIVO')
+
+        // Carregar endereço se existir
+        if (data.endereco) {
+          const end = data.endereco as any
+          setCep(end.cep ? formatCEP(end.cep) : '')
+          setLogradouro(end.logradouro || '')
+          setNumero(end.numero || '')
+          setComplemento(end.complemento || '')
+          setBairro(end.bairro || '')
+          setCidade(end.cidade || '')
+          setEstado(end.estado || '')
+        }
       }
     } catch (err: any) {
       console.error('Erro ao carregar fornecedor:', err)
@@ -87,6 +111,36 @@ export default function EditarFornecedorPage({ params }: PageProps) {
     )
   }
 
+  function formatCEP(cep: string): string {
+    if (!cep) return ''
+    const digits = cep.replace(/\D/g, '')
+    if (digits.length !== 8) return cep
+    return digits.replace(/^(\d{5})(\d{3})$/, '$1-$2')
+  }
+
+  const handleCEPChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '')
+
+    // Formatar CEP
+    if (value.length > 5) {
+      value = value.replace(/^(\d{5})(\d)/, '$1-$2')
+    }
+
+    setCep(value)
+
+    // Buscar endereço se CEP completo
+    if (value.replace(/\D/g, '').length === 8) {
+      const endereco = await buscarCEP(value)
+
+      if (endereco) {
+        setLogradouro(endereco.logradouro || '')
+        setBairro(endereco.bairro || '')
+        setCidade(endereco.localidade || '')
+        setEstado(endereco.uf || '')
+      }
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -98,6 +152,20 @@ export default function EditarFornecedorPage({ params }: PageProps) {
         .map((c) => c.trim())
         .filter((c) => c)
 
+      // Montar objeto de endereço
+      const enderecoObj =
+        cep || logradouro || cidade
+          ? {
+              cep: cep.replace(/\D/g, '') || null,
+              logradouro: logradouro.trim() || null,
+              numero: numero.trim() || null,
+              complemento: complemento.trim() || null,
+              bairro: bairro.trim() || null,
+              cidade: cidade.trim() || null,
+              estado: estado.trim() || null,
+            }
+          : null
+
       const { error: updateError } = await supabase
         .from('fornecedores')
         .update({
@@ -106,6 +174,7 @@ export default function EditarFornecedorPage({ params }: PageProps) {
           email: email.trim() || null,
           telefone: telefone.trim() || null,
           categorias: categoriasArray.length > 0 ? categoriasArray : null,
+          endereco: enderecoObj,
           status,
         })
         .eq('id', params.id)
@@ -274,6 +343,101 @@ export default function EditarFornecedorPage({ params }: PageProps) {
                 <p className="text-xs text-muted-foreground">
                   Separe as categorias por vírgula
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Endereço */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Endereço</CardTitle>
+              <CardDescription>
+                Informações de localização do fornecedor (opcional)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="cep">CEP</Label>
+                <Input
+                  id="cep"
+                  placeholder="00000-000"
+                  value={cep}
+                  onChange={handleCEPChange}
+                  maxLength={9}
+                  disabled={loadingCEP}
+                />
+                {loadingCEP && (
+                  <p className="text-xs text-muted-foreground">
+                    Buscando endereço...
+                  </p>
+                )}
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="logradouro">Logradouro</Label>
+                  <Input
+                    id="logradouro"
+                    placeholder="Rua, Avenida..."
+                    value={logradouro}
+                    onChange={(e) => setLogradouro(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="numero">Número</Label>
+                  <Input
+                    id="numero"
+                    placeholder="123"
+                    value={numero}
+                    onChange={(e) => setNumero(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="complemento">Complemento</Label>
+                  <Input
+                    id="complemento"
+                    placeholder="Sala, Bloco..."
+                    value={complemento}
+                    onChange={(e) => setComplemento(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bairro">Bairro</Label>
+                  <Input
+                    id="bairro"
+                    placeholder="Centro, Jardim..."
+                    value={bairro}
+                    onChange={(e) => setBairro(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="cidade">Cidade</Label>
+                  <Input
+                    id="cidade"
+                    placeholder="São Paulo"
+                    value={cidade}
+                    onChange={(e) => setCidade(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="estado">UF</Label>
+                  <Input
+                    id="estado"
+                    placeholder="SP"
+                    value={estado}
+                    onChange={(e) => setEstado(e.target.value.toUpperCase())}
+                    maxLength={2}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
