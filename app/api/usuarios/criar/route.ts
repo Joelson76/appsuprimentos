@@ -35,11 +35,20 @@ export async function POST(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
+    console.log('🔍 DEBUG adminProfile:', {
+      userId: user.id,
+      adminProfile,
+      profileError: profileError?.message,
+      hasTenantId: !!adminProfile?.tenant_id,
+      tenantIdValue: adminProfile?.tenant_id
+    })
+
     if (profileError || !adminProfile) {
       return NextResponse.json(
         {
           error: 'Erro ao buscar dados do administrador',
-          details: profileError?.message
+          details: profileError?.message,
+          debug: { userId: user.id, profileError }
         },
         { status: 500 }
       )
@@ -50,11 +59,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (!adminProfile.tenant_id) {
+      console.error('❌ Admin sem tenant_id!', { adminProfile, userId: user.id })
       return NextResponse.json(
-        { error: 'Administrador sem tenant configurado' },
+        {
+          error: 'Administrador sem tenant configurado',
+          debug: { adminProfile, userId: user.id }
+        },
         { status: 400 }
       )
     }
+
+    console.log('✅ tenant_id encontrado:', adminProfile.tenant_id)
 
     // 3. Validar dados recebidos
     const { email, senha, nome, perfil: novoPerfil } = await request.json()
@@ -116,14 +131,18 @@ export async function POST(request: NextRequest) {
     const userData = await createUserResponse.json()
 
     // 5. Criar profile usando service_role (já criado antes)
+    const profileToInsert = {
+      id: userData.id,
+      nome,
+      perfil: novoPerfil,
+      tenant_id: adminProfile.tenant_id,
+    }
+
+    console.log('💾 Inserindo profile:', profileToInsert)
+
     const { error: insertProfileError } = await supabaseAdmin
       .from('profiles')
-      .insert({
-        id: userData.id,
-        nome,
-        perfil: novoPerfil,
-        tenant_id: adminProfile.tenant_id,
-      })
+      .insert(profileToInsert)
 
     if (insertProfileError) {
       // Rollback: deletar usuário criado
