@@ -12,8 +12,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 })
     }
 
-    // 2. Buscar profile do admin e validar permissão
-    const { data: adminProfile, error: profileError } = await supabase
+    // 2. Buscar env vars PRIMEIRO
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      return NextResponse.json(
+        { error: 'Configuração do servidor incompleta' },
+        { status: 500 }
+      )
+    }
+
+    // 3. Criar client service_role para buscar profile (bypass RLS)
+    const supabaseAdmin = createServiceClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+
+    // 4. Buscar profile do admin usando service_role (ignora RLS)
+    const { data: adminProfile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('perfil, tenant_id')
       .eq('id', user.id)
@@ -21,7 +37,10 @@ export async function POST(request: NextRequest) {
 
     if (profileError || !adminProfile) {
       return NextResponse.json(
-        { error: 'Erro ao buscar dados do administrador' },
+        {
+          error: 'Erro ao buscar dados do administrador',
+          details: profileError?.message
+        },
         { status: 500 }
       )
     }
@@ -67,18 +86,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Perfil inválido' }, { status: 400 })
     }
 
-    // 4. Verificar env vars
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      return NextResponse.json(
-        { error: 'Configuração do servidor incompleta' },
-        { status: 500 }
-      )
-    }
-
-    // 5. Criar usuário via REST API do Supabase
+    // 4. Criar usuário via REST API do Supabase
     const createUserResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
       method: 'POST',
       headers: {
@@ -107,11 +115,7 @@ export async function POST(request: NextRequest) {
 
     const userData = await createUserResponse.json()
 
-    // 6. Criar profile usando service_role
-    const supabaseAdmin = createServiceClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-
+    // 5. Criar profile usando service_role (já criado antes)
     const { error: insertProfileError } = await supabaseAdmin
       .from('profiles')
       .insert({
