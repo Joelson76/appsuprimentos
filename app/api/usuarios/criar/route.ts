@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Criar usuário via REST API do Supabase
+    // IMPORTANTE: Passar tenant_id no user_metadata para o trigger handle_new_user
     const createUserResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
       method: 'POST',
       headers: {
@@ -113,7 +114,11 @@ export async function POST(request: NextRequest) {
         email,
         password: senha,
         email_confirm: true,
-        user_metadata: { nome },
+        user_metadata: {
+          nome,
+          tenant_id: adminProfile.tenant_id,
+          perfil: novoPerfil,
+        },
       }),
     })
 
@@ -130,40 +135,10 @@ export async function POST(request: NextRequest) {
 
     const userData = await createUserResponse.json()
 
-    // 5. Criar profile usando service_role (já criado antes)
-    const profileToInsert = {
-      id: userData.id,
-      nome,
-      perfil: novoPerfil,
-      tenant_id: adminProfile.tenant_id,
-    }
+    // 5. O profile JÁ FOI CRIADO pelo trigger handle_new_user automaticamente!
+    console.log('✅ Usuário criado! O trigger handle_new_user criou o profile automaticamente.')
 
-    console.log('💾 Inserindo profile:', profileToInsert)
-
-    const { error: insertProfileError } = await supabaseAdmin
-      .from('profiles')
-      .insert(profileToInsert)
-
-    if (insertProfileError) {
-      // Rollback: deletar usuário criado
-      await fetch(`${supabaseUrl}/auth/v1/admin/users/${userData.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${serviceRoleKey}`,
-          'apikey': serviceRoleKey,
-        },
-      })
-
-      return NextResponse.json(
-        {
-          error: 'Erro ao criar perfil do usuário',
-          details: insertProfileError.message,
-        },
-        { status: 500 }
-      )
-    }
-
-    // 7. Sucesso!
+    // 6. Sucesso!
     return NextResponse.json({
       success: true,
       user: {
