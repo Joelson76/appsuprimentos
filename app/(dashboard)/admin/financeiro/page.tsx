@@ -33,13 +33,15 @@ export default async function FinanceiroPage() {
     .eq('id', user?.id || '')
     .single()
 
-  const isAdmin = ['SUPER_ADMIN', 'ADMIN'].includes(profile?.perfil || '')
+  const isSuperAdmin = profile?.perfil === 'SUPER_ADMIN'
 
-  if (!isAdmin) {
+  if (!isSuperAdmin) {
     return (
       <div className="text-center py-12">
+        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Acesso Negado</h2>
         <p className="text-muted-foreground">
-          Acesso restrito a administradores
+          Esta página é restrita a Super Administradores da plataforma.
         </p>
       </div>
     )

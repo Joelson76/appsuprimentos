@@ -16,14 +16,39 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { DollarSign, TrendingUp, AlertTriangle, CheckCircle2, Eye } from 'lucide-react'
+import { DollarSign, TrendingUp, AlertTriangle, CheckCircle2, Eye, AlertCircle } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import Link from 'next/link'
 
 export default async function CobrancasPage() {
   const supabase = await createClient()
 
-  // Buscar todas as faturas (apenas SUPER_ADMIN ou ADMIN)
+  // Verificar se é SUPER_ADMIN
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('perfil')
+    .eq('id', user?.id || '')
+    .single()
+
+  const isSuperAdmin = profile?.perfil === 'SUPER_ADMIN'
+
+  if (!isSuperAdmin) {
+    return (
+      <div className="text-center py-12">
+        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Acesso Negado</h2>
+        <p className="text-muted-foreground">
+          Esta página é restrita a Super Administradores da plataforma.
+        </p>
+      </div>
+    )
+  }
+
+  // Buscar todas as faturas (apenas SUPER_ADMIN)
   const { data: faturas } = await supabase
     .from('faturas')
     .select(

@@ -45,6 +45,7 @@ export default async function ConfiguracoesPage() {
     .single()
 
   const isAdmin = profile?.perfil === 'SUPER_ADMIN' || profile?.perfil === 'ADMIN'
+  const isSuperAdmin = profile?.perfil === 'SUPER_ADMIN'
 
   return (
     <div className="space-y-6">
@@ -175,7 +176,7 @@ export default async function ConfiguracoesPage() {
             </Card>
           </Link>
 
-          {isAdmin && (
+          {isSuperAdmin && (
             <>
               <Link href="/admin/cobrancas">
                 <Card className="hover:bg-slate-50 transition-colors cursor-pointer">
@@ -185,12 +186,12 @@ export default async function ConfiguracoesPage() {
                       Gestão de Cobranças
                     </CardTitle>
                     <CardDescription>
-                      Painel administrativo de faturas
+                      Painel administrativo de faturas (Super Admin)
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Visualize todas as faturas
+                      Visualize todas as faturas de todos os tenants
                     </p>
                     <Button variant="outline" className="w-full">
                       Ver Faturas
@@ -207,12 +208,12 @@ export default async function ConfiguracoesPage() {
                       Dashboard Financeiro
                     </CardTitle>
                     <CardDescription>
-                      MRR, ARR e métricas
+                      MRR, ARR e métricas (Super Admin)
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Análise financeira completa
+                      Análise financeira completa da plataforma
                     </p>
                     <Button className="w-full bg-green-600 hover:bg-green-700">
                       Ver Dashboard

@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Download,
   ExternalLink,
+  AlertCircle,
 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import Link from 'next/link'
@@ -31,6 +32,31 @@ export default async function FaturaDetalhesPage({
   params: { id: string }
 }) {
   const supabase = await createClient()
+
+  // Verificar se é SUPER_ADMIN
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('perfil')
+    .eq('id', user?.id || '')
+    .single()
+
+  const isSuperAdmin = profile?.perfil === 'SUPER_ADMIN'
+
+  if (!isSuperAdmin) {
+    return (
+      <div className="text-center py-12">
+        <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Acesso Negado</h2>
+        <p className="text-muted-foreground">
+          Esta página é restrita a Super Administradores da plataforma.
+        </p>
+      </div>
+    )
+  }
 
   const { data: fatura, error } = await supabase
     .from('faturas')
