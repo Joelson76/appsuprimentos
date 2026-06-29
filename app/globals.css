@@ -56,4 +56,37 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Typography Editorial - Frontend Design Skill */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  p, li, span {
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  /* Números grandes e dramáticos */
+  .display-number {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(4rem, 12vw, 10rem);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+  }
+
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
