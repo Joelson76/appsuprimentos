@@ -61,36 +61,72 @@ export default async function DashboardPage() {
     .order('mes', { ascending: false })
     .limit(12)
 
-  // Busca evolução mensal por filial/CNPJ
-  const { data: evolucaoPorFilial, error: errorEvolucaoFilial } = await supabase
-    .from('vw_evolucao_mensal_por_filial')
-    .select('*')
+  // Buscar todas as filiais do tenant
+  const { data: filiais } = await supabase
+    .from('filiais')
+    .select('id, nome, cnpj, is_matriz')
     .eq('tenant_id', profile?.tenant_id || '')
-    .order('mes', { ascending: false })
-    .limit(72) // 12 meses * até 6 filiais
+    .eq('ativa', true)
+    .order('is_matriz', { ascending: false })
 
-  // Debug detalhado
-  console.log('=== DEBUG DASHBOARD ===')
-  console.log('📊 Evolução agregada:', evolucao?.length || 0, 'registros')
-  console.log('📊 Evolução por filial:', evolucaoPorFilial?.length || 0, 'registros')
+  // Buscar pedidos dos últimos 6 meses agrupados por filial
+  const { data: pedidosPorFilial, error: errorPedidos } = await supabase
+    .rpc('get_pedidos_por_filial_mes', {
+      p_tenant_id: profile?.tenant_id || ''
+    })
+    .catch(() => null)
 
-  if (errorEvolucao) {
-    console.error('❌ Erro evolução:', errorEvolucao)
-  }
-  if (errorEvolucaoFilial) {
-    console.error('❌ Erro evolução filial:', errorEvolucaoFilial)
-    console.error('Detalhes:', JSON.stringify(errorEvolucaoFilial, null, 2))
+  // Fallback: buscar direto da tabela se RPC não existir
+  let evolucaoPorFilial = pedidosPorFilial
+
+  if (!pedidosPorFilial) {
+    const { data: pedidosRaw } = await supabase
+      .from('ordens_compra')
+      .select('criado_em, valor_total, filial_id')
+      .eq('tenant_id', profile?.tenant_id || '')
+      .not('status', 'in', '("CANCELADA","RASCUNHO")')
+      .gte('criado_em', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
+
+    // Agrupar manualmente
+    if (pedidosRaw && filiais) {
+      const grouped = new Map<string, any>()
+
+      pedidosRaw.forEach(pedido => {
+        const mes = new Date(pedido.criado_em).toISOString().substring(0, 7) // YYYY-MM
+        const filialId = pedido.filial_id || 'SEM_FILIAL'
+        const key = `${mes}-${filialId}`
+
+        if (!grouped.has(key)) {
+          const filial = filiais.find(f => f.id === filialId)
+          grouped.set(key, {
+            mes: mes + '-01',
+            filial_id: filialId,
+            filial_nome: filial?.nome || 'Sem Filial',
+            cnpj: filial?.cnpj || null,
+            is_matriz: filial?.is_matriz || false,
+            qtd_pedidos: 0,
+            valor_total: 0
+          })
+        }
+
+        const item = grouped.get(key)!
+        item.qtd_pedidos++
+        item.valor_total += pedido.valor_total || 0
+      })
+
+      evolucaoPorFilial = Array.from(grouped.values())
+    }
   }
 
-  if (evolucao && evolucao.length > 0) {
-    console.log('✅ Dados agregados:', evolucao[0])
-  }
-  if (evolucaoPorFilial && evolucaoPorFilial.length > 0) {
-    console.log('✅ Dados por filial:', evolucaoPorFilial[0])
-  } else {
-    console.warn('⚠️ Nenhum dado retornado de vw_evolucao_mensal_por_filial')
-    console.warn('Verifique se a view foi criada no Supabase!')
-  }
+  // Debug
+  if (errorEvolucao) console.error('❌ Erro evolução:', errorEvolucao)
+  if (errorPedidos) console.error('❌ Erro pedidos por filial:', errorPedidos)
+
+  console.log('📊 Dashboard:', {
+    evolucao: evolucao?.length || 0,
+    evolucaoPorFilial: evolucaoPorFilial?.length || 0,
+    filiais: filiais?.length || 0
+  })
 
   // Busca top fornecedores
   const { data: topFornecedores } = await supabase
