@@ -111,30 +111,63 @@ export default async function DashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Valor de Pedidos por Mês
+            <BarChart3 className="h-5 w-5 text-primary" />
+            Evolução Mensal de Pedidos
           </CardTitle>
         </CardHeader>
         <CardContent>
           {evolucao && evolucao.length > 0 ? (
             <div className="space-y-4">
-              {evolucao.slice(0, 6).reverse().map((mes: any) => {
-                const mesNome = new Date(mes.mes + '-01').toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
+              {evolucao.slice(0, 6).reverse().map((mes: any, index: number) => {
+                const mesNome = new Date(mes.mes + '-01').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
                 const valorTotal = mes.valor_total_pedidos || 0
-                const maxValor = Math.max(...evolucao.slice(0, 6).map((m: any) => m.valor_total_pedidos || 0))
-                const percentual = maxValor > 0 ? (valorTotal / maxValor) * 100 : 0
+                const qtdPedidos = mes.total_pedidos || 0
+                const ticketMedio = qtdPedidos > 0 ? valorTotal / qtdPedidos : 0
+                const maxValor = Math.max(...evolucao.slice(0, 6).map((m: any) => m.valor_total_pedidos || 0), 1)
+                const percentual = (valorTotal / maxValor) * 100
+
+                // Variação em relação ao mês anterior
+                const mesAnterior = evolucao.slice(0, 6).reverse()[index - 1]
+                const variacao = mesAnterior && mesAnterior.valor_total_pedidos > 0
+                  ? ((valorTotal - mesAnterior.valor_total_pedidos) / mesAnterior.valor_total_pedidos) * 100
+                  : null
 
                 return (
-                  <div key={mes.mes} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium capitalize">{mesNome}</span>
-                      <span className="font-bold text-primary">
-                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
-                      </span>
+                  <div key={mes.mes} className="space-y-2 p-4 border rounded-lg hover:bg-accent/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-semibold capitalize text-foreground">{mesNome}</span>
+                          {variacao !== null && (
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                              variacao > 0
+                                ? 'bg-green-100 text-green-700'
+                                : variacao < 0
+                                ? 'bg-red-100 text-red-700'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}>
+                              {variacao > 0 ? '↑' : variacao < 0 ? '↓' : '='} {Math.abs(variacao).toFixed(1)}%
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>{qtdPedidos} {qtdPedidos === 1 ? 'pedido' : 'pedidos'}</span>
+                          {qtdPedidos > 0 && (
+                            <span>
+                              Ticket médio: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ticketMedio)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-bold text-primary">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
                       <div
-                        className="bg-primary h-full rounded-full transition-all duration-500"
+                        className="bg-gradient-to-r from-blue-600 to-cyan-500 h-full rounded-full transition-all duration-700 ease-out"
                         style={{ width: `${percentual}%` }}
                       />
                     </div>
@@ -146,6 +179,7 @@ export default async function DashboardPage() {
             <div className="text-center text-muted-foreground py-8">
               <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p className="text-sm">Nenhum dado de pedidos ainda</p>
+              <p className="text-xs mt-1">Comece criando requisições e pedidos</p>
             </div>
           )}
         </CardContent>
