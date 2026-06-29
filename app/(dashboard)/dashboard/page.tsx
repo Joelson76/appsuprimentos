@@ -319,24 +319,27 @@ export default async function DashboardPage() {
                         </div>
 
                         {/* Label completo na base: CNPJ → Meses → Valores */}
-                        <div className="text-center space-y-2 mt-2">
+                        <div className="text-center space-y-3 mt-3 p-4 border-t-2 border-primary/20 bg-accent/30 rounded-b-lg">
                           {/* Nome + Badge */}
                           <div className="flex items-center justify-center gap-2">
-                            <p className="text-sm font-bold text-foreground">
+                            <p className="text-lg font-bold text-foreground">
                               {filialNome}
                             </p>
                             {filialInfo?.is_matriz && (
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                                Matriz
+                              <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded font-bold shadow-sm">
+                                MATRIZ
                               </span>
                             )}
                           </div>
 
-                          {/* CNPJ */}
+                          {/* CNPJ - BEM DESTACADO COM FUNDO */}
                           {filialInfo?.cnpj && (
-                            <p className="text-xs text-muted-foreground font-mono">
-                              CNPJ: {filialInfo.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
-                            </p>
+                            <div className="bg-blue-50 dark:bg-blue-950 border-2 border-blue-200 dark:border-blue-800 px-4 py-3 rounded-lg shadow-sm">
+                              <p className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase mb-1">CNPJ</p>
+                              <p className="text-base font-black text-blue-900 dark:text-blue-100 font-mono tracking-wide">
+                                {filialInfo.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
+                              </p>
+                            </div>
                           )}
 
                           {/* Meses */}
