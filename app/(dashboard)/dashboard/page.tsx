@@ -117,10 +117,31 @@ export default async function DashboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {evolucao && evolucao.length > 0 ? (
-            <div className="space-y-4">
-              {evolucao.slice(0, 6).reverse().map((mes: any, index: number) => {
-                const mesNome = new Date(mes.mes + '-01').toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+          {(() => {
+            const dadosValidos = evolucao?.filter((m: any) =>
+              m.mes &&
+              m.mes.match(/^\d{4}-\d{2}$/) &&
+              (m.valor_total_pedidos > 0 || m.total_pedidos > 0)
+            ).slice(0, 6).reverse() || []
+
+            return dadosValidos.length > 0 ? (
+              <div className="space-y-4">
+                {dadosValidos.map((mes: any, index: number) => {
+                // Parse da data com validação
+                let mesNome = 'Mês inválido'
+                try {
+                  if (mes.mes) {
+                    // Formato esperado: YYYY-MM
+                    const [ano, mesNum] = mes.mes.split('-')
+                    if (ano && mesNum) {
+                      const data = new Date(parseInt(ano), parseInt(mesNum) - 1, 1)
+                      mesNome = data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+                    }
+                  }
+                } catch (e) {
+                  console.error('Erro ao formatar data:', mes.mes, e)
+                }
+
                 const valorTotal = mes.valor_total_pedidos || 0
                 const qtdPedidos = mes.total_pedidos || 0
                 const ticketMedio = qtdPedidos > 0 ? valorTotal / qtdPedidos : 0
@@ -176,13 +197,14 @@ export default async function DashboardPage() {
                 )
               })}
             </div>
-          ) : (
-            <div className="text-center text-muted-foreground py-8">
-              <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">Nenhum dado de pedidos ainda</p>
-              <p className="text-xs mt-1">Comece criando requisições e pedidos</p>
-            </div>
-          )}
+            ) : (
+              <div className="text-center text-muted-foreground py-8">
+                <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Nenhum dado de pedidos ainda</p>
+                <p className="text-xs mt-1">Comece criando requisições e pedidos</p>
+              </div>
+            )
+          })()}
         </CardContent>
       </Card>
 
