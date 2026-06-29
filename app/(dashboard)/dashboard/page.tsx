@@ -69,18 +69,27 @@ export default async function DashboardPage() {
     .order('mes', { ascending: false })
     .limit(72) // 12 meses * até 6 filiais
 
-  // Debug
+  // Debug detalhado
+  console.log('=== DEBUG DASHBOARD ===')
+  console.log('📊 Evolução agregada:', evolucao?.length || 0, 'registros')
+  console.log('📊 Evolução por filial:', evolucaoPorFilial?.length || 0, 'registros')
+
   if (errorEvolucao) {
-    console.error('❌ Erro ao buscar evolução:', errorEvolucao)
+    console.error('❌ Erro evolução:', errorEvolucao)
   }
   if (errorEvolucaoFilial) {
-    console.error('❌ Erro ao buscar evolução por filial:', errorEvolucaoFilial)
+    console.error('❌ Erro evolução filial:', errorEvolucaoFilial)
+    console.error('Detalhes:', JSON.stringify(errorEvolucaoFilial, null, 2))
   }
-  if (evolucao) {
-    console.log('📊 Evolução mensal:', evolucao)
+
+  if (evolucao && evolucao.length > 0) {
+    console.log('✅ Dados agregados:', evolucao[0])
   }
-  if (evolucaoPorFilial) {
-    console.log('📊 Evolução por filial:', evolucaoPorFilial)
+  if (evolucaoPorFilial && evolucaoPorFilial.length > 0) {
+    console.log('✅ Dados por filial:', evolucaoPorFilial[0])
+  } else {
+    console.warn('⚠️ Nenhum dado retornado de vw_evolucao_mensal_por_filial')
+    console.warn('Verifique se a view foi criada no Supabase!')
   }
 
   // Busca top fornecedores
