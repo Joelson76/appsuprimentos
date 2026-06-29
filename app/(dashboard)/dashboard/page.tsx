@@ -267,38 +267,10 @@ export default async function DashboardPage() {
               1
             )
 
-            // Renderizar: FILIAL → MESES
+            // Renderizar: Valores mensais em cima, CNPJs embaixo
             return (
               <div className="space-y-6">
-                {/* Resumo por CNPJ */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                  {Array.from(filiaisPorCnpj.entries()).map(([cnpj, dadosFilial]) => {
-                    const filialInfo = dadosFilial[0]
-                    const valorTotal = dadosFilial.reduce((sum, d) => sum + (d.valor_total || 0), 0)
-                    const qtdTotal = dadosFilial.reduce((sum, d) => sum + (d.qtd_pedidos || 0), 0)
-
-                    return (
-                      <div key={`resumo-${cnpj}`} className="p-3 border rounded-lg bg-accent/50">
-                        <p className="text-xs font-semibold text-foreground mb-1 truncate">
-                          {filialInfo?.filial_nome || cnpj}
-                        </p>
-                        {filialInfo?.cnpj && (
-                          <p className="text-xs text-muted-foreground font-mono mb-2">
-                            {filialInfo.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
-                          </p>
-                        )}
-                        <p className="text-lg font-bold text-primary">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {qtdTotal} {qtdTotal === 1 ? 'pedido' : 'pedidos'}
-                        </p>
-                      </div>
-                    )
-                  })}
-                </div>
-
-                {/* Gráfico agrupado por FILIAL */}
+                {/* Gráfico agrupado por FILIAL - Valores mensais */}
                 <div className="flex items-end justify-between gap-6 h-64 pb-2">
                   {Array.from(filiaisPorCnpj.entries()).map(([cnpj, dadosFilial], filialIdx) => {
                     const filialInfo = dadosFilial[0]
@@ -367,9 +339,49 @@ export default async function DashboardPage() {
                   })}
                 </div>
 
+                {/* Resumo por CNPJ - EMBAIXO DO GRÁFICO */}
+                <div className="border-t pt-4 mt-4">
+                  <p className="text-sm font-semibold text-foreground mb-3">Totais por CNPJ/Filial:</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {Array.from(filiaisPorCnpj.entries()).map(([cnpj, dadosFilial]) => {
+                      const filialInfo = dadosFilial[0]
+                      const valorTotal = dadosFilial.reduce((sum, d) => sum + (d.valor_total || 0), 0)
+                      const qtdTotal = dadosFilial.reduce((sum, d) => sum + (d.qtd_pedidos || 0), 0)
+
+                      return (
+                        <div key={`resumo-${cnpj}`} className="p-4 border rounded-lg bg-gradient-to-br from-accent/30 to-accent/10 hover:shadow-md transition-shadow">
+                          <div className="flex items-start justify-between mb-2">
+                            <p className="text-sm font-bold text-foreground truncate flex-1">
+                              {filialInfo?.filial_nome || cnpj}
+                            </p>
+                            {filialInfo?.is_matriz && (
+                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded ml-2">
+                                Matriz
+                              </span>
+                            )}
+                          </div>
+                          {filialInfo?.cnpj && (
+                            <p className="text-xs text-muted-foreground font-mono mb-3">
+                              CNPJ: {filialInfo.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
+                            </p>
+                          )}
+                          <div className="space-y-1">
+                            <p className="text-2xl font-bold text-primary">
+                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {qtdTotal} {qtdTotal === 1 ? 'pedido' : 'pedidos'} • Últimos {mesesUnicos.length} meses
+                            </p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
                 {/* Legenda de meses */}
-                <div className="border-t pt-3">
-                  <p className="text-xs font-semibold text-muted-foreground mb-2">Legenda de Meses:</p>
+                <div className="border-t pt-3 mt-4">
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">Legenda de Cores (Meses):</p>
                   <div className="flex flex-wrap gap-3">
                     {mesesUnicos.map((mes, idx) => {
                       let mesNome = 'N/A'
@@ -385,13 +397,6 @@ export default async function DashboardPage() {
                       )
                     })}
                   </div>
-                </div>
-
-                {/* Info */}
-                <div className="border-t pt-2">
-                  <p className="text-xs text-center text-muted-foreground">
-                    {Array.from(filiaisPorCnpj.keys()).length} {Array.from(filiaisPorCnpj.keys()).length === 1 ? 'filial' : 'filiais'} • Últimos {mesesUnicos.length} meses
-                  </p>
                 </div>
               </div>
             )
