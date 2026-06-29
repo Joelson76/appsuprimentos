@@ -107,30 +107,49 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Segunda linha de KPIs */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <KPICard
-          title="Produtos Críticos"
-          value={kpis?.produtos_estoque_baixo || 0}
-          icon={<AlertTriangle className="h-4 w-4 text-orange-500" />}
-        />
-        <KPICard
-          title="Produtos em Ruptura"
-          value={kpis?.produtos_ruptura || 0}
-          icon={<Package className="h-4 w-4 text-red-500" />}
-        />
-        <KPICard
-          title="Aprovações Pendentes"
-          value={kpis?.aprovacoes_pendentes || 0}
-          icon={<CheckCircle className="h-4 w-4 text-blue-500" />}
-        />
-        <KPICard
-          title="Score Médio Fornecedores"
-          value={(kpis?.score_medio_fornecedores || 0).toFixed(1)}
-          icon={<TrendingUp className="h-4 w-4 text-green-500" />}
-          suffix=" / 5"
-        />
-      </div>
+      {/* Valor de Pedidos por Mês - Últimos 6 meses */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            Valor de Pedidos por Mês
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {evolucao && evolucao.length > 0 ? (
+            <div className="space-y-4">
+              {evolucao.slice(0, 6).reverse().map((mes: any) => {
+                const mesNome = new Date(mes.mes + '-01').toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
+                const valorTotal = mes.valor_total_pedidos || 0
+                const maxValor = Math.max(...evolucao.slice(0, 6).map((m: any) => m.valor_total_pedidos || 0))
+                const percentual = maxValor > 0 ? (valorTotal / maxValor) * 100 : 0
+
+                return (
+                  <div key={mes.mes} className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium capitalize">{mesNome}</span>
+                      <span className="font-bold text-primary">
+                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
+                      </span>
+                    </div>
+                    <div className="w-full bg-secondary rounded-full h-3 overflow-hidden">
+                      <div
+                        className="bg-primary h-full rounded-full transition-all duration-500"
+                        style={{ width: `${percentual}%` }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground py-8">
+              <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Nenhum dado de pedidos ainda</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Widgets */}
       <div className="grid gap-4 md:grid-cols-2">
