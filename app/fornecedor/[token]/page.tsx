@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { fetchCotacaoByToken, submitRespostaCotacao } from '@/lib/supabase/public-access'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -49,8 +50,6 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
 
   const loadData = async () => {
     try {
-      const supabase = createClient()
-
       // DEBUG: Mostrar o token recebido
       console.log('🔍 Token recebido:', params.token)
       console.log('🔍 Tamanho do token:', params.token?.length)
@@ -61,66 +60,26 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
       const tokenLimpo = params.token.trim().replace(/\s+/g, '')
       console.log('🔍 Token limpo:', tokenLimpo)
 
-      // Buscar item pelo token (SEM JOIN - queries separadas para evitar RLS)
-      const { data: itemData, error: itemError } = await supabase
-        .from('itens_cotacao')
-        .select('*')
-        .eq('token_resposta', tokenLimpo)
-        .limit(1)
-        .single()
+      // Usar helper que seta token e busca dados (compatível com RLS seguro)
+      const dados = await fetchCotacaoByToken(tokenLimpo)
 
-      console.log('🔍 Resultado da busca do item:', { itemData, itemError })
-
-      if (itemError || !itemData) {
-        console.error('❌ Erro ao buscar token:', itemError)
+      if (!dados) {
+        console.error('❌ Erro ao buscar token')
         setDebugInfo({
           tokenOriginal: params.token,
           tokenLimpo,
           tamanho: tokenLimpo.length,
           encontrado: false,
-          erro: itemError?.message || 'Item não encontrado',
+          erro: 'Token inválido ou expirado',
         })
         setError('Link inválido ou expirado.')
         setLoading(false)
         return
       }
 
-      // Buscar cotação separadamente
-      const { data: cotacaoData, error: cotacaoError } = await supabase
-        .from('cotacoes')
-        .select('*')
-        .eq('id', itemData.cotacao_id)
-        .single()
+      console.log('✅ Dados carregados:', dados)
 
-      console.log('🔍 Resultado da busca da cotação:', { cotacaoData, cotacaoError })
-
-      if (cotacaoError || !cotacaoData) {
-        console.error('❌ Erro ao buscar cotação:', cotacaoError)
-        setDebugInfo({
-          tokenOriginal: params.token,
-          tokenLimpo,
-          tamanho: tokenLimpo.length,
-          encontrado: true,
-          erro: `Cotação não encontrada: ${cotacaoError?.message}`,
-        })
-        setError('Erro ao carregar cotação.')
-        setLoading(false)
-        return
-      }
-
-      // Buscar fornecedor separadamente
-      const { data: fornecedorData, error: fornecedorError } = await supabase
-        .from('fornecedores')
-        .select('razao_social, nome_fantasia')
-        .eq('id', itemData.fornecedor_id)
-        .single()
-
-      console.log('🔍 Resultado da busca do fornecedor:', { fornecedorData, fornecedorError })
-
-      if (fornecedorError || !fornecedorData) {
-        console.error('❌ Erro ao buscar fornecedor:', fornecedorError)
-        // Continuar mesmo sem fornecedor (não é crítico)
-      }
+      const { cotacao: cotacaoData, fornecedor: fornecedorData, itens: itensData, itemPrincipal } = dados
 
       // Verificar se a cotação ainda está dentro do prazo
       const dataLimite = new Date(cotacaoData.data_limite)
@@ -140,12 +99,13 @@ export default function FornecedorCotacaoPage({ params }: PageProps) {
       })
 
       // Mostrar aviso se a cotação expirou (mas ainda permitir visualizar)
-      if (cotacaoExpirada && !itemData.valor_unitario) {
+      if (cotacaoExpirada && !itemPrincipal.valor_unitario) {
         setError(`⚠️ Atenção: O prazo desta cotação venceu em ${dataLimite.toLocaleDateString('pt-BR')}. Entre em contato com o comprador.`)
       }
 
-      // Buscar todos os itens desta cotação para este fornecedor
-      const { data: itensData, error: itensError } = await supabase
+      // Buscar todos os itens (já vem do helper)
+      const supabase = createClient()
+      const { data: allItensData, error: itensError } = await supabase
         .from('itens_cotacao')
         .select('*')
         .eq('cotacao_id', itemData.cotacao_id)
