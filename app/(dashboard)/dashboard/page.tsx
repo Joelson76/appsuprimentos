@@ -199,28 +199,9 @@ export default async function DashboardPage() {
 
               const maxValor = Math.max(...dadosValidos.map((m: any) => m.valor_total || 0), 1)
 
-              // Renderizar gráfico simples (sem filiais) + DEBUG
+              // Renderizar gráfico simples (sem filiais)
               return (
                 <div className="space-y-6">
-                  {/* ALERTA: Sem dados por filial */}
-                  <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
-                    <p className="text-sm font-bold text-yellow-900 mb-2">⚠️ CNPJ Não Disponível</p>
-                    <p className="text-xs text-yellow-800 mb-3">
-                      Os pedidos não estão associados a filiais com CNPJ cadastrado.
-                    </p>
-                    <div className="bg-white rounded p-3 font-mono text-xs space-y-1">
-                      <p><strong>Filiais cadastradas:</strong> {filiais?.length || 0}</p>
-                      <p><strong>Pedidos brutos:</strong> {pedidosRaw?.length || 0}</p>
-                      <p><strong>Evolução por filial:</strong> {evolucaoPorFilial?.length || 0}</p>
-                      <p className="text-red-600 font-bold mt-2">
-                        {evolucaoPorFilial?.length === 0 && '❌ Pedidos sem filial_id ou filiais sem CNPJ!'}
-                      </p>
-                    </div>
-                    <p className="text-xs text-yellow-800 mt-3">
-                      <strong>Solução:</strong> Associe os pedidos às filiais ou cadastre o CNPJ das filiais.
-                    </p>
-                  </div>
-
                   <div className="flex items-end justify-between gap-4 h-64 pb-2">
                     {dadosValidos.map((mes: any, index: number) => {
                       const valorTotal = mes.valor_total || 0
