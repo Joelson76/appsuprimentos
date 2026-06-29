@@ -24,10 +24,11 @@ const ibmPlexSerif = IBM_Plex_Serif({
 export const metadata: Metadata = {
   title: "SupriFlow - Gestão de Compras e Suprimentos",
   description: "Sistema Completo de Gestão de Compras e Suprimentos para Indústria e Varejo",
+  // Next.js detecta automaticamente app/icon.jpg como favicon
 };
 
 export const viewport: Viewport = {
-  themeColor: "#667eea",
+  themeColor: "#10b981", // Verde esmeralda (emerald-600)
   width: "device-width",
   initialScale: 1,
 };
