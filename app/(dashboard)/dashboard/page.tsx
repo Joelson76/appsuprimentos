@@ -61,12 +61,26 @@ export default async function DashboardPage() {
     .order('mes', { ascending: false })
     .limit(12)
 
+  // Busca evolução mensal por filial/CNPJ
+  const { data: evolucaoPorFilial, error: errorEvolucaoFilial } = await supabase
+    .from('vw_evolucao_mensal_por_filial')
+    .select('*')
+    .eq('tenant_id', profile?.tenant_id || '')
+    .order('mes', { ascending: false })
+    .limit(72) // 12 meses * até 6 filiais
+
   // Debug
   if (errorEvolucao) {
     console.error('❌ Erro ao buscar evolução:', errorEvolucao)
   }
+  if (errorEvolucaoFilial) {
+    console.error('❌ Erro ao buscar evolução por filial:', errorEvolucaoFilial)
+  }
   if (evolucao) {
     console.log('📊 Evolução mensal:', evolucao)
+  }
+  if (evolucaoPorFilial) {
+    console.log('📊 Evolução por filial:', evolucaoPorFilial)
   }
 
   // Busca top fornecedores
@@ -126,76 +140,132 @@ export default async function DashboardPage() {
         </CardHeader>
         <CardContent>
           {(() => {
-            const dadosValidos = evolucao?.filter((m: any) =>
-              m.mes &&
-              (m.valor_total > 0 || m.qtd_pedidos > 0)
-            ).slice(0, 6).reverse() || []
+            // Processar dados por mês com breakdown por CNPJ
+            const mesesUnicos = [...new Set(evolucaoPorFilial?.map((e: any) => e.mes) || [])]
+              .slice(0, 6)
+              .reverse()
 
-            return dadosValidos.length > 0 ? (
+            // Se não tem dados por filial, usar dados agregados
+            if (!evolucaoPorFilial || evolucaoPorFilial.length === 0) {
+              const dadosValidos = evolucao?.filter((m: any) =>
+                m.mes &&
+                (m.valor_total > 0 || m.qtd_pedidos > 0)
+              ).slice(0, 6).reverse() || []
+
+              if (dadosValidos.length === 0) {
+                return (
+                  <div className="text-center text-muted-foreground py-8">
+                    <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Nenhum dado de pedidos ainda</p>
+                    <p className="text-xs mt-1">Comece criando requisições e pedidos</p>
+                  </div>
+                )
+              }
+            }
+
+            // Cores para cada CNPJ/filial
+            const cores = [
+              { from: 'from-blue-600', to: 'to-blue-400', hover: 'hover:from-blue-700 hover:to-blue-500' },
+              { from: 'from-cyan-600', to: 'to-cyan-400', hover: 'hover:from-cyan-700 hover:to-cyan-500' },
+              { from: 'from-purple-600', to: 'to-purple-400', hover: 'hover:from-purple-700 hover:to-purple-500' },
+              { from: 'from-emerald-600', to: 'to-emerald-400', hover: 'hover:from-emerald-700 hover:to-emerald-500' },
+              { from: 'from-orange-600', to: 'to-orange-400', hover: 'hover:from-orange-700 hover:to-orange-500' },
+            ]
+
+            // Mapear cores por CNPJ
+            const cnpjsUnicos = [...new Set(evolucaoPorFilial?.map((e: any) => e.cnpj) || [])]
+            const coresPorCnpj: Record<string, typeof cores[0]> = {}
+            cnpjsUnicos.forEach((cnpj, idx) => {
+              coresPorCnpj[cnpj] = cores[idx % cores.length]
+            })
+
+            // Calcular valor máximo para escala
+            const valoresPorMes = mesesUnicos.map(mes =>
+              evolucaoPorFilial
+                ?.filter((e: any) => e.mes === mes)
+                .reduce((sum: number, e: any) => sum + (e.valor_total || 0), 0) || 0
+            )
+            const maxValor = Math.max(...valoresPorMes, 1)
+
+            return mesesUnicos.length > 0 ? (
               <div className="space-y-6">
-                {/* Gráfico de Barras Vertical */}
+                {/* Gráfico de Barras Vertical Empilhadas */}
                 <div className="flex items-end justify-between gap-4 h-64 pb-2">
-                  {dadosValidos.map((mes: any, index: number) => {
+                  {mesesUnicos.map((mes: any, mesIndex: number) => {
+                    // Dados do mês
+                    const dadosMes = evolucaoPorFilial?.filter((e: any) => e.mes === mes) || []
+                    const valorTotalMes = dadosMes.reduce((sum, e) => sum + (e.valor_total || 0), 0)
+                    const qtdTotalMes = dadosMes.reduce((sum, e) => sum + (e.qtd_pedidos || 0), 0)
+
                     // Parse da data
                     let mesNome = 'N/A'
                     let mesAbrev = 'N/A'
                     try {
-                      if (mes.mes) {
-                        const data = new Date(mes.mes)
-                        mesNome = data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-                        mesAbrev = data.toLocaleDateString('pt-BR', { month: 'short' })
-                      }
+                      const data = new Date(mes)
+                      mesNome = data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+                      mesAbrev = data.toLocaleDateString('pt-BR', { month: 'short' })
                     } catch (e) {
-                      console.error('Erro ao formatar data:', mes.mes, e)
+                      console.error('Erro ao formatar data:', mes, e)
                     }
 
-                    const valorTotal = mes.valor_total || 0
-                    const qtdPedidos = mes.qtd_pedidos || 0
-                    const maxValor = Math.max(...dadosValidos.map((m: any) => m.valor_total || 0), 1)
-                    const alturaPercentual = (valorTotal / maxValor) * 100
-
-                    // Variação
-                    const mesAnterior = dadosValidos[index - 1]
-                    const variacao = mesAnterior && mesAnterior.valor_total > 0
-                      ? ((valorTotal - mesAnterior.valor_total) / mesAnterior.valor_total) * 100
-                      : null
-
                     return (
-                      <div key={mes.mes} className="flex-1 flex flex-col items-center gap-2 group">
-                        {/* Tooltip com detalhes */}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-2 text-center">
-                          <div className="bg-popover border rounded-lg shadow-lg p-3 min-w-[200px]">
-                            <p className="text-xs font-semibold capitalize mb-1">{mesNome}</p>
-                            <p className="text-lg font-bold text-primary mb-1">
-                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
+                      <div key={mes} className="flex-1 flex flex-col items-center gap-2 group">
+                        {/* Tooltip com breakdown por CNPJ */}
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-2 text-center z-10">
+                          <div className="bg-popover border rounded-lg shadow-lg p-3 min-w-[220px]">
+                            <p className="text-xs font-semibold capitalize mb-2">{mesNome}</p>
+                            <p className="text-lg font-bold text-primary mb-2">
+                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotalMes)}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {qtdPedidos} {qtdPedidos === 1 ? 'pedido' : 'pedidos'}
+                            <p className="text-xs text-muted-foreground mb-2">
+                              {qtdTotalMes} {qtdTotalMes === 1 ? 'pedido' : 'pedidos'}
                             </p>
-                            {variacao !== null && (
-                              <p className={`text-xs font-medium mt-1 ${
-                                variacao > 0 ? 'text-green-600' : variacao < 0 ? 'text-red-600' : 'text-gray-600'
-                              }`}>
-                                {variacao > 0 ? '↑' : variacao < 0 ? '↓' : '='} {Math.abs(variacao).toFixed(1)}%
-                              </p>
+                            {dadosMes.length > 0 && (
+                              <div className="mt-2 pt-2 border-t space-y-1">
+                                <p className="text-xs font-semibold text-muted-foreground mb-1">Por CNPJ:</p>
+                                {dadosMes.map((d: any) => (
+                                  <div key={d.cnpj} className="flex items-center justify-between text-xs">
+                                    <span className="truncate max-w-[100px]">{d.cnpj?.substring(0, 14) || 'Sem CNPJ'}</span>
+                                    <span className="font-semibold">
+                                      {new Intl.NumberFormat('pt-BR', {
+                                        style: 'currency',
+                                        currency: 'BRL',
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                      }).format(d.valor_total || 0)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
                             )}
                           </div>
                         </div>
 
-                        {/* Barra vertical */}
+                        {/* Barra vertical empilhada */}
                         <div className="relative w-full flex items-end justify-center" style={{ height: '100%' }}>
-                          <div
-                            className="w-full max-w-[60px] bg-gradient-to-t from-blue-600 to-cyan-400 rounded-t-lg transition-all duration-700 ease-out hover:from-blue-700 hover:to-cyan-500 cursor-pointer shadow-lg"
-                            style={{ height: `${alturaPercentual}%`, minHeight: valorTotal > 0 ? '8px' : '0' }}
-                          >
-                            {/* Valor no topo da barra */}
+                          <div className="w-full max-w-[60px] flex flex-col justify-end">
+                            {dadosMes.map((dado: any, idx: number) => {
+                              const valorSegmento = dado.valor_total || 0
+                              const alturaSegmento = (valorSegmento / maxValor) * 100
+                              const cor = coresPorCnpj[dado.cnpj] || cores[0]
+
+                              return (
+                                <div
+                                  key={`${mes}-${dado.cnpj}-${idx}`}
+                                  className={`w-full bg-gradient-to-t ${cor.from} ${cor.to} ${cor.hover} transition-all duration-700 ease-out cursor-pointer shadow-sm ${idx === dadosMes.length - 1 ? 'rounded-t-lg' : ''}`}
+                                  style={{ height: `${alturaSegmento}%`, minHeight: valorSegmento > 0 ? '4px' : '0' }}
+                                  title={`${dado.cnpj}: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorSegmento)}`}
+                                />
+                              )
+                            })}
+                            {/* Valor total no topo */}
                             <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap">
                               {new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
                                 currency: 'BRL',
                                 minimumFractionDigits: 0,
                                 maximumFractionDigits: 0
-                              }).format(valorTotal)}
+                              }).format(valorTotalMes)}
                             </div>
                           </div>
                         </div>
@@ -209,9 +279,30 @@ export default async function DashboardPage() {
                   })}
                 </div>
 
+                {/* Legenda de cores por CNPJ */}
+                {cnpjsUnicos.length > 1 && (
+                  <div className="border-t pt-3">
+                    <p className="text-xs font-semibold text-muted-foreground mb-2">Legenda por CNPJ:</p>
+                    <div className="flex flex-wrap gap-3">
+                      {cnpjsUnicos.map((cnpj: string) => {
+                        const cor = coresPorCnpj[cnpj]
+                        const filial = evolucaoPorFilial?.find((e: any) => e.cnpj === cnpj)
+                        return (
+                          <div key={cnpj} className="flex items-center gap-2">
+                            <div className={`w-4 h-4 rounded bg-gradient-to-t ${cor.from} ${cor.to}`} />
+                            <span className="text-xs text-muted-foreground">
+                              {filial?.filial_nome || cnpj?.substring(0, 14) || 'Sem CNPJ'}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {/* Linha de base */}
-                <div className="border-t pt-2">
-                  <p className="text-xs text-center text-muted-foreground">Últimos {dadosValidos.length} meses</p>
+                <div className={`${cnpjsUnicos.length > 1 ? 'border-t' : ''} pt-2`}>
+                  <p className="text-xs text-center text-muted-foreground">Últimos {mesesUnicos.length} meses</p>
                 </div>
               </div>
             ) : (
