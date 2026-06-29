@@ -332,15 +332,20 @@ export default async function DashboardPage() {
                             )}
                           </div>
 
-                          {/* CNPJ - BEM DESTACADO COM FUNDO */}
-                          {filialInfo?.cnpj && (
-                            <div className="bg-blue-50 dark:bg-blue-950 border-2 border-blue-200 dark:border-blue-800 px-4 py-3 rounded-lg shadow-sm">
-                              <p className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase mb-1">CNPJ</p>
-                              <p className="text-base font-black text-blue-900 dark:text-blue-100 font-mono tracking-wide">
-                                {filialInfo.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
+                          {/* CNPJ - SEMPRE MOSTRA (mesmo se vazio) */}
+                          <div className="bg-blue-50 dark:bg-blue-950 border-2 border-blue-200 dark:border-blue-800 px-4 py-3 rounded-lg shadow-sm">
+                            <p className="text-xs text-blue-600 dark:text-blue-400 font-bold uppercase mb-1">CNPJ</p>
+                            <p className="text-base font-black text-blue-900 dark:text-blue-100 font-mono tracking-wide">
+                              {filialInfo?.cnpj
+                                ? filialInfo.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')
+                                : '❌ CNPJ NÃO CADASTRADO'}
+                            </p>
+                            {!filialInfo?.cnpj && (
+                              <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                                Cadastre o CNPJ desta filial
                               </p>
-                            </div>
-                          )}
+                            )}
+                          </div>
 
                           {/* Meses */}
                           <div className="flex justify-center gap-1 text-xs text-muted-foreground font-medium">
