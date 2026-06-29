@@ -4,7 +4,6 @@ import { KPICard } from '@/components/dashboard/kpi-card'
 import { AlertasWidget } from '@/components/dashboard/alertas-widget'
 import { AprovacoesWidget } from '@/components/dashboard/aprovacoes-widget'
 import { BreakdownFiliaisChart } from '@/components/dashboard/breakdown-filiais-chart'
-import { BreakdownMensalFiliaisChart } from '@/components/dashboard/breakdown-mensal-filiais-chart'
 import {
   Card,
   CardContent,
@@ -167,13 +166,8 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Gráfico Mensal por Filial/CNPJ - NOVO FORMATO */}
-      {evolucaoPorFilial && evolucaoPorFilial.length > 0 && (
-        <BreakdownMensalFiliaisChart data={evolucaoPorFilial} />
-      )}
-
-      {/* Valor de Pedidos por Mês - Últimos 6 meses (ANTIGO - manter como fallback) */}
-      <Card className={evolucaoPorFilial && evolucaoPorFilial.length > 0 ? 'hidden' : ''}>
+      {/* Valor de Pedidos por Mês - Últimos 6 meses */}
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
