@@ -152,183 +152,172 @@ export default async function DashboardPage() {
               )
             }
 
-            // Processar dados
-            const dadosValidos = evolucao.filter((m: any) =>
-              m.mes && (m.valor_total > 0 || m.qtd_pedidos > 0)
-            ).slice(0, 6).reverse()
-
-            // Preparar dados por CNPJ se disponível
+            // Preparar dados agrupados por FILIAL
             const temDadosPorFilial = evolucaoPorFilial && evolucaoPorFilial.length > 0
-            const mesesComFilial = new Map<string, any[]>()
 
-            if (temDadosPorFilial) {
-              evolucaoPorFilial.forEach((item: any) => {
-                const mesKey = new Date(item.mes).toISOString()
-                if (!mesesComFilial.has(mesKey)) {
-                  mesesComFilial.set(mesKey, [])
-                }
-                mesesComFilial.get(mesKey)?.push(item)
-              })
+            if (!temDadosPorFilial) {
+              // Se não tem dados por filial, mostrar agregado simples
+              const dadosValidos = evolucao.filter((m: any) =>
+                m.mes && (m.valor_total > 0 || m.qtd_pedidos > 0)
+              ).slice(0, 6).reverse()
+
+              const maxValor = Math.max(...dadosValidos.map((m: any) => m.valor_total || 0), 1)
+
+              // Renderizar gráfico simples (sem filiais)
+              return (
+                <div className="space-y-6">
+                  <div className="flex items-end justify-between gap-4 h-64 pb-2">
+                    {dadosValidos.map((mes: any, index: number) => {
+                      const valorTotal = mes.valor_total || 0
+                      const alturaPercentual = (valorTotal / maxValor) * 100
+                      let mesAbrev = 'N/A'
+                      try {
+                        mesAbrev = new Date(mes.mes).toLocaleDateString('pt-BR', { month: 'short' })
+                      } catch (e) {}
+
+                      return (
+                        <div key={index} className="flex-1 flex flex-col items-center gap-2">
+                          <div className="relative w-full flex items-end justify-center" style={{ height: '100%' }}>
+                            <div
+                              className="w-full max-w-[60px] bg-gradient-to-t from-blue-600 to-cyan-400 rounded-t-lg transition-all duration-700 cursor-pointer shadow-lg"
+                              style={{ height: `${alturaPercentual}%`, minHeight: valorTotal > 0 ? '8px' : '0' }}
+                            >
+                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap">
+                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(valorTotal)}
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-xs font-medium capitalize text-muted-foreground">{mesAbrev}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <div className="border-t pt-2">
+                    <p className="text-xs text-center text-muted-foreground">Últimos {dadosValidos.length} meses</p>
+                  </div>
+                </div>
+              )
             }
 
-            // Cores para CNPJs
-            const cores = [
+            // Agrupar por FILIAL primeiro
+            const filiaisPorCnpj = new Map<string, any[]>()
+            evolucaoPorFilial.forEach((item: any) => {
+              const cnpj = item.cnpj || 'SEM_CNPJ'
+              if (!filiaisPorCnpj.has(cnpj)) {
+                filiaisPorCnpj.set(cnpj, [])
+              }
+              filiaisPorCnpj.get(cnpj)?.push(item)
+            })
+
+            // Pegar últimos 6 meses únicos
+            const mesesUnicos = [...new Set(evolucaoPorFilial.map((e: any) => e.mes))]
+              .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+              .slice(0, 6)
+              .reverse()
+
+            // Cores para meses
+            const coresMeses = [
               'from-blue-600 to-blue-400',
               'from-cyan-600 to-cyan-400',
               'from-purple-600 to-purple-400',
               'from-emerald-600 to-emerald-400',
               'from-orange-600 to-orange-400',
+              'from-pink-600 to-pink-400',
             ]
 
-            const maxValor = Math.max(...dadosValidos.map((m: any) => m.valor_total || 0), 1)
+            // Calcular max valor global
+            const maxValor = Math.max(
+              ...Array.from(filiaisPorCnpj.values()).flat().map((e: any) => e.valor_total || 0),
+              1
+            )
 
+            // Renderizar: FILIAL → MESES
             return (
               <div className="space-y-6">
-                {/* Gráfico de Barras Vertical */}
-                <div className="flex items-end justify-between gap-4 h-64 pb-2">
-                  {dadosValidos.map((mes: any, index: number) => {
-                    const valorTotal = mes.valor_total || 0
-                    const qtdPedidos = mes.qtd_pedidos || 0
-                    const alturaPercentual = (valorTotal / maxValor) * 100
-
-                    // Parse da data
-                    let mesNome = 'N/A'
-                    let mesAbrev = 'N/A'
-                    try {
-                      const data = new Date(mes.mes)
-                      mesNome = data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-                      mesAbrev = data.toLocaleDateString('pt-BR', { month: 'short' })
-                    } catch (e) {
-                      console.error('Erro ao formatar data:', mes.mes, e)
-                    }
-
-                    // Buscar dados por filial para este mês
-                    const mesKey = new Date(mes.mes).toISOString()
-                    const filiaisMes = mesesComFilial.get(mesKey) || []
-                    const cnpjsUnicos = [...new Set(filiaisMes.map(f => f.cnpj || 'SEM_CNPJ'))]
+                {/* Gráfico agrupado por FILIAL */}
+                <div className="flex items-end justify-between gap-6 h-64 pb-2">
+                  {Array.from(filiaisPorCnpj.entries()).map(([cnpj, dadosFilial], filialIdx) => {
+                    const filialInfo = dadosFilial[0]
+                    const filialNome = filialInfo?.filial_nome || cnpj
 
                     return (
-                      <div key={mes.mes || index} className="flex-1 flex flex-col items-center gap-2 group">
-                        {/* Tooltip */}
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-2 text-center z-10">
-                          <div className="bg-popover border rounded-lg shadow-lg p-3 min-w-[220px]">
-                            <p className="text-xs font-semibold capitalize mb-1">{mesNome}</p>
-                            <p className="text-lg font-bold text-primary mb-1">
-                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
-                            </p>
-                            <p className="text-xs text-muted-foreground mb-2">
-                              {qtdPedidos} {qtdPedidos === 1 ? 'pedido' : 'pedidos'}
-                            </p>
+                      <div key={cnpj} className="flex-1 flex flex-col items-center gap-2">
+                        {/* Grupo de barras para esta filial (uma barra por mês) */}
+                        <div className="w-full flex items-end justify-center gap-1" style={{ height: '100%' }}>
+                          {mesesUnicos.map((mes, mesIdx) => {
+                            const dadoMes = dadosFilial.find((d: any) => d.mes === mes)
+                            const valor = dadoMes?.valor_total || 0
+                            const altura = (valor / maxValor) * 100
 
-                            {/* Breakdown por CNPJ no tooltip */}
-                            {filiaisMes.length > 0 && (
-                              <div className="mt-2 pt-2 border-t space-y-1">
-                                <p className="text-xs font-semibold text-muted-foreground mb-1">Por CNPJ:</p>
-                                {filiaisMes.map((f: any, idx: number) => (
-                                  <div key={idx} className="flex items-center justify-between gap-2 text-xs">
-                                    <div className={`w-3 h-3 rounded bg-gradient-to-t ${cores[idx % cores.length]}`} />
-                                    <span className="flex-1 truncate text-left">{f.filial_nome || f.cnpj || 'N/A'}</span>
-                                    <span className="font-semibold">
+                            let mesAbrev = 'N/A'
+                            try {
+                              mesAbrev = new Date(mes).toLocaleDateString('pt-BR', { month: 'short' })
+                            } catch (e) {}
+
+                            return (
+                              <div
+                                key={mesIdx}
+                                className="flex-1 group relative"
+                                style={{ maxWidth: '32px' }}
+                              >
+                                {/* Barra */}
+                                <div
+                                  className={`w-full bg-gradient-to-t ${coresMeses[mesIdx % coresMeses.length]} rounded-t-lg transition-all duration-700 cursor-pointer shadow-sm hover:opacity-80`}
+                                  style={{ height: `${altura}%`, minHeight: valor > 0 ? '8px' : '0' }}
+                                  title={`${filialNome} - ${mesAbrev}: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor)}`}
+                                >
+                                  {/* Valor no topo */}
+                                  {valor > 0 && (
+                                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
                                       {new Intl.NumberFormat('pt-BR', {
                                         style: 'currency',
                                         currency: 'BRL',
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 0
-                                      }).format(f.valor_total || 0)}
-                                    </span>
-                                  </div>
-                                ))}
+                                        minimumFractionDigits: 0
+                                      }).format(valor)}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                            )}
-                          </div>
+                            )
+                          })}
                         </div>
 
-                        {/* Barras agrupadas lado a lado por CNPJ */}
-                        <div className="relative w-full flex items-end justify-center gap-1" style={{ height: '100%' }}>
-                          {filiaisMes.length > 0 ? (
-                            // Barras lado a lado (grouped)
-                            <>
-                              {filiaisMes.map((filial: any, idx: number) => {
-                                const valorFilial = filial.valor_total || 0
-                                const alturaFilial = (valorFilial / maxValor) * 100
-                                return (
-                                  <div
-                                    key={idx}
-                                    className={`flex-1 bg-gradient-to-t ${cores[idx % cores.length]} rounded-t-lg transition-all duration-700 cursor-pointer shadow-sm hover:opacity-80`}
-                                    style={{ height: `${alturaFilial}%`, minHeight: valorFilial > 0 ? '8px' : '0', maxWidth: '24px' }}
-                                    title={`${filial.filial_nome}: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorFilial)}`}
-                                  >
-                                    {/* Valor individual no topo (apenas se for o maior) */}
-                                    {idx === 0 && (
-                                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap">
-                                        {new Intl.NumberFormat('pt-BR', {
-                                          style: 'currency',
-                                          currency: 'BRL',
-                                          minimumFractionDigits: 0,
-                                          maximumFractionDigits: 0
-                                        }).format(valorTotal)}
-                                      </div>
-                                    )}
-                                  </div>
-                                )
-                              })}
-                            </>
-                          ) : (
-                            // Barra simples (sem breakdown)
-                            <div
-                              className="w-full max-w-[60px] bg-gradient-to-t from-blue-600 to-cyan-400 rounded-t-lg transition-all duration-700 ease-out hover:from-blue-700 hover:to-cyan-500 cursor-pointer shadow-lg"
-                              style={{ height: `${alturaPercentual}%`, minHeight: valorTotal > 0 ? '8px' : '0' }}
-                            >
-                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap">
-                                {new Intl.NumberFormat('pt-BR', {
-                                  style: 'currency',
-                                  currency: 'BRL',
-                                  minimumFractionDigits: 0,
-                                  maximumFractionDigits: 0
-                                }).format(valorTotal)}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Label do mês */}
+                        {/* Label da filial */}
                         <div className="text-center">
-                          <p className="text-xs font-medium capitalize text-muted-foreground">{mesAbrev}</p>
+                          <p className="text-xs font-semibold text-foreground truncate max-w-[120px]">
+                            {filialNome}
+                          </p>
                         </div>
                       </div>
                     )
                   })}
                 </div>
 
-                {/* Legenda (se tiver dados por filial) */}
-                {temDadosPorFilial && (() => {
-                  // Pegar todos CNPJs únicos
-                  const todosCnpjs = [...new Set(evolucaoPorFilial.map((f: any) => f.cnpj || 'SEM_CNPJ'))]
-                  if (todosCnpjs.length <= 1) return null
+                {/* Legenda de meses */}
+                <div className="border-t pt-3">
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">Legenda de Meses:</p>
+                  <div className="flex flex-wrap gap-3">
+                    {mesesUnicos.map((mes, idx) => {
+                      let mesNome = 'N/A'
+                      try {
+                        mesNome = new Date(mes).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
+                      } catch (e) {}
 
-                  return (
-                    <div className="border-t pt-3 mt-2">
-                      <p className="text-xs font-semibold text-muted-foreground mb-2">Legenda por Filial/CNPJ:</p>
-                      <div className="flex flex-wrap gap-3">
-                        {todosCnpjs.slice(0, 5).map((cnpj: string, idx: number) => {
-                          const filial = evolucaoPorFilial.find((f: any) => f.cnpj === cnpj)
-                          return (
-                            <div key={cnpj} className="flex items-center gap-2">
-                              <div className={`w-4 h-4 rounded bg-gradient-to-t ${cores[idx % cores.length]}`} />
-                              <span className="text-xs text-muted-foreground">
-                                {filial?.filial_nome || cnpj}
-                              </span>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })()}
+                      return (
+                        <div key={idx} className="flex items-center gap-2">
+                          <div className={`w-4 h-4 rounded bg-gradient-to-t ${coresMeses[idx % coresMeses.length]}`} />
+                          <span className="text-xs text-muted-foreground capitalize">{mesNome}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
 
-                {/* Linha de base */}
-                <div className="border-t pt-2 mt-2">
-                  <p className="text-xs text-center text-muted-foreground">Últimos {dadosValidos.length} meses</p>
+                {/* Info */}
+                <div className="border-t pt-2">
+                  <p className="text-xs text-center text-muted-foreground">
+                    {Array.from(filiaisPorCnpj.keys()).length} {Array.from(filiaisPorCnpj.keys()).length === 1 ? 'filial' : 'filiais'} • Últimos {mesesUnicos.length} meses
+                  </p>
                 </div>
               </div>
             )
