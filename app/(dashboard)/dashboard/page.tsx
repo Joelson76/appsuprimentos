@@ -243,33 +243,36 @@ export default async function DashboardPage() {
                           </div>
                         </div>
 
-                        {/* Barra vertical (empilhada se tiver CNPJs, simples se não) */}
-                        <div className="relative w-full flex items-end justify-center" style={{ height: '100%' }}>
+                        {/* Barras agrupadas lado a lado por CNPJ */}
+                        <div className="relative w-full flex items-end justify-center gap-1" style={{ height: '100%' }}>
                           {filiaisMes.length > 0 ? (
-                            // Barra empilhada por CNPJ
-                            <div className="w-full max-w-[60px] flex flex-col justify-end">
+                            // Barras lado a lado (grouped)
+                            <>
                               {filiaisMes.map((filial: any, idx: number) => {
                                 const valorFilial = filial.valor_total || 0
                                 const alturaFilial = (valorFilial / maxValor) * 100
                                 return (
                                   <div
                                     key={idx}
-                                    className={`w-full bg-gradient-to-t ${cores[idx % cores.length]} transition-all duration-700 cursor-pointer ${idx === filiaisMes.length - 1 ? 'rounded-t-lg' : ''}`}
-                                    style={{ height: `${alturaFilial}%`, minHeight: valorFilial > 0 ? '4px' : '0' }}
+                                    className={`flex-1 bg-gradient-to-t ${cores[idx % cores.length]} rounded-t-lg transition-all duration-700 cursor-pointer shadow-sm hover:opacity-80`}
+                                    style={{ height: `${alturaFilial}%`, minHeight: valorFilial > 0 ? '8px' : '0', maxWidth: '24px' }}
                                     title={`${filial.filial_nome}: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorFilial)}`}
-                                  />
+                                  >
+                                    {/* Valor individual no topo (apenas se for o maior) */}
+                                    {idx === 0 && (
+                                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap">
+                                        {new Intl.NumberFormat('pt-BR', {
+                                          style: 'currency',
+                                          currency: 'BRL',
+                                          minimumFractionDigits: 0,
+                                          maximumFractionDigits: 0
+                                        }).format(valorTotal)}
+                                      </div>
+                                    )}
+                                  </div>
                                 )
                               })}
-                              {/* Valor total no topo */}
-                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap">
-                                {new Intl.NumberFormat('pt-BR', {
-                                  style: 'currency',
-                                  currency: 'BRL',
-                                  minimumFractionDigits: 0,
-                                  maximumFractionDigits: 0
-                                }).format(valorTotal)}
-                              </div>
-                            </div>
+                            </>
                           ) : (
                             // Barra simples (sem breakdown)
                             <div
