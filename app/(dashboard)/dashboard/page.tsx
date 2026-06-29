@@ -132,78 +132,88 @@ export default async function DashboardPage() {
             ).slice(0, 6).reverse() || []
 
             return dadosValidos.length > 0 ? (
-              <div className="space-y-4">
-                {dadosValidos.map((mes: any, index: number) => {
-                // Parse da data com validação
-                let mesNome = 'Mês inválido'
-                try {
-                  if (mes.mes) {
-                    // Formato esperado: YYYY-MM
-                    const [ano, mesNum] = mes.mes.split('-')
-                    if (ano && mesNum) {
-                      const data = new Date(parseInt(ano), parseInt(mesNum) - 1, 1)
-                      mesNome = data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+              <div className="space-y-6">
+                {/* Gráfico de Barras Vertical */}
+                <div className="flex items-end justify-between gap-4 h-64 pb-2">
+                  {dadosValidos.map((mes: any, index: number) => {
+                    // Parse da data
+                    let mesNome = 'N/A'
+                    let mesAbrev = 'N/A'
+                    try {
+                      if (mes.mes) {
+                        const data = new Date(mes.mes)
+                        mesNome = data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+                        mesAbrev = data.toLocaleDateString('pt-BR', { month: 'short' })
+                      }
+                    } catch (e) {
+                      console.error('Erro ao formatar data:', mes.mes, e)
                     }
-                  }
-                } catch (e) {
-                  console.error('Erro ao formatar data:', mes.mes, e)
-                }
 
-                const valorTotal = mes.valor_total || 0
-                const qtdPedidos = mes.qtd_pedidos || 0
-                const ticketMedio = mes.ticket_medio || (qtdPedidos > 0 ? valorTotal / qtdPedidos : 0)
-                const maxValor = Math.max(...dadosValidos.map((m: any) => m.valor_total || 0), 1)
-                const percentual = (valorTotal / maxValor) * 100
+                    const valorTotal = mes.valor_total || 0
+                    const qtdPedidos = mes.qtd_pedidos || 0
+                    const maxValor = Math.max(...dadosValidos.map((m: any) => m.valor_total || 0), 1)
+                    const alturaPercentual = (valorTotal / maxValor) * 100
 
-                // Variação em relação ao mês anterior
-                const mesAnterior = dadosValidos[index - 1]
-                const variacao = mesAnterior && mesAnterior.valor_total > 0
-                  ? ((valorTotal - mesAnterior.valor_total) / mesAnterior.valor_total) * 100
-                  : null
+                    // Variação
+                    const mesAnterior = dadosValidos[index - 1]
+                    const variacao = mesAnterior && mesAnterior.valor_total > 0
+                      ? ((valorTotal - mesAnterior.valor_total) / mesAnterior.valor_total) * 100
+                      : null
 
-                return (
-                  <div key={mes.mes} className="space-y-2 p-4 border rounded-lg hover:bg-accent/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-semibold capitalize text-foreground">{mesNome}</span>
-                          {variacao !== null && (
-                            <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                              variacao > 0
-                                ? 'bg-green-100 text-green-700'
-                                : variacao < 0
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-gray-100 text-gray-700'
-                            }`}>
-                              {variacao > 0 ? '↑' : variacao < 0 ? '↓' : '='} {Math.abs(variacao).toFixed(1)}%
-                            </span>
-                          )}
+                    return (
+                      <div key={mes.mes} className="flex-1 flex flex-col items-center gap-2 group">
+                        {/* Tooltip com detalhes */}
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-2 text-center">
+                          <div className="bg-popover border rounded-lg shadow-lg p-3 min-w-[200px]">
+                            <p className="text-xs font-semibold capitalize mb-1">{mesNome}</p>
+                            <p className="text-lg font-bold text-primary mb-1">
+                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {qtdPedidos} {qtdPedidos === 1 ? 'pedido' : 'pedidos'}
+                            </p>
+                            {variacao !== null && (
+                              <p className={`text-xs font-medium mt-1 ${
+                                variacao > 0 ? 'text-green-600' : variacao < 0 ? 'text-red-600' : 'text-gray-600'
+                              }`}>
+                                {variacao > 0 ? '↑' : variacao < 0 ? '↓' : '='} {Math.abs(variacao).toFixed(1)}%
+                              </p>
+                            )}
+                          </div>
                         </div>
-                        <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>{qtdPedidos} {qtdPedidos === 1 ? 'pedido' : 'pedidos'}</span>
-                          {qtdPedidos > 0 && (
-                            <span>
-                              Ticket médio: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(ticketMedio)}
-                            </span>
-                          )}
+
+                        {/* Barra vertical */}
+                        <div className="relative w-full flex items-end justify-center" style={{ height: '100%' }}>
+                          <div
+                            className="w-full max-w-[60px] bg-gradient-to-t from-blue-600 to-cyan-400 rounded-t-lg transition-all duration-700 ease-out hover:from-blue-700 hover:to-cyan-500 cursor-pointer shadow-lg"
+                            style={{ height: `${alturaPercentual}%`, minHeight: valorTotal > 0 ? '8px' : '0' }}
+                          >
+                            {/* Valor no topo da barra */}
+                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap">
+                              {new Intl.NumberFormat('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                              }).format(valorTotal)}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Label do mês */}
+                        <div className="text-center">
+                          <p className="text-xs font-medium capitalize text-muted-foreground">{mesAbrev}</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-lg font-bold text-primary">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2.5 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-blue-600 to-cyan-500 h-full rounded-full transition-all duration-700 ease-out"
-                        style={{ width: `${percentual}%` }}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+                    )
+                  })}
+                </div>
+
+                {/* Linha de base */}
+                <div className="border-t pt-2">
+                  <p className="text-xs text-center text-muted-foreground">Últimos {dadosValidos.length} meses</p>
+                </div>
+              </div>
             ) : (
               <div className="text-center text-muted-foreground py-8">
                 <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
