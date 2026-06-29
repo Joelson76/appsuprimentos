@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import styles from './page-editorial.module.css'
 import {
   Card,
   CardContent,
@@ -39,7 +38,7 @@ export default function LandingPage() {
               className="object-contain"
             />
             <div className="flex flex-col">
-              <span className="text-xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
                 SupriFlow
               </span>
               <span className="text-[10px] text-muted-foreground -mt-1">
@@ -60,10 +59,10 @@ export default function LandingPage() {
           </nav>
           <div className="flex items-center gap-4">
             <Link href="/login">
-              <Button variant="outline" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50">Entrar</Button>
+              <Button variant="ghost">Entrar</Button>
             </Link>
             <Link href="/cadastro">
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">Começar Grátis</Button>
+              <Button>Começar Grátis</Button>
             </Link>
           </div>
         </div>
@@ -71,48 +70,38 @@ export default function LandingPage() {
 
       <main className="flex-1 pt-16">{/* pt-16 = altura do header fixo */}
         {/* Hero Section */}
-        <section className={`relative py-20 md:py-32 overflow-hidden ${styles.diagonalMesh}`}>
-          <div className="absolute inset-0 -z-10" />
+        <section className="relative py-20 md:py-32 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-cyan-50 to-background -z-10" />
 
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center text-center space-y-8">
-              <div className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-50 text-emerald-800 text-sm font-semibold border border-emerald-200 ${styles.badgeShimmer} ${styles.scrollReveal}`}>
-                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                Usado por +50 indústrias e varejos no Brasil
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
+                <Zap className="h-4 w-4" />
+                Teste grátis por 14 dias
               </div>
 
-              {/* Nome da Marca em Destaque */}
-              <div className={`${styles.staggerReveal} space-y-3`}>
-                <div className="inline-block">
-                  <h1 className={`text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-3 ${styles.brandName}`}>
-                    SupriFlow
-                  </h1>
-                  <div className={`h-1 w-full rounded-full ${styles.brandUnderline}`}></div>
-                </div>
-                <p className="text-lg md:text-xl text-slate-600 font-medium">
-                  Sistema Completo de Gestão de Compras e Suprimentos
-                </p>
-              </div>
-
-              <h2 className={`${styles.editorialHeadline} max-w-4xl ${styles.staggerReveal}`}>
-                Reduza <em>20% dos Custos</em> de Compras em 60 Dias
-              </h2>
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight max-w-4xl">
+                Gestão de Compras{' '}
+                <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                  Simples e Eficiente
+                </span>
+              </h1>
 
               <p className="text-xl text-muted-foreground max-w-2xl">
-                Transforme planilhas e e-mails em um sistema profissional de gestão de compras.
-                70% menos tempo em cotações. Aprovações automáticas. KPIs em tempo real.
+                Automatize requisições, cotações e pedidos de compra.
+                Reduza custos, ganhe tempo e tenha controle total sobre seus suprimentos.
               </p>
 
-              <div className={`flex flex-col sm:flex-row gap-4 ${styles.scrollReveal}`}>
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/cadastro">
-                  <Button size="lg" className={`h-14 px-10 text-lg font-semibold bg-emerald-600 hover:bg-emerald-700 text-white ${styles.ctaMagnetic}`}>
-                    Começar Teste Grátis por 14 Dias
+                  <Button size="lg" className="h-12 px-8 text-base">
+                    Começar Agora
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="#features">
-                  <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-2 border-slate-300 hover:bg-slate-50">
-                    Ver Como Funciona
+                  <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+                    Ver Demonstração
                   </Button>
                 </Link>
               </div>
@@ -135,32 +124,25 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Stats Section - Social Proof com Números Reais */}
-        <section className="py-16 bg-white border-y border-slate-200">
+        {/* Stats Section */}
+        <section className="py-16 bg-slate-50">
           <div className="container px-4">
-            <p className="text-center text-slate-500 mb-8 text-sm uppercase tracking-wide font-medium">
-              Resultados reais de clientes que usam SupriFlow
-            </p>
-            <div className={`grid grid-cols-2 md:grid-cols-4 gap-12 ${styles.staggerReveal}`}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <div className="text-center">
-                <div className={styles.dramaticNumber} data-label="REDUÇÃO">20%</div>
-                <div className="text-sm text-slate-700 mt-2 font-medium">Redução de Custos</div>
-                <div className="text-xs text-muted-foreground mt-1">Média em 60 dias</div>
+                <div className="text-4xl font-bold text-blue-600">98%</div>
+                <div className="text-sm text-muted-foreground mt-2">Satisfação</div>
               </div>
               <div className="text-center">
-                <div className={styles.dramaticNumber} data-label="MENOS TEMPO">70%</div>
-                <div className="text-sm text-slate-700 mt-2 font-medium">Menos Tempo</div>
-                <div className="text-xs text-muted-foreground mt-1">Em cotações manuais</div>
+                <div className="text-4xl font-bold text-blue-600">-40%</div>
+                <div className="text-sm text-muted-foreground mt-2">Custos de Compra</div>
               </div>
               <div className="text-center">
-                <div className={styles.dramaticNumber} data-label="SETUP">5min</div>
-                <div className="text-sm text-slate-700 mt-2 font-medium">Setup Completo</div>
-                <div className="text-xs text-muted-foreground mt-1">Pronto para usar</div>
+                <div className="text-4xl font-bold text-blue-600">10h</div>
+                <div className="text-sm text-muted-foreground mt-2">Economizadas/Semana</div>
               </div>
               <div className="text-center">
-                <div className={styles.dramaticNumber} data-label="EMPRESAS">+50</div>
-                <div className="text-sm text-slate-700 mt-2 font-medium">Empresas Ativas</div>
-                <div className="text-xs text-muted-foreground mt-1">Indústria e varejo</div>
+                <div className="text-4xl font-bold text-blue-600">500+</div>
+                <div className="text-sm text-muted-foreground mt-2">Empresas Ativas</div>
               </div>
             </div>
           </div>
@@ -171,19 +153,19 @@ export default function LandingPage() {
           <div className="container px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                Por que escolher SupriFlow?
+                Tudo que você precisa em um só lugar
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Mais simples que ERPs complexos, mais profissional que planilhas.
-                Sistema completo do início ao fim.
+                Sistema completo para gestão de compras e suprimentos,
+                do zero ao pedido recebido
               </p>
             </div>
 
-            <div className={`grid md:grid-cols-2 lg:grid-cols-3 gap-8 ${styles.staggerReveal}`}>
-              <Card className={styles.luxuryCard}>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <Card className="border-2 hover:border-blue-200 transition-colors">
                 <CardHeader>
-                  <div className={styles.refinedIcon}>
-                    <FileText className="h-7 w-7 text-emerald-700" />
+                  <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center mb-4">
+                    <FileText className="h-6 w-6 text-blue-600" />
                   </div>
                   <CardTitle>Requisições Inteligentes</CardTitle>
                   <CardDescription>
@@ -192,10 +174,10 @@ export default function LandingPage() {
                 </CardHeader>
               </Card>
 
-              <Card className={styles.luxuryCard}>
+              <Card className="border-2 hover:border-blue-200 transition-colors">
                 <CardHeader>
-                  <div className="h-12 w-12 rounded-lg bg-teal-100 flex items-center justify-center mb-4">
-                    <TrendingUp className="h-6 w-6 text-teal-700" />
+                  <div className="h-12 w-12 rounded-lg bg-cyan-100 flex items-center justify-center mb-4">
+                    <TrendingUp className="h-6 w-6 text-cyan-600" />
                   </div>
                   <CardTitle>Cotações Simultâneas</CardTitle>
                   <CardDescription>
@@ -204,10 +186,10 @@ export default function LandingPage() {
                 </CardHeader>
               </Card>
 
-              <Card className={styles.luxuryCard}>
+              <Card className="border-2 hover:border-blue-200 transition-colors">
                 <CardHeader>
-                  <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center mb-4">
-                    <Shield className="h-6 w-6 text-slate-700" />
+                  <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center mb-4">
+                    <Shield className="h-6 w-6 text-green-600" />
                   </div>
                   <CardTitle>Portal do Fornecedor</CardTitle>
                   <CardDescription>
@@ -216,10 +198,10 @@ export default function LandingPage() {
                 </CardHeader>
               </Card>
 
-              <Card className={styles.luxuryCard}>
+              <Card className="border-2 hover:border-blue-200 transition-colors">
                 <CardHeader>
-                  <div className="h-12 w-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4">
-                    <BarChart3 className="h-6 w-6 text-amber-700" />
+                  <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center mb-4">
+                    <BarChart3 className="h-6 w-6 text-purple-600" />
                   </div>
                   <CardTitle>Dashboards em Tempo Real</CardTitle>
                   <CardDescription>
@@ -228,10 +210,10 @@ export default function LandingPage() {
                 </CardHeader>
               </Card>
 
-              <Card className={styles.luxuryCard}>
+              <Card className="border-2 hover:border-blue-200 transition-colors">
                 <CardHeader>
-                  <div className="h-12 w-12 rounded-lg bg-indigo-100 flex items-center justify-center mb-4">
-                    <Users className="h-6 w-6 text-indigo-700" />
+                  <div className="h-12 w-12 rounded-lg bg-orange-100 flex items-center justify-center mb-4">
+                    <Users className="h-6 w-6 text-orange-600" />
                   </div>
                   <CardTitle>Multi-usuário</CardTitle>
                   <CardDescription>
@@ -240,10 +222,10 @@ export default function LandingPage() {
                 </CardHeader>
               </Card>
 
-              <Card className={styles.luxuryCard}>
+              <Card className="border-2 hover:border-blue-200 transition-colors">
                 <CardHeader>
-                  <div className="h-12 w-12 rounded-lg bg-rose-100 flex items-center justify-center mb-4">
-                    <Clock className="h-6 w-6 text-rose-700" />
+                  <div className="h-12 w-12 rounded-lg bg-pink-100 flex items-center justify-center mb-4">
+                    <Clock className="h-6 w-6 text-pink-600" />
                   </div>
                   <CardTitle>Automação Total</CardTitle>
                   <CardDescription>
@@ -256,14 +238,14 @@ export default function LandingPage() {
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="py-20 md:py-32 bg-gradient-to-b from-slate-50 to-white">
+        <section id="pricing" className="py-20 md:py-32 bg-slate-50">
           <div className="container px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                Planos transparentes e sem surpresas
+                Planos para empresas de todos os tamanhos
               </h2>
               <p className="text-xl text-muted-foreground">
-                Teste grátis por 14 dias. Sem cartão de crédito. Cancele quando quiser.
+                Comece grátis e faça upgrade quando precisar
               </p>
             </div>
 
@@ -296,16 +278,16 @@ export default function LandingPage() {
                     <span>Suporte por email</span>
                   </div>
                   <Link href="/cadastro" className="block">
-                    <Button className="w-full mt-6 h-12 border-emerald-600 text-emerald-700 hover:bg-emerald-50" variant="outline">
-                      Testar Grátis por 14 Dias
+                    <Button className="w-full mt-6" variant="outline">
+                      Começar Grátis
                     </Button>
                   </Link>
                 </CardContent>
               </Card>
 
               {/* Profissional */}
-              <Card className="border-2 border-emerald-600 relative shadow-lg">
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-emerald-600 text-white text-sm rounded-full font-medium">
+              <Card className="border-2 border-blue-600 relative">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-600 text-white text-sm rounded-full">
                   Mais Popular
                 </div>
                 <CardHeader>
@@ -338,8 +320,8 @@ export default function LandingPage() {
                     <span>Suporte prioritário</span>
                   </div>
                   <Link href="/cadastro" className="block">
-                    <Button className="w-full mt-6 h-12 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white">
-                      Começar Teste Grátis
+                    <Button className="w-full mt-6">
+                      Começar Grátis
                     </Button>
                   </Link>
                 </CardContent>
@@ -376,11 +358,9 @@ export default function LandingPage() {
                     <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <span>Gerente de conta</span>
                   </div>
-                  <Link href="https://wa.me/5543991679911?text=Olá!%20Tenho%20interesse%20no%20plano%20Enterprise" target="_blank">
-                    <Button className="w-full mt-6 h-12 border-emerald-600 text-emerald-700 hover:bg-emerald-50" variant="outline">
-                      Falar com Especialista
-                    </Button>
-                  </Link>
+                  <Button className="w-full mt-6" variant="outline">
+                    Falar com Vendas
+                  </Button>
                 </CardContent>
               </Card>
             </div>
@@ -392,11 +372,8 @@ export default function LandingPage() {
           <div className="container px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                O que nossos clientes dizem
+                Empresas que confiam no SupriFlow
               </h2>
-              <p className="text-lg text-muted-foreground">
-                Empresas reais, resultados reais
-              </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -408,16 +385,14 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <p className="mb-4 text-muted-foreground">
-                    "Reduzimos <strong className="text-foreground">35% dos custos</strong> de compra em 6 meses.
-                    A comparação automática de cotações economiza horas do meu time!"
+                    Reduzimos 35% dos custos de compra em 6 meses.
+                    A comparação automática de cotações é incrível!
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center text-white font-bold text-lg">
-                      CS
-                    </div>
+                    <div className="h-10 w-10 rounded-full bg-blue-100" />
                     <div>
                       <div className="font-semibold">Carlos Silva</div>
-                      <div className="text-sm text-muted-foreground">Gerente de Suprimentos, Indústria Metalúrgica</div>
+                      <div className="text-sm text-muted-foreground">Gerente de Suprimentos</div>
                     </div>
                   </div>
                 </CardContent>
@@ -431,16 +406,14 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <p className="mb-4 text-muted-foreground">
-                    "Implementação <strong className="text-foreground">super rápida</strong>. Em 2 dias já estávamos usando.
-                    O suporte em português faz toda a diferença!"
+                    Implementação super rápida. Em 2 dias já estávamos usando.
+                    Suporte excelente!
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center text-white font-bold text-lg">
-                      AC
-                    </div>
+                    <div className="h-10 w-10 rounded-full bg-green-100" />
                     <div>
                       <div className="font-semibold">Ana Costa</div>
-                      <div className="text-sm text-muted-foreground">Diretora Financeira, Rede de Varejo</div>
+                      <div className="text-sm text-muted-foreground">Diretora Financeira</div>
                     </div>
                   </div>
                 </CardContent>
@@ -454,161 +427,46 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <p className="mb-4 text-muted-foreground">
-                    "Finalmente conseguimos <strong className="text-foreground">controlar todas as requisições</strong>.
-                    Agora sei exatamente o que está sendo comprado e por quem!"
+                    Finalmente conseguimos controlar todas as requisições.
+                    O fluxo de aprovação é perfeito!
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-white font-bold text-lg">
-                      RL
-                    </div>
+                    <div className="h-10 w-10 rounded-full bg-purple-100" />
                     <div>
                       <div className="font-semibold">Roberto Lima</div>
-                      <div className="text-sm text-muted-foreground">CEO, Indústria de Alimentos</div>
+                      <div className="text-sm text-muted-foreground">CEO</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Section - Objection Handling */}
-        <section className="py-20 md:py-32 bg-white">
-          <div className="container px-4">
-            <div className="max-w-3xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  Perguntas Frequentes
-                </h2>
-                <p className="text-lg text-muted-foreground">
-                  Tudo que você precisa saber antes de começar
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <details className="group bg-slate-50 rounded-lg p-6 hover:bg-slate-100 transition-colors">
-                  <summary className="font-semibold text-lg cursor-pointer list-none flex items-center justify-between">
-                    Como funciona o teste gratuito?
-                    <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-                  </summary>
-                  <p className="mt-4 text-muted-foreground leading-relaxed">
-                    Você tem acesso completo a todas as funcionalidades do plano Professional por 14 dias.
-                    Não pedimos cartão de crédito. Apenas preencha o cadastro e comece a usar imediatamente.
-                    Após os 14 dias, você escolhe o plano que mais se adequa à sua empresa.
-                  </p>
-                </details>
-
-                <details className="group bg-slate-50 rounded-lg p-6 hover:bg-slate-100 transition-colors">
-                  <summary className="font-semibold text-lg cursor-pointer list-none flex items-center justify-between">
-                    É difícil implementar? Quanto tempo leva?
-                    <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-                  </summary>
-                  <p className="mt-4 text-muted-foreground leading-relaxed">
-                    Não! Em 5 minutos você já está operando. O sistema tem um tutorial guiado que ensina
-                    a criar sua primeira requisição, cotação e ordem de compra. Nosso suporte em português
-                    está disponível via WhatsApp para qualquer dúvida.
-                  </p>
-                </details>
-
-                <details className="group bg-slate-50 rounded-lg p-6 hover:bg-slate-100 transition-colors">
-                  <summary className="font-semibold text-lg cursor-pointer list-none flex items-center justify-between">
-                    Funciona para minha indústria/varejo?
-                    <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-                  </summary>
-                  <p className="mt-4 text-muted-foreground leading-relaxed">
-                    Sim! SupriFlow foi desenvolvido especificamente para indústrias e varejos brasileiros.
-                    Suporta classificação de produtos (matéria-prima, MRO, ativos), múltiplas filiais,
-                    validação de CNPJ e integração com NF-e. Atendemos desde pequenas empresas até grupos
-                    com múltiplas unidades.
-                  </p>
-                </details>
-
-                <details className="group bg-slate-50 rounded-lg p-6 hover:bg-slate-100 transition-colors">
-                  <summary className="font-semibold text-lg cursor-pointer list-none flex items-center justify-between">
-                    Meus dados estão seguros?
-                    <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-                  </summary>
-                  <p className="mt-4 text-muted-foreground leading-relaxed">
-                    Absolutamente. Usamos isolamento completo entre clientes (tecnologia multi-tenant),
-                    criptografia de ponta a ponta e hospedagem em servidores certificados. Seus dados
-                    nunca são compartilhados com terceiros. Somos 100% LGPD compliant.
-                  </p>
-                </details>
-
-                <details className="group bg-slate-50 rounded-lg p-6 hover:bg-slate-100 transition-colors">
-                  <summary className="font-semibold text-lg cursor-pointer list-none flex items-center justify-between">
-                    Posso migrar meus dados de planilhas/outro sistema?
-                    <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-                  </summary>
-                  <p className="mt-4 text-muted-foreground leading-relaxed">
-                    Sim! Oferecemos importação de fornecedores, produtos e histórico de compras via planilha Excel/CSV.
-                    Para clientes Enterprise, fazemos a migração completa sem custo adicional. Nosso time técnico
-                    te ajuda em todo o processo.
-                  </p>
-                </details>
-
-                <details className="group bg-slate-50 rounded-lg p-6 hover:bg-slate-100 transition-colors">
-                  <summary className="font-semibold text-lg cursor-pointer list-none flex items-center justify-between">
-                    Posso cancelar a qualquer momento?
-                    <span className="text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-                  </summary>
-                  <p className="mt-4 text-muted-foreground leading-relaxed">
-                    Sim, sem burocracia! Você pode cancelar sua assinatura a qualquer momento direto no painel.
-                    Sem multas, sem taxas de cancelamento, sem perguntas inconvenientes. Seus dados ficam
-                    disponíveis para exportação por 30 dias após o cancelamento.
-                  </p>
-                </details>
-              </div>
-
-              <div className="mt-12 text-center">
-                <p className="text-muted-foreground mb-4">Ainda tem dúvidas?</p>
-                <Link href="https://wa.me/5543991679911?text=Olá!%20Tenho%20algumas%20dúvidas%20sobre%20o%20SupriFlow" target="_blank">
-                  <Button variant="outline" size="lg" className="h-12 px-6">
-                    Falar com Especialista via WhatsApp
-                  </Button>
-                </Link>
-              </div>
             </div>
           </div>
         </section>
 
         {/* CTA Final */}
-        <section className="py-20 md:py-32 bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 text-white">
+        <section className="py-20 md:py-32 bg-gradient-to-br from-blue-600 to-cyan-500 text-white">
           <div className="container px-4">
             <div className="max-w-3xl mx-auto text-center space-y-8">
               <h2 className="text-3xl md:text-5xl font-bold">
-                Pronto para reduzir custos e ganhar eficiência?
+                Pronto para revolucionar suas compras?
               </h2>
               <p className="text-xl text-blue-100">
-                Junte-se a +50 empresas brasileiras que já economizam em média 20% em compras
+                Junte-se a centenas de empresas que já economizam tempo e dinheiro com o SupriFlow
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/cadastro">
-                  <Button size="lg" className="h-14 px-10 text-lg font-semibold shadow-xl bg-emerald-600 hover:bg-emerald-500">
-                    Começar Teste Grátis por 14 Dias
+                  <Button size="lg" variant="secondary" className="h-12 px-8 text-base">
+                    Começar Teste Grátis
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="https://wa.me/5543991679911?text=Olá!%20Gostaria%20de%20agendar%20uma%20demonstração" target="_blank">
-                  <Button size="lg" variant="outline" className="h-14 px-8 text-lg bg-transparent text-white border-2 border-white hover:bg-white hover:text-slate-800 transition-all">
-                    Falar com Especialista
-                  </Button>
-                </Link>
+                <Button size="lg" variant="outline" className="h-12 px-8 text-base bg-transparent text-white border-white hover:bg-white/10">
+                  Agendar Demonstração
+                </Button>
               </div>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-slate-300">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="font-medium">14 dias grátis</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="font-medium">Sem cartão de crédito</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="font-medium">Cancele quando quiser</span>
-                </div>
-              </div>
+              <p className="text-sm text-blue-100">
+                ✓ 14 dias grátis • ✓ Sem cartão de crédito • ✓ Cancele quando quiser
+              </p>
             </div>
           </div>
         </section>

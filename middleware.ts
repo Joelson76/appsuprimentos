@@ -69,24 +69,11 @@ export async function middleware(request: NextRequest) {
 
     if (profileError) {
       console.error('❌ Erro ao buscar profile:', profileError)
-
-      // Se erro de RLS, fazer logout e redirecionar
-      if (profileError.code === 'PGRST116' || profileError.message?.includes('permission denied')) {
-        console.error('🚨 RLS bloqueando acesso ao profile - fazendo logout')
-        await supabase.auth.signOut()
-        const redirectUrl = new URL('/login', request.url)
-        redirectUrl.searchParams.set('error', 'rls_error')
-        return NextResponse.redirect(redirectUrl)
-      }
     }
 
     // Validar profile
     if (!profile || !profile.tenant_id) {
       console.error('❌ Usuário sem profile/tenant:', user.id, 'profile:', profile)
-
-      // Fazer logout antes de redirecionar para evitar loop
-      await supabase.auth.signOut()
-
       const redirectUrl = new URL('/login', request.url)
       redirectUrl.searchParams.set('error', 'invalid_profile')
       return NextResponse.redirect(redirectUrl)
