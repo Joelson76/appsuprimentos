@@ -24,6 +24,12 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
+  const [stats, setStats] = useState({
+    requisicoes: 0,
+    cotacoes: 0,
+    pedidos: 0,
+    fornecedores: 0
+  })
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -45,6 +51,45 @@ export default function DashboardPage() {
         .single()
 
       setProfile(profileData)
+
+      // Buscar estatísticas se tiver tenant
+      if (profileData?.tenant_id) {
+        try {
+          // Requisições ativas
+          const { count: reqCount } = await supabase
+            .from('requisicoes')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', profileData.tenant_id)
+
+          // Cotações
+          const { count: cotCount } = await supabase
+            .from('cotacoes')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', profileData.tenant_id)
+
+          // Pedidos
+          const { count: pedCount } = await supabase
+            .from('pedidos')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', profileData.tenant_id)
+
+          // Fornecedores
+          const { count: fornCount } = await supabase
+            .from('fornecedores')
+            .select('*', { count: 'exact', head: true })
+            .eq('tenant_id', profileData.tenant_id)
+
+          setStats({
+            requisicoes: reqCount || 0,
+            cotacoes: cotCount || 0,
+            pedidos: pedCount || 0,
+            fornecedores: fornCount || 0
+          })
+        } catch (error) {
+          console.error('Erro ao buscar stats:', error)
+        }
+      }
+
       setLoading(false)
     }
 
@@ -85,62 +130,62 @@ export default function DashboardPage() {
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-emerald-600">
+        <Card className="border-l-4 border-l-emerald-600 hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Requisições Ativas
+              Requisições
             </CardTitle>
             <FileText className="h-4 w-4 text-emerald-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
+            <div className="text-2xl font-bold text-emerald-700">{stats.requisicoes}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Aguardando processamento
+              {stats.requisicoes === 0 ? 'Nenhuma requisição' : 'Total de requisições'}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-blue-600">
+        <Card className="border-l-4 border-l-emerald-500 hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Cotações em Andamento
+              Cotações
             </CardTitle>
-            <ShoppingCart className="h-4 w-4 text-blue-600" />
+            <ShoppingCart className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
+            <div className="text-2xl font-bold text-emerald-600">{stats.cotacoes}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Aguardando fornecedores
+              {stats.cotacoes === 0 ? 'Nenhuma cotação' : 'Total de cotações'}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-purple-600">
+        <Card className="border-l-4 border-l-emerald-600 hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Pedidos do Mês
+              Pedidos
             </CardTitle>
-            <Package className="h-4 w-4 text-purple-600" />
+            <Package className="h-4 w-4 text-emerald-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
+            <div className="text-2xl font-bold text-emerald-700">{stats.pedidos}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Total de pedidos
+              {stats.pedidos === 0 ? 'Nenhum pedido' : 'Total de pedidos'}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-orange-600">
+        <Card className="border-l-4 border-l-emerald-500 hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Fornecedores Ativos
+              Fornecedores
             </CardTitle>
-            <Users className="h-4 w-4 text-orange-600" />
+            <Users className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
+            <div className="text-2xl font-bold text-emerald-600">{stats.fornecedores}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Cadastrados no sistema
+              {stats.fornecedores === 0 ? 'Nenhum fornecedor' : 'Fornecedores cadastrados'}
             </p>
           </CardContent>
         </Card>
@@ -157,28 +202,28 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             <Link href="/requisicoes/novo">
-              <Button variant="outline" className="w-full justify-start hover:bg-emerald-50 hover:border-emerald-600">
+              <Button variant="outline" className="w-full justify-start hover:bg-emerald-50 hover:border-emerald-600 hover:text-emerald-700">
                 <FileText className="h-4 w-4 mr-2" />
                 Criar Nova Requisição
                 <ArrowRight className="h-4 w-4 ml-auto" />
               </Button>
             </Link>
             <Link href="/cotacoes">
-              <Button variant="outline" className="w-full justify-start hover:bg-blue-50 hover:border-blue-600">
+              <Button variant="outline" className="w-full justify-start hover:bg-emerald-50 hover:border-emerald-600 hover:text-emerald-700">
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Ver Cotações
                 <ArrowRight className="h-4 w-4 ml-auto" />
               </Button>
             </Link>
             <Link href="/fornecedores">
-              <Button variant="outline" className="w-full justify-start hover:bg-purple-50 hover:border-purple-600">
+              <Button variant="outline" className="w-full justify-start hover:bg-emerald-50 hover:border-emerald-600 hover:text-emerald-700">
                 <Users className="h-4 w-4 mr-2" />
                 Gerenciar Fornecedores
                 <ArrowRight className="h-4 w-4 ml-auto" />
               </Button>
             </Link>
             <Link href="/produtos">
-              <Button variant="outline" className="w-full justify-start hover:bg-orange-50 hover:border-orange-600">
+              <Button variant="outline" className="w-full justify-start hover:bg-emerald-50 hover:border-emerald-600 hover:text-emerald-700">
                 <Package className="h-4 w-4 mr-2" />
                 Cadastrar Produtos
                 <ArrowRight className="h-4 w-4 ml-auto" />
