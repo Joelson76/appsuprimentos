@@ -119,7 +119,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/requisicoes/novo">
+          <Link href="/requisicoes/nova">
             <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
               <FileText className="h-4 w-4 mr-2" />
               Nova Requisição
@@ -201,7 +201,7 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Link href="/requisicoes/novo">
+            <Link href="/requisicoes/nova">
               <Button variant="outline" className="w-full justify-start hover:bg-emerald-50 hover:border-emerald-600 hover:text-emerald-700">
                 <FileText className="h-4 w-4 mr-2" />
                 Criar Nova Requisição
