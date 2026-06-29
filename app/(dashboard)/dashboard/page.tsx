@@ -318,21 +318,55 @@ export default async function DashboardPage() {
                           })}
                         </div>
 
-                        {/* Label da filial com CNPJ */}
-                        <div className="text-center space-y-1">
-                          <p className="text-xs font-semibold text-foreground truncate max-w-[120px]">
-                            {filialNome}
-                          </p>
+                        {/* Label completo na base: CNPJ → Meses → Valores */}
+                        <div className="text-center space-y-2 mt-2">
+                          {/* Nome + Badge */}
+                          <div className="flex items-center justify-center gap-2">
+                            <p className="text-sm font-bold text-foreground">
+                              {filialNome}
+                            </p>
+                            {filialInfo?.is_matriz && (
+                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                Matriz
+                              </span>
+                            )}
+                          </div>
+
+                          {/* CNPJ */}
                           {filialInfo?.cnpj && (
                             <p className="text-xs text-muted-foreground font-mono">
-                              {filialInfo.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
+                              CNPJ: {filialInfo.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
                             </p>
                           )}
-                          {filialInfo?.is_matriz && (
-                            <span className="inline-block text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                              Matriz
-                            </span>
-                          )}
+
+                          {/* Meses */}
+                          <div className="flex justify-center gap-1 text-xs text-muted-foreground font-medium">
+                            {mesesUnicos.map((mes, idx) => {
+                              let mesAbrev = 'N/A'
+                              try {
+                                mesAbrev = new Date(mes).toLocaleDateString('pt-BR', { month: 'short' })
+                              } catch (e) {}
+                              return <span key={idx} className="capitalize w-12 text-center">{mesAbrev}</span>
+                            })}
+                          </div>
+
+                          {/* Valores por mês */}
+                          <div className="flex justify-center gap-1 text-xs font-bold text-primary">
+                            {mesesUnicos.map((mes, idx) => {
+                              const dadoMes = dadosFilial.find((d: any) => d.mes === mes)
+                              const valor = dadoMes?.valor_total || 0
+                              return (
+                                <span key={idx} className="w-12 text-center">
+                                  {new Intl.NumberFormat('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL',
+                                    minimumFractionDigits: 0,
+                                    maximumFractionDigits: 0
+                                  }).format(valor)}
+                                </span>
+                              )
+                            })}
+                          </div>
                         </div>
                       </div>
                     )
