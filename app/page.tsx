@@ -59,10 +59,10 @@ export default function LandingPage() {
           </nav>
           <div className="flex items-center gap-4">
             <Link href="/login">
-              <Button variant="ghost">Entrar</Button>
+              <Button variant="outline" className="border-emerald-600 text-emerald-700 hover:bg-emerald-50">Entrar</Button>
             </Link>
             <Link href="/cadastro">
-              <Button>Começar Grátis</Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">Começar Grátis</Button>
             </Link>
           </div>
         </div>
@@ -94,13 +94,13 @@ export default function LandingPage() {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/cadastro">
-                  <Button size="lg" className="h-12 px-8 text-base">
+                  <Button size="lg" className="h-12 px-8 text-base bg-emerald-600 hover:bg-emerald-700 text-white">
                     Começar Agora
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="#features">
-                  <Button size="lg" variant="outline" className="h-12 px-8 text-base">
+                  <Button size="lg" variant="outline" className="h-12 px-8 text-base border-emerald-600 text-emerald-700 hover:bg-emerald-50">
                     Ver Demonstração
                   </Button>
                 </Link>
