@@ -1,24 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, IBM_Plex_Serif } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 
-// Display: Geométrico e impactante para headlines
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-display",
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
 });
-
-// Body: Serifada editorial para textos (sofisticação)
-const ibmPlexSerif = IBM_Plex_Serif({
-  subsets: ["latin"],
-  variable: "--font-body",
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  weight: "100 900",
 });
 
 export const metadata: Metadata = {
@@ -40,8 +34,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body
-        className={`${spaceGrotesk.variable} ${ibmPlexSerif.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-body)' }}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"
