@@ -54,12 +54,20 @@ export default async function DashboardPage() {
   }
 
   // Busca evolução mensal
-  const { data: evolucao } = await supabase
+  const { data: evolucao, error: errorEvolucao } = await supabase
     .from('vw_evolucao_compras_mensal')
     .select('*')
     .eq('tenant_id', profile?.tenant_id || '')
     .order('mes', { ascending: false })
     .limit(12)
+
+  // Debug
+  if (errorEvolucao) {
+    console.error('❌ Erro ao buscar evolução:', errorEvolucao)
+  }
+  if (evolucao) {
+    console.log('📊 Evolução mensal:', evolucao)
+  }
 
   // Busca top fornecedores
   const { data: topFornecedores } = await supabase
@@ -120,8 +128,7 @@ export default async function DashboardPage() {
           {(() => {
             const dadosValidos = evolucao?.filter((m: any) =>
               m.mes &&
-              m.mes.match(/^\d{4}-\d{2}$/) &&
-              (m.valor_total_pedidos > 0 || m.total_pedidos > 0)
+              (m.valor_total > 0 || m.qtd_pedidos > 0)
             ).slice(0, 6).reverse() || []
 
             return dadosValidos.length > 0 ? (
@@ -142,16 +149,16 @@ export default async function DashboardPage() {
                   console.error('Erro ao formatar data:', mes.mes, e)
                 }
 
-                const valorTotal = mes.valor_total_pedidos || 0
-                const qtdPedidos = mes.total_pedidos || 0
-                const ticketMedio = qtdPedidos > 0 ? valorTotal / qtdPedidos : 0
-                const maxValor = Math.max(...evolucao.slice(0, 6).map((m: any) => m.valor_total_pedidos || 0), 1)
+                const valorTotal = mes.valor_total || 0
+                const qtdPedidos = mes.qtd_pedidos || 0
+                const ticketMedio = mes.ticket_medio || (qtdPedidos > 0 ? valorTotal / qtdPedidos : 0)
+                const maxValor = Math.max(...dadosValidos.map((m: any) => m.valor_total || 0), 1)
                 const percentual = (valorTotal / maxValor) * 100
 
                 // Variação em relação ao mês anterior
-                const mesAnterior = evolucao.slice(0, 6).reverse()[index - 1]
-                const variacao = mesAnterior && mesAnterior.valor_total_pedidos > 0
-                  ? ((valorTotal - mesAnterior.valor_total_pedidos) / mesAnterior.valor_total_pedidos) * 100
+                const mesAnterior = dadosValidos[index - 1]
+                const variacao = mesAnterior && mesAnterior.valor_total > 0
+                  ? ((valorTotal - mesAnterior.valor_total) / mesAnterior.valor_total) * 100
                   : null
 
                 return (
