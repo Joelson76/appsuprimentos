@@ -209,15 +209,6 @@ export default async function DashboardPage() {
               filiaisPorCnpj.get(cnpj)?.push(item)
             })
 
-            // Filtrar apenas filiais com pelo menos 1 pedido
-            const filiaisComPedidos = new Map<string, any[]>()
-            filiaisPorCnpj.forEach((dadosFilial, cnpj) => {
-              const totalPedidos = dadosFilial.reduce((sum, d) => sum + (d.qtd_pedidos || 0), 0)
-              if (totalPedidos > 0) {
-                filiaisComPedidos.set(cnpj, dadosFilial)
-              }
-            })
-
             // Pegar últimos 6 meses únicos
             const mesesUnicos = [...new Set(evolucaoPorFilial.map((e: any) => e.mes))]
               .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
@@ -234,20 +225,9 @@ export default async function DashboardPage() {
               'from-pink-600 to-pink-400',
             ]
 
-            // Se não tem filiais com pedidos, mostrar empty state
-            if (filiaisComPedidos.size === 0) {
-              return (
-                <div className="text-center text-muted-foreground py-8">
-                  <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">Nenhum pedido registrado por filial ainda</p>
-                  <p className="text-xs mt-1">Crie pedidos associados às filiais</p>
-                </div>
-              )
-            }
-
             // Calcular max valor global
             const maxValor = Math.max(
-              ...Array.from(filiaisComPedidos.values()).flat().map((e: any) => e.valor_total || 0),
+              ...Array.from(filiaisPorCnpj.values()).flat().map((e: any) => e.valor_total || 0),
               1
             )
 
@@ -256,7 +236,7 @@ export default async function DashboardPage() {
               <div className="space-y-6">
                 {/* Gráfico agrupado por FILIAL */}
                 <div className="flex items-end justify-between gap-6 h-64 pb-2">
-                  {Array.from(filiaisComPedidos.entries()).map(([cnpj, dadosFilial], filialIdx) => {
+                  {Array.from(filiaisPorCnpj.entries()).map(([cnpj, dadosFilial], filialIdx) => {
                     const filialInfo = dadosFilial[0]
                     const filialNome = filialInfo?.filial_nome || cnpj
 
@@ -336,7 +316,7 @@ export default async function DashboardPage() {
                 {/* Info */}
                 <div className="border-t pt-2">
                   <p className="text-xs text-center text-muted-foreground">
-                    {Array.from(filiaisComPedidos.keys()).length} {Array.from(filiaisComPedidos.keys()).length === 1 ? 'filial' : 'filiais'} com pedidos • Últimos {mesesUnicos.length} meses
+                    {Array.from(filiaisPorCnpj.keys()).length} {Array.from(filiaisPorCnpj.keys()).length === 1 ? 'filial' : 'filiais'} • Últimos {mesesUnicos.length} meses
                   </p>
                 </div>
               </div>
