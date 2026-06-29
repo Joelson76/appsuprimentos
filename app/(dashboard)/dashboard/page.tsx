@@ -69,63 +69,54 @@ export default async function DashboardPage() {
     .eq('ativa', true)
     .order('is_matriz', { ascending: false })
 
-  // Buscar pedidos dos últimos 6 meses agrupados por filial
-  const { data: pedidosPorFilial, error: errorPedidos } = await supabase
-    .rpc('get_pedidos_por_filial_mes', {
-      p_tenant_id: profile?.tenant_id || ''
+  // Buscar pedidos direto e agrupar
+  const { data: pedidosRaw } = await supabase
+    .from('ordens_compra')
+    .select('criado_em, valor_total, filial_id')
+    .eq('tenant_id', profile?.tenant_id || '')
+    .not('status', 'in', '("CANCELADA","RASCUNHO")')
+    .gte('criado_em', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
+
+  // Agrupar manualmente por filial + mês
+  let evolucaoPorFilial: any[] = []
+
+  if (pedidosRaw && filiais) {
+    const grouped = new Map<string, any>()
+
+    pedidosRaw.forEach(pedido => {
+      const mes = new Date(pedido.criado_em).toISOString().substring(0, 7) // YYYY-MM
+      const filialId = pedido.filial_id || 'SEM_FILIAL'
+      const key = `${mes}-${filialId}`
+
+      if (!grouped.has(key)) {
+        const filial = filiais.find(f => f.id === filialId)
+        grouped.set(key, {
+          mes: mes + '-01',
+          filial_id: filialId,
+          filial_nome: filial?.nome || 'Sem Filial',
+          cnpj: filial?.cnpj || null,
+          is_matriz: filial?.is_matriz || false,
+          qtd_pedidos: 0,
+          valor_total: 0
+        })
+      }
+
+      const item = grouped.get(key)!
+      item.qtd_pedidos++
+      item.valor_total += pedido.valor_total || 0
     })
-    .catch(() => null)
 
-  // Fallback: buscar direto da tabela se RPC não existir
-  let evolucaoPorFilial = pedidosPorFilial
-
-  if (!pedidosPorFilial) {
-    const { data: pedidosRaw } = await supabase
-      .from('ordens_compra')
-      .select('criado_em, valor_total, filial_id')
-      .eq('tenant_id', profile?.tenant_id || '')
-      .not('status', 'in', '("CANCELADA","RASCUNHO")')
-      .gte('criado_em', new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
-
-    // Agrupar manualmente
-    if (pedidosRaw && filiais) {
-      const grouped = new Map<string, any>()
-
-      pedidosRaw.forEach(pedido => {
-        const mes = new Date(pedido.criado_em).toISOString().substring(0, 7) // YYYY-MM
-        const filialId = pedido.filial_id || 'SEM_FILIAL'
-        const key = `${mes}-${filialId}`
-
-        if (!grouped.has(key)) {
-          const filial = filiais.find(f => f.id === filialId)
-          grouped.set(key, {
-            mes: mes + '-01',
-            filial_id: filialId,
-            filial_nome: filial?.nome || 'Sem Filial',
-            cnpj: filial?.cnpj || null,
-            is_matriz: filial?.is_matriz || false,
-            qtd_pedidos: 0,
-            valor_total: 0
-          })
-        }
-
-        const item = grouped.get(key)!
-        item.qtd_pedidos++
-        item.valor_total += pedido.valor_total || 0
-      })
-
-      evolucaoPorFilial = Array.from(grouped.values())
-    }
+    evolucaoPorFilial = Array.from(grouped.values())
   }
 
   // Debug
   if (errorEvolucao) console.error('❌ Erro evolução:', errorEvolucao)
-  if (errorPedidos) console.error('❌ Erro pedidos por filial:', errorPedidos)
 
   console.log('📊 Dashboard:', {
     evolucao: evolucao?.length || 0,
     evolucaoPorFilial: evolucaoPorFilial?.length || 0,
-    filiais: filiais?.length || 0
+    filiais: filiais?.length || 0,
+    pedidosRaw: pedidosRaw?.length || 0
   })
 
   // Busca top fornecedores
