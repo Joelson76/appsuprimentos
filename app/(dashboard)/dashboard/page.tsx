@@ -140,12 +140,9 @@ export default async function DashboardPage() {
         </CardHeader>
         <CardContent>
           {(() => {
-            // Verificar se tem dados para mostrar
-            const temDadosPorFilial = evolucaoPorFilial && evolucaoPorFilial.length > 0
+            // Verificar se tem dados
             const temDadosAgregados = evolucao && evolucao.length > 0
-
-            // Se não tem nenhum dado, mostrar empty state
-            if (!temDadosPorFilial && !temDadosAgregados) {
+            if (!temDadosAgregados) {
               return (
                 <div className="text-center text-muted-foreground py-8">
                   <BarChart3 className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -155,10 +152,33 @@ export default async function DashboardPage() {
               )
             }
 
-            // Usar dados agregados simples (sem breakdown por filial)
+            // Processar dados
             const dadosValidos = evolucao.filter((m: any) =>
               m.mes && (m.valor_total > 0 || m.qtd_pedidos > 0)
             ).slice(0, 6).reverse()
+
+            // Preparar dados por CNPJ se disponível
+            const temDadosPorFilial = evolucaoPorFilial && evolucaoPorFilial.length > 0
+            const mesesComFilial = new Map<string, any[]>()
+
+            if (temDadosPorFilial) {
+              evolucaoPorFilial.forEach((item: any) => {
+                const mesKey = new Date(item.mes).toISOString()
+                if (!mesesComFilial.has(mesKey)) {
+                  mesesComFilial.set(mesKey, [])
+                }
+                mesesComFilial.get(mesKey)?.push(item)
+              })
+            }
+
+            // Cores para CNPJs
+            const cores = [
+              'from-blue-600 to-blue-400',
+              'from-cyan-600 to-cyan-400',
+              'from-purple-600 to-purple-400',
+              'from-emerald-600 to-emerald-400',
+              'from-orange-600 to-orange-400',
+            ]
 
             const maxValor = Math.max(...dadosValidos.map((m: any) => m.valor_total || 0), 1)
 
@@ -182,37 +202,90 @@ export default async function DashboardPage() {
                       console.error('Erro ao formatar data:', mes.mes, e)
                     }
 
+                    // Buscar dados por filial para este mês
+                    const mesKey = new Date(mes.mes).toISOString()
+                    const filiaisMes = mesesComFilial.get(mesKey) || []
+                    const cnpjsUnicos = [...new Set(filiaisMes.map(f => f.cnpj || 'SEM_CNPJ'))]
+
                     return (
                       <div key={mes.mes || index} className="flex-1 flex flex-col items-center gap-2 group">
                         {/* Tooltip */}
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mb-2 text-center z-10">
-                          <div className="bg-popover border rounded-lg shadow-lg p-3 min-w-[200px]">
+                          <div className="bg-popover border rounded-lg shadow-lg p-3 min-w-[220px]">
                             <p className="text-xs font-semibold capitalize mb-1">{mesNome}</p>
                             <p className="text-lg font-bold text-primary mb-1">
                               {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground mb-2">
                               {qtdPedidos} {qtdPedidos === 1 ? 'pedido' : 'pedidos'}
                             </p>
+
+                            {/* Breakdown por CNPJ no tooltip */}
+                            {filiaisMes.length > 0 && (
+                              <div className="mt-2 pt-2 border-t space-y-1">
+                                <p className="text-xs font-semibold text-muted-foreground mb-1">Por CNPJ:</p>
+                                {filiaisMes.map((f: any, idx: number) => (
+                                  <div key={idx} className="flex items-center justify-between gap-2 text-xs">
+                                    <div className={`w-3 h-3 rounded bg-gradient-to-t ${cores[idx % cores.length]}`} />
+                                    <span className="flex-1 truncate text-left">{f.filial_nome || f.cnpj || 'N/A'}</span>
+                                    <span className="font-semibold">
+                                      {new Intl.NumberFormat('pt-BR', {
+                                        style: 'currency',
+                                        currency: 'BRL',
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                      }).format(f.valor_total || 0)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
 
-                        {/* Barra vertical */}
+                        {/* Barra vertical (empilhada se tiver CNPJs, simples se não) */}
                         <div className="relative w-full flex items-end justify-center" style={{ height: '100%' }}>
-                          <div
-                            className="w-full max-w-[60px] bg-gradient-to-t from-blue-600 to-cyan-400 rounded-t-lg transition-all duration-700 ease-out hover:from-blue-700 hover:to-cyan-500 cursor-pointer shadow-lg"
-                            style={{ height: `${alturaPercentual}%`, minHeight: valorTotal > 0 ? '8px' : '0' }}
-                          >
-                            {/* Valor no topo */}
-                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap">
-                              {new Intl.NumberFormat('pt-BR', {
-                                style: 'currency',
-                                currency: 'BRL',
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0
-                              }).format(valorTotal)}
+                          {filiaisMes.length > 0 ? (
+                            // Barra empilhada por CNPJ
+                            <div className="w-full max-w-[60px] flex flex-col justify-end">
+                              {filiaisMes.map((filial: any, idx: number) => {
+                                const valorFilial = filial.valor_total || 0
+                                const alturaFilial = (valorFilial / maxValor) * 100
+                                return (
+                                  <div
+                                    key={idx}
+                                    className={`w-full bg-gradient-to-t ${cores[idx % cores.length]} transition-all duration-700 cursor-pointer ${idx === filiaisMes.length - 1 ? 'rounded-t-lg' : ''}`}
+                                    style={{ height: `${alturaFilial}%`, minHeight: valorFilial > 0 ? '4px' : '0' }}
+                                    title={`${filial.filial_nome}: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorFilial)}`}
+                                  />
+                                )
+                              })}
+                              {/* Valor total no topo */}
+                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap">
+                                {new Intl.NumberFormat('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 0
+                                }).format(valorTotal)}
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            // Barra simples (sem breakdown)
+                            <div
+                              className="w-full max-w-[60px] bg-gradient-to-t from-blue-600 to-cyan-400 rounded-t-lg transition-all duration-700 ease-out hover:from-blue-700 hover:to-cyan-500 cursor-pointer shadow-lg"
+                              style={{ height: `${alturaPercentual}%`, minHeight: valorTotal > 0 ? '8px' : '0' }}
+                            >
+                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-foreground whitespace-nowrap">
+                                {new Intl.NumberFormat('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
+                                  minimumFractionDigits: 0,
+                                  maximumFractionDigits: 0
+                                }).format(valorTotal)}
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {/* Label do mês */}
@@ -224,8 +297,34 @@ export default async function DashboardPage() {
                   })}
                 </div>
 
+                {/* Legenda (se tiver dados por filial) */}
+                {temDadosPorFilial && (() => {
+                  // Pegar todos CNPJs únicos
+                  const todosCnpjs = [...new Set(evolucaoPorFilial.map((f: any) => f.cnpj || 'SEM_CNPJ'))]
+                  if (todosCnpjs.length <= 1) return null
+
+                  return (
+                    <div className="border-t pt-3 mt-2">
+                      <p className="text-xs font-semibold text-muted-foreground mb-2">Legenda por Filial/CNPJ:</p>
+                      <div className="flex flex-wrap gap-3">
+                        {todosCnpjs.slice(0, 5).map((cnpj: string, idx: number) => {
+                          const filial = evolucaoPorFilial.find((f: any) => f.cnpj === cnpj)
+                          return (
+                            <div key={cnpj} className="flex items-center gap-2">
+                              <div className={`w-4 h-4 rounded bg-gradient-to-t ${cores[idx % cores.length]}`} />
+                              <span className="text-xs text-muted-foreground">
+                                {filial?.filial_nome || cnpj}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })()}
+
                 {/* Linha de base */}
-                <div className="border-t pt-2">
+                <div className="border-t pt-2 mt-2">
                   <p className="text-xs text-center text-muted-foreground">Últimos {dadosValidos.length} meses</p>
                 </div>
               </div>
