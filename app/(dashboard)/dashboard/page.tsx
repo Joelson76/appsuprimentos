@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { KPICard } from '@/components/dashboard/kpi-card'
 import { AlertasWidget } from '@/components/dashboard/alertas-widget'
 import { AprovacoesWidget } from '@/components/dashboard/aprovacoes-widget'
@@ -24,6 +25,11 @@ export default async function DashboardPage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
+
+  // Se não está autenticado, redirecionar para login
+  if (!user) {
+    redirect('/login')
+  }
 
   const { data: profile } = await supabase
     .from('profiles')
