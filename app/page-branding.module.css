@@ -1,0 +1,44 @@
+/* ==== BRANDING SUPRIFLOW ==== */
+
+.brandName {
+  animation: brandGlow 4s ease-in-out infinite;
+  position: relative;
+  display: inline-block;
+}
+
+.brandUnderline {
+  height: 4px;
+  background: linear-gradient(90deg, #047857, #10b981, #0d9488);
+  animation: shimmer 3s linear infinite;
+  background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes brandGlow {
+  0%, 100% {
+    filter: brightness(1);
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+  }
+  50% {
+    filter: brightness(1.1);
+    text-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+  }
+}
+
+/* Reveal animation */
+.staggerReveal {
+  animation: staggerIn 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@keyframes staggerIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

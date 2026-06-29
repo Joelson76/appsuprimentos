@@ -22,6 +22,7 @@ import {
   Star,
 } from 'lucide-react'
 import { FloatingContactButtons } from '@/components/ui/floating-contact-buttons'
+import styles from './page-branding.module.css'
 
 export default function LandingPage() {
   return (
@@ -75,17 +76,27 @@ export default function LandingPage() {
 
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center text-center space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
-                <Zap className="h-4 w-4" />
-                Teste grátis por 14 dias
+              <div className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-50 text-emerald-800 text-sm font-semibold border border-emerald-200 ${styles.staggerReveal}`}>
+                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                Usado por +50 indústrias e varejos no Brasil
               </div>
 
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight max-w-4xl">
-                Gestão de Compras{' '}
-                <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                  Simples e Eficiente
-                </span>
-              </h1>
+              {/* Nome da Marca em Destaque */}
+              <div className={`${styles.staggerReveal} space-y-3`}>
+                <div className="inline-block">
+                  <h1 className={`text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-3 ${styles.brandName}`}>
+                    SupriFlow
+                  </h1>
+                  <div className={`h-1 w-full rounded-full ${styles.brandUnderline}`}></div>
+                </div>
+                <p className="text-lg md:text-xl text-slate-600 font-medium">
+                  Sistema Completo de Gestão de Compras e Suprimentos
+                </p>
+              </div>
+
+              <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight max-w-4xl">
+                Reduza <em className="not-italic text-emerald-600">20% dos Custos</em> de Compras em 60 Dias
+              </h2>
 
               <p className="text-xl text-muted-foreground max-w-2xl">
                 Automatize requisições, cotações e pedidos de compra.
