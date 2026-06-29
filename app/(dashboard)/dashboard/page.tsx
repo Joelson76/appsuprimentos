@@ -19,6 +19,7 @@ import {
   DollarSign,
   AlertTriangle,
   CheckCircle,
+  BarChart3,
 } from 'lucide-react'
 
 export default async function DashboardPage() {
