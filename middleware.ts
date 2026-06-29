@@ -22,6 +22,24 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // Client service_role para queries de profile (bypass RLS)
+  const supabaseAdmin = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -60,8 +78,8 @@ export async function middleware(request: NextRequest) {
   if (user && !isPublicPath) {
     console.log('🔍 Middleware: Buscando profile para usuário', user.id)
 
-    // Buscar profile do usuário
-    const { data: profile, error: profileError } = await supabase
+    // Buscar profile do usuário usando service_role (bypass RLS)
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('tenant_id, perfil')
       .eq('id', user.id)
@@ -90,7 +108,7 @@ export async function middleware(request: NextRequest) {
     if (profile.perfil !== 'SUPER_ADMIN') {
       console.log('🔍 Middleware: Buscando assinatura para tenant', profile.tenant_id)
 
-      const { data: assinatura, error: assinaturaError } = await supabase
+      const { data: assinatura, error: assinaturaError } = await supabaseAdmin
         .from('assinaturas')
         .select('status, trial_fim')
         .eq('tenant_id', profile.tenant_id)
