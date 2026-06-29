@@ -270,6 +270,34 @@ export default async function DashboardPage() {
             // Renderizar: FILIAL → MESES
             return (
               <div className="space-y-6">
+                {/* Resumo por CNPJ */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                  {Array.from(filiaisPorCnpj.entries()).map(([cnpj, dadosFilial]) => {
+                    const filialInfo = dadosFilial[0]
+                    const valorTotal = dadosFilial.reduce((sum, d) => sum + (d.valor_total || 0), 0)
+                    const qtdTotal = dadosFilial.reduce((sum, d) => sum + (d.qtd_pedidos || 0), 0)
+
+                    return (
+                      <div key={`resumo-${cnpj}`} className="p-3 border rounded-lg bg-accent/50">
+                        <p className="text-xs font-semibold text-foreground mb-1 truncate">
+                          {filialInfo?.filial_nome || cnpj}
+                        </p>
+                        {filialInfo?.cnpj && (
+                          <p className="text-xs text-muted-foreground font-mono mb-2">
+                            {filialInfo.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
+                          </p>
+                        )}
+                        <p className="text-lg font-bold text-primary">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valorTotal)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {qtdTotal} {qtdTotal === 1 ? 'pedido' : 'pedidos'}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+
                 {/* Gráfico agrupado por FILIAL */}
                 <div className="flex items-end justify-between gap-6 h-64 pb-2">
                   {Array.from(filiaisPorCnpj.entries()).map(([cnpj, dadosFilial], filialIdx) => {
@@ -318,11 +346,21 @@ export default async function DashboardPage() {
                           })}
                         </div>
 
-                        {/* Label da filial */}
-                        <div className="text-center">
+                        {/* Label da filial com CNPJ */}
+                        <div className="text-center space-y-1">
                           <p className="text-xs font-semibold text-foreground truncate max-w-[120px]">
                             {filialNome}
                           </p>
+                          {filialInfo?.cnpj && (
+                            <p className="text-xs text-muted-foreground font-mono">
+                              {filialInfo.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}
+                            </p>
+                          )}
+                          {filialInfo?.is_matriz && (
+                            <span className="inline-block text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                              Matriz
+                            </span>
+                          )}
                         </div>
                       </div>
                     )
