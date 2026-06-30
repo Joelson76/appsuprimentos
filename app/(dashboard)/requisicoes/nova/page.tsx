@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -20,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { SelectFilial } from '@/components/filiais/select-filial'
 import { SelectorProduto } from '@/components/requisicoes/selector-produto'
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
@@ -49,6 +48,7 @@ export default function NovaRequisicaoPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [loadingFilial, setLoadingFilial] = useState(true)
 
   const [filialId, setFilialId] = useState('')
   const [descricao, setDescricao] = useState('')
@@ -56,6 +56,58 @@ export default function NovaRequisicaoPage() {
   const [itens, setItens] = useState<Item[]>([
     { produto_id: '', produto_descricao: '', quantidade: 1, unidade: 'UN', valor_estimado: 0, observacao: '' },
   ])
+
+  // Buscar filial do usuário automaticamente
+  useEffect(() => {
+    async function loadFilialUsuario() {
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+          setLoadingFilial(false)
+          return
+        }
+
+        // Buscar profile do usuário
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('tenant_id, filial_id')
+          .eq('id', user.id)
+          .single()
+
+        if (!profile) {
+          setLoadingFilial(false)
+          return
+        }
+
+        // Se usuário tem filial, usar ela
+        if (profile.filial_id) {
+          setFilialId(profile.filial_id)
+        } else {
+          // Se não tem filial, buscar a matriz do tenant
+          const { data: matriz } = await supabase
+            .from('filiais')
+            .select('id')
+            .eq('tenant_id', profile.tenant_id)
+            .eq('is_matriz', true)
+            .eq('ativa', true)
+            .single()
+
+          if (matriz) {
+            setFilialId(matriz.id)
+          }
+          // Se não encontrar matriz, filialId fica vazio (permitido)
+        }
+      } catch (error) {
+        console.error('Erro ao carregar filial do usuário:', error)
+      } finally {
+        setLoadingFilial(false)
+      }
+    }
+
+    loadFilialUsuario()
+  }, [])
 
   const addItem = () => {
     setItens([
@@ -138,13 +190,7 @@ export default function NovaRequisicaoPage() {
       )
 
       if (itensValidos.length === 0) {
-        setError('Adicione pelo menos um item válido com produto selecionado')
-        return
-      }
-
-      // Validar filial
-      if (!filialId) {
-        setError('Selecione a filial')
+        setError('Selecione um produto para cada item da requisição')
         return
       }
 
@@ -153,7 +199,7 @@ export default function NovaRequisicaoPage() {
         .from('requisicoes')
         .insert({
           tenant_id: profile.tenant_id,
-          filial_id: filialId,
+          filial_id: filialId || null, // Permite null se não tiver filial
           solicitante_id: user.id,
           descricao: descricao.trim(),
           urgencia,
@@ -226,7 +272,7 @@ export default function NovaRequisicaoPage() {
         </div>
       )}
 
-      <form onSubmit={(e) => handleSubmit(e, false)}>
+      <form onSubmit={(e) => handleSubmit(e, false)} noValidate>
         <div className="space-y-6">
           {/* Dados Gerais */}
           <Card>
@@ -237,14 +283,6 @@ export default function NovaRequisicaoPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Seletor de Filial */}
-              <SelectFilial
-                value={filialId}
-                onChange={setFilialId}
-                required
-                label="Filial / Unidade"
-              />
-
               <div className="space-y-2">
                 <Label htmlFor="descricao">
                   Descrição / Justificativa *

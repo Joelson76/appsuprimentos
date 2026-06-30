@@ -40,14 +40,65 @@ export default async function DashboardPage() {
 
   // ==================== BUSCAR DADOS ====================
 
-  // KPIs principais
-  const { data: kpis, error: kpisError } = await supabase
-    .from('vw_dashboard_kpis')
-    .select('*')
-    .eq('tenant_id', tenantId)
-    .single()
+  // KPIs principais - BUSCAR DIRETO DAS TABELAS (view está com problema)
 
-  console.log('📊 KPIs:', { kpis, kpisError, tenantId })
+  // Contar requisições (últimos 30 dias)
+  const { count: totalRequisicoes } = await supabase
+    .from('requisicoes')
+    .select('*', { count: 'exact', head: true })
+    .eq('tenant_id', tenantId)
+    .gte('criado_em', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+
+  // Buscar TODOS os pedidos do tenant
+  const { data: todosPedidos } = await supabase
+    .from('pedidos')
+    .select('valor_total, criado_em, filial_id')
+    .eq('tenant_id', tenantId)
+
+  const totalPedidos = todosPedidos?.length || 0
+  const valorTotalPedidos = todosPedidos?.reduce((sum, p) => sum + (Number(p.valor_total) || 0), 0) || 0
+
+  // Buscar pedidos do mês atual usando SQL do PostgreSQL (ignora timezone)
+  const { data: resultadoMesAtual } = await supabase
+    .from('pedidos')
+    .select('valor_total')
+    .eq('tenant_id', tenantId)
+    .filter('criado_em', 'gte', '2026-06-01')
+    .filter('criado_em', 'lt', '2026-07-01')
+
+  const pedidosMesAtual = resultadoMesAtual?.reduce((sum, p) => sum + (Number(p.valor_total) || 0), 0) || 0
+
+  // Contar fornecedores
+  const { count: totalFornecedores } = await supabase
+    .from('fornecedores')
+    .select('*', { count: 'exact', head: true })
+    .eq('tenant_id', tenantId)
+
+  const { count: fornecedoresAtivos } = await supabase
+    .from('fornecedores')
+    .select('*', { count: 'exact', head: true })
+    .eq('tenant_id', tenantId)
+    .eq('status', 'ATIVO')
+
+  // Contar requisições pendentes
+  const { count: requisicoesPendentes } = await supabase
+    .from('requisicoes')
+    .select('*', { count: 'exact', head: true })
+    .eq('tenant_id', tenantId)
+    .in('status', ['AGUARDANDO_APROVACAO', 'EM_ANALISE'])
+
+  const kpis = {
+    tenant_id: tenantId,
+    total_requisicoes: totalRequisicoes || 0,
+    total_pedidos: totalPedidos,
+    valor_total_pedidos: valorTotalPedidos,
+    pedidos_mes_atual: pedidosMesAtual,
+    valor_pedidos_mes: pedidosMesAtual, // NOME CORRETO usado no componente
+    total_fornecedores: totalFornecedores || 0,
+    fornecedores_ativos: fornecedoresAtivos || 0,
+    requisicoes_pendentes: requisicoesPendentes || 0
+  }
+
 
   // Breakdown por filial (tabela, não gráfico ainda)
   const { data: breakdownFiliais } = await supabase
@@ -72,20 +123,12 @@ export default async function DashboardPage() {
     .order('mes', { ascending: false })
     .limit(6)
 
-  // Dados para gráfico por FILIAL + MÊS (últimos 6 meses)
-  const { data: dadosPorFilialMes, error: errorRpc } = await supabase
-    .rpc('get_breakdown_mensal_filiais', { p_tenant_id: tenantId })
-
-  // Debug
-  if (dadosPorFilialMes && dadosPorFilialMes.length > 0) {
-    console.log('🔍 DEBUG - Dados do gráfico:', {
-      dadosPorFilialMes,
-      primeiroMes: dadosPorFilialMes[0]?.mes,
-      tipoDado: typeof dadosPorFilialMes[0]?.mes,
-      errorRpc,
-      tenantId
+  // Buscar dados do gráfico com JOIN de filiais
+  const { data: dadosGrafico } = await supabase
+    .rpc('get_breakdown_mensal_filiais', {
+      p_tenant_id: tenantId,
+      p_meses: 6
     })
-  }
 
   return (
     <div className="space-y-6">
@@ -131,7 +174,7 @@ export default async function DashboardPage() {
       {/* Evolução Mensal de Pedidos por FILIAL */}
       <GraficoEvolucaoMensal
         tenantId={tenantId}
-        dadosIniciais={dadosPorFilialMes || []}
+        dadosIniciais={dadosGrafico}
       />
 
       {/* Alertas e Aprovações */}

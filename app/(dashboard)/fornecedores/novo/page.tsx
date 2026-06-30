@@ -131,16 +131,16 @@ export default function NovoFornecedorPage() {
         return
       }
 
-      // Verificar se CNPJ já existe
-      const { data: existente } = await supabase
+      // Verificar se CNPJ já existe NO SEU TENANT
+      const { data: existentes } = await supabase
         .from('fornecedores')
         .select('id')
         .eq('tenant_id', profile.tenant_id)
         .eq('cnpj', cnpjLimpo)
-        .single()
+        .limit(1)
 
-      if (existente) {
-        setError('CNPJ já cadastrado')
+      if (existentes && existentes.length > 0) {
+        setError('CNPJ já cadastrado no seu cadastro de fornecedores')
         return
       }
 

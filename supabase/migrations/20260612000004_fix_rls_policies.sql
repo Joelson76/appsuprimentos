@@ -7,6 +7,10 @@
 
 -- CONTRATOS
 DROP POLICY IF EXISTS "contratos_tenant" ON contratos;
+DROP POLICY IF EXISTS "contratos_select" ON contratos;
+DROP POLICY IF EXISTS "contratos_insert" ON contratos;
+DROP POLICY IF EXISTS "contratos_update" ON contratos;
+DROP POLICY IF EXISTS "contratos_delete" ON contratos;
 
 -- Policy para SELECT
 CREATE POLICY "contratos_select" ON contratos
@@ -55,6 +59,10 @@ CREATE POLICY "contratos_delete" ON contratos
 
 -- PRODUTOS
 DROP POLICY IF EXISTS "produtos_tenant" ON produtos;
+DROP POLICY IF EXISTS "produtos_select" ON produtos;
+DROP POLICY IF EXISTS "produtos_insert" ON produtos;
+DROP POLICY IF EXISTS "produtos_update" ON produtos;
+DROP POLICY IF EXISTS "produtos_delete" ON produtos;
 
 CREATE POLICY "produtos_select" ON produtos
   FOR SELECT TO authenticated
@@ -75,6 +83,10 @@ CREATE POLICY "produtos_delete" ON produtos
 
 -- NOTAS FISCAIS
 DROP POLICY IF EXISTS "notas_fiscais_tenant" ON notas_fiscais;
+DROP POLICY IF EXISTS "notas_fiscais_select" ON notas_fiscais;
+DROP POLICY IF EXISTS "notas_fiscais_insert" ON notas_fiscais;
+DROP POLICY IF EXISTS "notas_fiscais_update" ON notas_fiscais;
+DROP POLICY IF EXISTS "notas_fiscais_delete" ON notas_fiscais;
 
 CREATE POLICY "notas_fiscais_select" ON notas_fiscais
   FOR SELECT TO authenticated
@@ -95,6 +107,10 @@ CREATE POLICY "notas_fiscais_delete" ON notas_fiscais
 
 -- MOVIMENTAÇÕES DE ESTOQUE
 DROP POLICY IF EXISTS "movimentacoes_estoque_tenant" ON movimentacoes_estoque;
+DROP POLICY IF EXISTS "movimentacoes_estoque_select" ON movimentacoes_estoque;
+DROP POLICY IF EXISTS "movimentacoes_estoque_insert" ON movimentacoes_estoque;
+DROP POLICY IF EXISTS "movimentacoes_estoque_update" ON movimentacoes_estoque;
+DROP POLICY IF EXISTS "movimentacoes_estoque_delete" ON movimentacoes_estoque;
 
 CREATE POLICY "movimentacoes_estoque_select" ON movimentacoes_estoque
   FOR SELECT TO authenticated

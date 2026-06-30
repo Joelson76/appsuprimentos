@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -24,6 +24,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Logout automático ao carregar a página de login
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const supabase = createClient()
+      supabase.auth.signOut().catch(() => {})
+      localStorage.clear()
+      sessionStorage.clear()
+    }
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

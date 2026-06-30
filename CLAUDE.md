@@ -24,12 +24,43 @@ Setores: Indústria/Manufatura e Varejo/Comércio. Mercado brasileiro.
 
 ## ⚠️ Regra de ouro — Multi-Tenant via RLS
 O isolamento entre tenants é feito 100% pelo Row Level Security (RLS) do PostgreSQL.
-TODA tabela que contém dados de tenant DEVE ter:
-  1. Coluna `tenant_id uuid NOT NULL REFERENCES tenants(id)`
-  2. RLS habilitado: `ALTER TABLE <tabela> ENABLE ROW LEVEL SECURITY;`
-  3. Policy de isolamento baseada no JWT custom claim `tenant_id`
+TODA tabela que contém dados de tenant DEVE seguir o processo obrigatório:
 
-NUNCA usar o cliente Supabase com a service_role key no frontend.
+### ✅ Checklist Obrigatório para Novas Tabelas
+Ao criar qualquer tabela com dados por tenant:
+
+1. **Use o template:** `supabase/TEMPLATE_TABELA_MULTI_TENANT.sql`
+   - Copie o template completo
+   - Substitua `{{NOME_TABELA}}` pelo nome real
+   - Adicione as colunas específicas da tabela
+
+2. **Estrutura obrigatória:**
+   - ✅ Coluna `tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE`
+   - ✅ `ALTER TABLE <tabela> ENABLE ROW LEVEL SECURITY;`
+   - ✅ As 4 policies: SELECT, INSERT, UPDATE, DELETE
+   - ✅ Policies usam `profiles.tenant_id` (NÃO JWT diretamente)
+   - ✅ Índice: `CREATE INDEX <tabela>_tenant_id_idx ON <tabela>(tenant_id);`
+
+3. **Validação pós-criação:**
+   - Execute `supabase/AUDIT_RLS_MULTI_TENANT.sql` no SQL Editor
+   - Confirme que a tabela aparece com "✅ OK" no resumo
+   - Teste com 2 tenants diferentes: cada um deve ver apenas seus dados
+
+4. **Atalho rápido (opcional):**
+   ```sql
+   -- Aplica RLS + 4 policies automaticamente:
+   SELECT create_tenant_policies('nome_da_tabela');
+   
+   -- Ou aplica em TODAS as tabelas com tenant_id de uma vez:
+   SELECT * FROM apply_tenant_policies_to_all();
+   ```
+
+### 🚫 Nunca Fazer
+- NUNCA usar `service_role` key no frontend
+- NUNCA confiar apenas no JWT (sempre validar via `profiles.tenant_id`)
+- NUNCA criar tabela com tenant_id sem as 4 policies
+- NUNCA fazer deploy sem executar `AUDIT_RLS_MULTI_TENANT.sql`
+
 O frontend SEMPRE usa o cliente anon com a sessão do usuário autenticado.
 
 ## Sistema de Filiais (Multi-CNPJ)

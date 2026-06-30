@@ -39,12 +39,9 @@ export function ExportarGastoCategoria() {
       }
 
       const dadosExcel = data.map((categoria: any) => ({
-        'Categoria': categoria.categoria || 'Sem Categoria',
+        'Categoria': categoria.categoria_nome || 'Sem Categoria',
         'Total de Pedidos': categoria.total_pedidos || 0,
-        'Quantidade de Itens': categoria.quantidade_total || 0,
         'Valor Total (R$)': Number(categoria.valor_total) || 0,
-        'Valor Médio (R$)': Number(categoria.valor_medio) || 0,
-        '% do Total': categoria.percentual_total ? `${Number(categoria.percentual_total).toFixed(1)}%` : '0%',
       }))
 
       const ws = XLSX.utils.json_to_sheet(dadosExcel)
@@ -114,21 +111,15 @@ export function ExportarGastoCategoria() {
               <tr>
                 <th>Categoria</th>
                 <th>Total Pedidos</th>
-                <th>Quantidade Itens</th>
                 <th>Valor Total</th>
-                <th>Valor Médio</th>
-                <th>% do Total</th>
               </tr>
             </thead>
             <tbody>
               ${data.map(cat => `
                 <tr>
-                  <td>${cat.categoria || 'Sem Categoria'}</td>
+                  <td>${cat.categoria_nome || 'Sem Categoria'}</td>
                   <td>${cat.total_pedidos || 0}</td>
-                  <td>${cat.quantidade_total || 0}</td>
                   <td>R$ ${Number(cat.valor_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                  <td>R$ ${Number(cat.valor_medio || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                  <td>${cat.percentual_total ? Number(cat.percentual_total).toFixed(1) : 0}%</td>
                 </tr>
               `).join('')}
             </tbody>

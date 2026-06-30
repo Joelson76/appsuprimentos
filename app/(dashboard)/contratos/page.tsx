@@ -210,9 +210,11 @@ export default async function ContratosPage() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         {contrato.arquivo_path && (
-                          <Button variant="ghost" size="sm" title="Baixar arquivo">
-                            <FileText className="h-4 w-4" />
-                          </Button>
+                          <a href={contrato.arquivo_path} target="_blank" rel="noopener noreferrer" download>
+                            <Button variant="ghost" size="sm" title="Baixar arquivo">
+                              <FileText className="h-4 w-4" />
+                            </Button>
+                          </a>
                         )}
                         <Link href={`/contratos/${contrato.id}`}>
                           <Button variant="ghost" size="sm">

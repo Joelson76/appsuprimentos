@@ -84,12 +84,11 @@ export default function NovaCotacaoPage() {
 
     setRequisicoes(reqs || [])
 
-    // Buscar apenas fornecedores da filial selecionada
+    // Buscar fornecedores ativos do tenant (fornecedores não são por filial)
     const { data: forn } = await supabase
       .from('fornecedores')
-      .select('id, razao_social, nome_fantasia, filial_id')
+      .select('id, razao_social, nome_fantasia')
       .eq('status', 'ATIVO')
-      .eq('filial_id', filialSelecionada)
       .order('razao_social')
 
     setFornecedores(forn || [])
@@ -203,12 +202,27 @@ export default function NovaCotacaoPage() {
           itensReq.map((item: any) => ({
             cotacao_id: cotacao.id,
             fornecedor_id: fornId,
+            produto_id: item.produto_id,
             descricao: item.descricao,
             quantidade: item.quantidade,
           }))
         )
 
-        await supabase.from('itens_cotacao').insert(itensCotacao)
+        console.log('🔍 Inserindo itens da cotação:', {
+          total: itensCotacao.length,
+          itens: itensCotacao
+        })
+
+        const { error: itensError } = await supabase
+          .from('itens_cotacao')
+          .insert(itensCotacao)
+
+        if (itensError) {
+          console.error('❌ Erro ao inserir itens:', itensError)
+          throw new Error(`Erro ao criar itens da cotação: ${itensError.message}`)
+        }
+
+        console.log('✅ Itens inseridos com sucesso!')
       }
 
       // Atualizar status da requisição
