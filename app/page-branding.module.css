@@ -8,7 +8,7 @@
 
 .brandUnderline {
   height: 4px;
-  background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+  background: linear-gradient(90deg, #f97316, #ea580c, #f97316);
   animation: shimmer 3s linear infinite;
   background-size: 200% 100%;
 }
@@ -21,11 +21,11 @@
 @keyframes brandGlow {
   0%, 100% {
     filter: brightness(1);
-    text-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+    text-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
   }
   50% {
     filter: brightness(1.1);
-    text-shadow: 0 0 30px rgba(118, 75, 162, 0.3);
+    text-shadow: 0 0 30px rgba(234, 88, 12, 0.4);
   }
 }
 
